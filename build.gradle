@@ -62,3 +62,13 @@ tasks.named('asciidoctor') {
     attributes 'snippets': snippetsDir
     dependsOn test
 }
+
+tasks.register('copyDocs', Copy) {
+    dependsOn tasks.named('asciidoctor')
+    from layout.buildDirectory.dir('docs/asciidoc')
+    into layout.projectDirectory.dir('src/main/resources/static/docs')
+}
+
+tasks.named('asciidoctor') {
+    finalizedBy tasks.named('copyDocs')
+}
