@@ -2,6 +2,9 @@ package kr.ac.skku.scg.exhibition.media.controller;
 
 import static org.mockito.BDDMockito.given;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessRequest;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessResponse;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -46,6 +49,8 @@ class MediaControllerTest {
         mockMvc.perform(get("/items/{id}/media", itemId))
             .andExpect(status().isOk())
             .andDo(document("media-list",
+                preprocessRequest(prettyPrint()),
+                preprocessResponse(prettyPrint()),
                 pathParameters(parameterWithName("id").description("항목 ID"))));
     }
 
@@ -60,6 +65,7 @@ class MediaControllerTest {
             .andExpect(content().bytes("abc".getBytes()))
             .andExpect(content().contentType(MediaType.IMAGE_JPEG))
             .andDo(document("media-get",
+                preprocessRequest(prettyPrint()),
                 pathParameters(parameterWithName("id").description("미디어 ID"))));
     }
 

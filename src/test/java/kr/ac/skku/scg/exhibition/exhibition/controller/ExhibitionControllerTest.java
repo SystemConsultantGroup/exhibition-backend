@@ -2,6 +2,9 @@ package kr.ac.skku.scg.exhibition.exhibition.controller;
 
 import static org.mockito.BDDMockito.given;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessRequest;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessResponse;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
@@ -50,6 +53,8 @@ class ExhibitionControllerTest {
         mockMvc.perform(get("/exhibitions").param("active", "true").accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andDo(document("exhibitions-list",
+                preprocessRequest(prettyPrint()),
+                preprocessResponse(prettyPrint()),
                 queryParameters(parameterWithName("active").description("활성 전시 여부")),
                 responseFields(
                     fieldWithPath("items[].id").description("전시 ID"),
@@ -78,6 +83,8 @@ class ExhibitionControllerTest {
         mockMvc.perform(get("/exhibitions/{id}", entity.getId()).accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andDo(document("exhibitions-get",
+                preprocessRequest(prettyPrint()),
+                preprocessResponse(prettyPrint()),
                 pathParameters(parameterWithName("id").description("전시 ID"))));
     }
 

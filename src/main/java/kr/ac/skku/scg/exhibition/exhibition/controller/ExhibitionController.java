@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,19 +26,20 @@ public class ExhibitionController {
     private final ExhibitionService exhibitionService;
 
     @GetMapping
-    public PageResponse<ExhibitionResponse> list(
+    public ResponseEntity<PageResponse<ExhibitionResponse>> list(
         @RequestParam(required = false) Boolean active,
         @RequestParam(defaultValue = "1") int page,
         @RequestParam(name = "page_size", defaultValue = "20") int pageSize
     ) {
         var pageable = PageRequest.of(Math.max(0, page - 1), Math.max(1, pageSize), Sort.by("createdAt").descending());
         var result = exhibitionService.list(active, pageable);
-        return new PageResponse<>(result.getContent().stream().map(this::toResponse).toList(), page, pageSize, result.getTotalElements());
+        var response = new PageResponse<>(result.getContent().stream().map(this::toResponse).toList(), page, pageSize, result.getTotalElements());
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{exhibitionId}")
-    public ExhibitionResponse get(@PathVariable UUID exhibitionId) {
-        return toResponse(exhibitionService.get(exhibitionId));
+    public ResponseEntity<ExhibitionResponse> get(@PathVariable UUID exhibitionId) {
+        return ResponseEntity.ok(toResponse(exhibitionService.get(exhibitionId)));
     }
 
     private ExhibitionResponse toResponse(ExhibitionServiceEntity entity) {

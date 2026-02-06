@@ -25,10 +25,11 @@ public class MediaController {
     private final MediaService mediaService;
 
     @GetMapping("/items/{itemId}/media")
-    public List<MediaResponse> listByItem(@PathVariable UUID itemId) {
-        return mediaService.listByItem(itemId).stream()
+    public ResponseEntity<List<MediaResponse>> listByItem(@PathVariable UUID itemId) {
+        var response = mediaService.listByItem(itemId).stream()
             .map(this::toResponse)
             .toList();
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/media/{mediaId}")

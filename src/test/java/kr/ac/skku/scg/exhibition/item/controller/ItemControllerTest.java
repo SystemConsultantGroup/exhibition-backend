@@ -2,6 +2,9 @@ package kr.ac.skku.scg.exhibition.item.controller;
 
 import static org.mockito.BDDMockito.given;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessRequest;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessResponse;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
@@ -51,6 +54,8 @@ class ItemControllerTest {
         mockMvc.perform(get("/exhibitions/{id}/items", exhibitionId))
             .andExpect(status().isOk())
             .andDo(document("items-list",
+                preprocessRequest(prettyPrint()),
+                preprocessResponse(prettyPrint()),
                 pathParameters(parameterWithName("id").description("전시 ID")),
                 queryParameters(
                     parameterWithName("category_id").optional().description("카테고리 ID"),
@@ -71,6 +76,8 @@ class ItemControllerTest {
         mockMvc.perform(get("/items/{id}", item.getId()))
             .andExpect(status().isOk())
             .andDo(document("items-get",
+                preprocessRequest(prettyPrint()),
+                preprocessResponse(prettyPrint()),
                 pathParameters(parameterWithName("id").description("항목 ID"))));
     }
 

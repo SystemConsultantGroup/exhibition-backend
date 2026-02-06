@@ -1,56 +1,136 @@
-= Exhibition API Docs
+= 전시 플랫폼 API 문서
 :toc: left
 :toclevels: 2
 :sectnums:
 
-== Exhibitions
+== 공통 응답 형식
 
-=== List Exhibitions
+이 API는 엔드포인트 성격에 따라 아래 응답 형식을 사용합니다.
+
+=== 목록 조회 응답 (페이지네이션)
+
+목록 조회 API는 `items`, `page`, `pageSize`, `total`을 포함한 페이지네이션 구조를 사용합니다.
+
+[source,json]
+----
+{
+  "items": [
+    {
+      "...": "리소스 필드"
+    }
+  ],
+  "page": 1,
+  "pageSize": 20,
+  "total": 120
+}
+----
+
+=== 단건 조회 응답
+
+단건 조회 API는 해당 리소스 객체를 그대로 반환합니다.
+
+[source,json]
+----
+{
+  "id": "uuid",
+  "...": "리소스 필드"
+}
+----
+
+=== 파일 다운로드 응답
+
+파일 조회 API(`/media/{id}`)는 JSON이 아닌 바이너리 본문을 반환하며, `Content-Type`은 파일 형식에 따라 달라집니다.
+
+== 전시(Exhibition)
+
+=== 전시 목록 조회
+==== 요청 예시
 include::{snippets}/exhibitions-list/http-request.adoc[]
+==== 쿼리 파라미터
 include::{snippets}/exhibitions-list/query-parameters.adoc[]
+==== 응답 필드
 include::{snippets}/exhibitions-list/response-fields.adoc[]
+==== 응답 예시
 include::{snippets}/exhibitions-list/http-response.adoc[]
+==== 응답 본문(JSON)
+include::{snippets}/exhibitions-list/response-body.adoc[]
 
-=== Get Exhibition
+=== 단일 전시 조회
+==== 경로 파라미터
 include::{snippets}/exhibitions-get/path-parameters.adoc[]
+==== 요청 예시
 include::{snippets}/exhibitions-get/http-request.adoc[]
+==== 응답 예시
 include::{snippets}/exhibitions-get/http-response.adoc[]
+==== 응답 본문(JSON)
+include::{snippets}/exhibitions-get/response-body.adoc[]
 
-== Categories
+== 카테고리(Category)
 
-=== Get Category Tree
+=== 카테고리 트리 조회
+==== 경로 파라미터
 include::{snippets}/categories-tree/path-parameters.adoc[]
+==== 요청 예시
 include::{snippets}/categories-tree/http-request.adoc[]
+==== 응답 예시
 include::{snippets}/categories-tree/http-response.adoc[]
+==== 응답 본문(JSON)
+include::{snippets}/categories-tree/response-body.adoc[]
 
-== Items
+== 항목(Item)
 
-=== List Items
+=== 항목 목록 조회
+==== 경로 파라미터
 include::{snippets}/items-list/path-parameters.adoc[]
+==== 쿼리 파라미터
 include::{snippets}/items-list/query-parameters.adoc[]
+==== 요청 예시
 include::{snippets}/items-list/http-request.adoc[]
+==== 응답 예시
 include::{snippets}/items-list/http-response.adoc[]
+==== 응답 본문(JSON)
+include::{snippets}/items-list/response-body.adoc[]
 
-=== Get Item
+=== 단일 항목 조회
+==== 경로 파라미터
 include::{snippets}/items-get/path-parameters.adoc[]
+==== 요청 예시
 include::{snippets}/items-get/http-request.adoc[]
+==== 응답 예시
 include::{snippets}/items-get/http-response.adoc[]
+==== 응답 본문(JSON)
+include::{snippets}/items-get/response-body.adoc[]
 
-== Classifications
+== 분류(Classification)
 
-=== List Classifications
+=== 분류 목록 조회
+==== 경로 파라미터
 include::{snippets}/classifications-list/path-parameters.adoc[]
+==== 요청 예시
 include::{snippets}/classifications-list/http-request.adoc[]
+==== 응답 예시
 include::{snippets}/classifications-list/http-response.adoc[]
+==== 응답 본문(JSON)
+include::{snippets}/classifications-list/response-body.adoc[]
 
-== Media
+== 미디어(Media)
 
-=== List Media By Item
+=== 항목별 미디어 목록 조회
+==== 경로 파라미터
 include::{snippets}/media-list/path-parameters.adoc[]
+==== 요청 예시
 include::{snippets}/media-list/http-request.adoc[]
+==== 응답 예시
 include::{snippets}/media-list/http-response.adoc[]
+==== 응답 본문(JSON)
+include::{snippets}/media-list/response-body.adoc[]
 
-=== Get Media
+=== 단일 미디어 조회
+==== 경로 파라미터
 include::{snippets}/media-get/path-parameters.adoc[]
+==== 요청 예시
 include::{snippets}/media-get/http-request.adoc[]
+==== 응답 예시
 include::{snippets}/media-get/http-response.adoc[]
+==== 응답 본문(바이너리)
+include::{snippets}/media-get/response-body.adoc[]

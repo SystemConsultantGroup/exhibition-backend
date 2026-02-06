@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,7 +26,7 @@ public class ItemController {
     private final ItemService itemService;
 
     @GetMapping("/exhibitions/{exhibitionId}/items")
-    public PageResponse<ItemResponse> list(
+    public ResponseEntity<PageResponse<ItemResponse>> list(
         @PathVariable UUID exhibitionId,
         @RequestParam(name = "category_id", required = false) UUID categoryId,
         @RequestParam(required = false) String q,
@@ -37,12 +38,13 @@ public class ItemController {
     ) {
         var pageable = PageRequest.of(Math.max(0, page - 1), Math.max(1, pageSize), Sort.by("createdAt").descending());
         var result = itemService.list(exhibitionId, categoryId, q, visibility, published, classification, pageable);
-        return new PageResponse<>(result.getContent().stream().map(this::toResponse).toList(), page, pageSize, result.getTotalElements());
+        var response = new PageResponse<>(result.getContent().stream().map(this::toResponse).toList(), page, pageSize, result.getTotalElements());
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/items/{itemId}")
-    public ItemResponse get(@PathVariable UUID itemId) {
-        return toResponse(itemService.get(itemId));
+    public ResponseEntity<ItemResponse> get(@PathVariable UUID itemId) {
+        return ResponseEntity.ok(toResponse(itemService.get(itemId)));
     }
 
     private ItemResponse toResponse(ItemEntity item) {
