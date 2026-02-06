@@ -43,7 +43,7 @@
 - 컨테이너화된 백엔드(Docker).
 - 쿠버네티스 배포(K8s).
 - 객체 스토리지 MinIO.
-- 관계형 데이터베이스(예: PostgreSQL 또는 MySQL).
+- 관계형 데이터베이스는 MySQL을 사용해야 한다.
 - 성능 향상을 위한 선택적 캐시(예: Redis).
 
 ### 2.5 설계 및 구현 제약
@@ -52,11 +52,43 @@
 - 쿠버네티스에 배포 가능해야 한다.
 - 파일 저장을 위해 MinIO와 연동해야 한다.
 - 프론트엔드 연동을 위한 API 엔드포인트를 제공해야 한다.
+- 복잡한 쿼리는 QueryDSL을 사용해야 한다.
 - 환경변수 설정은 `application.yml`을 `application-prod`와 `application-dev`로 분리해야 한다.
 - `.env`, `application-*.yml` 등 비밀정보(환경변수, 키, 토큰)를 포함할 수 있는 파일은 반드시 `.gitignore`에 포함해야 하며, 원격 저장소에 커밋되어서는 안 된다.
-- 개발 시 도메인형 디렉터리 구조를 사용해야 한다.
+- 개발 시 도메인형 디렉터리 구조를 사용해야 하며, 레이어형(예: controller/service/repository 전역 분리) 단독 구조는 지양한다.
 - 개발 시 각 함수에 간단한 주석을 작성해야 한다.
 - 컨트롤러와 서비스를 반드시 분리해야 한다.
+
+#### 2.5.1 디렉터리 구조 원칙(도메인형)
+- 패키지는 `exhibition`, `category`, `item`, `classification` 등 도메인 단위로 구성해야 한다.
+- 각 도메인 내부에서 `controller`, `service`, `domain`, `repository` 계층을 분리할 수 있어야 한다.
+- 공통 모듈(auth, common, config, error, infra, util 등)은 반드시 `global` 디렉터리 하위에 위치해야 한다.
+- 예시 구조:
+```text
+src/main/java/.../exhibition
+  ├─ global
+  │  ├─ auth
+  │  ├─ common
+  │  ├─ config
+  │  ├─ error
+  │  ├─ infra
+  │  └─ util
+  ├─ exhibition
+  │  ├─ controller
+  │  ├─ service
+  │  ├─ domain
+  │  └─ repository
+  ├─ category
+  │  ├─ controller
+  │  ├─ service
+  │  ├─ domain
+  │  └─ repository
+  └─ item
+     ├─ controller
+     ├─ service
+     ├─ domain
+     └─ repository
+```
 
 ### 2.6 가정 및 의존성
 - 프론트엔드는 백엔드 API를 사용한다.
@@ -132,6 +164,7 @@
 
 #### 3.2.5 유지보수성
 - NFR-8: 시스템은 API 문서(예: OpenAPI/Swagger)를 제공해야 한다.
+- NFR-8a: 시스템은 기능별 단위 테스트 코드를 기반으로 Spring REST Docs를 생성해야 한다.
 - NFR-9: 시스템은 시스템 상태 및 오류를 로깅하고 모니터링해야 한다.
 - NFR-10: 시스템의 모든 기능에 대해 단위 테스트를 수행해야 한다.
 

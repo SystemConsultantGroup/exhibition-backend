@@ -1,0 +1,56 @@
+= Exhibition API Docs
+:toc: left
+:toclevels: 2
+:sectnums:
+
+== Exhibitions
+
+=== List Exhibitions
+include::{snippets}/exhibitions-list/http-request.adoc[]
+include::{snippets}/exhibitions-list/query-parameters.adoc[]
+include::{snippets}/exhibitions-list/response-fields.adoc[]
+include::{snippets}/exhibitions-list/http-response.adoc[]
+
+=== Get Exhibition
+include::{snippets}/exhibitions-get/path-parameters.adoc[]
+include::{snippets}/exhibitions-get/http-request.adoc[]
+include::{snippets}/exhibitions-get/http-response.adoc[]
+
+== Categories
+
+=== Get Category Tree
+include::{snippets}/categories-tree/path-parameters.adoc[]
+include::{snippets}/categories-tree/http-request.adoc[]
+include::{snippets}/categories-tree/http-response.adoc[]
+
+== Items
+
+=== List Items
+include::{snippets}/items-list/path-parameters.adoc[]
+include::{snippets}/items-list/query-parameters.adoc[]
+include::{snippets}/items-list/http-request.adoc[]
+include::{snippets}/items-list/http-response.adoc[]
+
+=== Get Item
+include::{snippets}/items-get/path-parameters.adoc[]
+include::{snippets}/items-get/http-request.adoc[]
+include::{snippets}/items-get/http-response.adoc[]
+
+== Classifications
+
+=== List Classifications
+include::{snippets}/classifications-list/path-parameters.adoc[]
+include::{snippets}/classifications-list/http-request.adoc[]
+include::{snippets}/classifications-list/http-response.adoc[]
+
+== Media
+
+=== List Media By Item
+include::{snippets}/media-list/path-parameters.adoc[]
+include::{snippets}/media-list/http-request.adoc[]
+include::{snippets}/media-list/http-response.adoc[]
+
+=== Get Media
+include::{snippets}/media-get/path-parameters.adoc[]
+include::{snippets}/media-get/http-request.adoc[]
+include::{snippets}/media-get/http-response.adoc[]
