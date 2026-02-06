@@ -1,41 +1,30 @@
 package kr.ac.skku.scg.exhibition.exhibition.controller;
 
-import static org.mockito.BDDMockito.given;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
-import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessRequest;
-import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessResponse;
-import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
-import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
-import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
-import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
-import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
-import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.time.LocalDate;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
-
+import kr.ac.skku.scg.exhibition.exhibition.dto.response.ExhibitionResponse;
+import kr.ac.skku.scg.exhibition.exhibition.service.ExhibitionService;
+import kr.ac.skku.scg.exhibition.global.config.SecurityConfig;
+import kr.ac.skku.scg.exhibition.global.error.ApiExceptionHandler;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.restdocs.test.autoconfigure.AutoConfigureRestDocs;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.context.annotation.Import;
-
-import kr.ac.skku.scg.exhibition.exhibition.domain.ExhibitionServiceEntity;
-import kr.ac.skku.scg.exhibition.exhibition.service.ExhibitionService;
-import kr.ac.skku.scg.exhibition.global.config.SecurityConfig;
+import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(controllers = ExhibitionController.class)
-@AutoConfigureRestDocs(outputDir = "build/generated-snippets")
-@Import(SecurityConfig.class)
+@Import({SecurityConfig.class, ApiExceptionHandler.class})
+@AutoConfigureRestDocs
 class ExhibitionControllerTest {
 
     @Autowired
@@ -45,60 +34,25 @@ class ExhibitionControllerTest {
     private ExhibitionService exhibitionService;
 
     @Test
-    void listExhibitions() throws Exception {
-        ExhibitionServiceEntity entity = exhibition("cse-2026");
-        var pageable = PageRequest.of(0, 20, Sort.by("createdAt").descending());
-        given(exhibitionService.list(true, pageable)).willReturn(new PageImpl<>(List.of(entity), pageable, 1));
+    void getById() throws Exception {
+        UUID id = UUID.randomUUID();
+        when(exhibitionService.get(id)).thenReturn(new ExhibitionResponse(id, "cse-2026", "CSE 2026", Instant.now(), Instant.now()));
 
-        mockMvc.perform(get("/exhibitions").param("active", "true").accept(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andDo(document("exhibitions-list",
-                preprocessRequest(prettyPrint()),
-                preprocessResponse(prettyPrint()),
-                queryParameters(parameterWithName("active").description("활성 전시 여부")),
-                responseFields(
-                    fieldWithPath("items[].id").description("전시 ID"),
-                    fieldWithPath("items[].slug").description("슬러그"),
-                    fieldWithPath("items[].name").description("전시명"),
-                    fieldWithPath("items[].description").description("설명"),
-                    fieldWithPath("items[].startDate").description("시작일"),
-                    fieldWithPath("items[].endDate").description("종료일"),
-                    fieldWithPath("items[].isActive").description("활성 여부"),
-                    fieldWithPath("items[].popupEnabled").description("팝업 활성"),
-                    fieldWithPath("items[].logoMediaId").description("로고 미디어 ID").optional(),
-                    fieldWithPath("items[].popupImageMediaId").description("팝업 이미지 미디어 ID").optional(),
-                    fieldWithPath("items[].introTitle").description("인트로 타이틀").optional(),
-                    fieldWithPath("items[].introDescription").description("인트로 설명").optional(),
-                    fieldWithPath("items[].introVideoMediaId").description("인트로 비디오 미디어 ID").optional(),
-                    fieldWithPath("page").description("페이지"),
-                    fieldWithPath("pageSize").description("페이지 크기"),
-                    fieldWithPath("total").description("총 개수")
-                )));
+        mockMvc.perform(get("/exhibitions/{id}", id))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(id.toString()))
+                .andDo(document("exhibitions-get"));
     }
 
     @Test
-    void getExhibition() throws Exception {
-        ExhibitionServiceEntity entity = exhibition("cse-2026");
-        given(exhibitionService.get(entity.getId())).willReturn(entity);
+    void list() throws Exception {
+        when(exhibitionService.list(any())).thenReturn(List.of(
+                new ExhibitionResponse(UUID.randomUUID(), "cse-2026", "CSE 2026", Instant.now(), Instant.now())
+        ));
 
-        mockMvc.perform(get("/exhibitions/{id}", entity.getId()).accept(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andDo(document("exhibitions-get",
-                preprocessRequest(prettyPrint()),
-                preprocessResponse(prettyPrint()),
-                pathParameters(parameterWithName("id").description("전시 ID"))));
-    }
-
-    private ExhibitionServiceEntity exhibition(String slug) {
-        ExhibitionServiceEntity entity = new ExhibitionServiceEntity();
-        entity.setId(UUID.randomUUID());
-        entity.setSlug(slug);
-        entity.setName("CSE 2026");
-        entity.setDescription("desc");
-        entity.setStartDate(LocalDate.of(2026, 2, 1));
-        entity.setEndDate(LocalDate.of(2026, 3, 1));
-        entity.setActive(true);
-        entity.setPopupEnabled(false);
-        return entity;
+        mockMvc.perform(get("/exhibitions").param("q", "cse"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].name").value("CSE 2026"))
+                .andDo(document("exhibitions-list"));
     }
 }

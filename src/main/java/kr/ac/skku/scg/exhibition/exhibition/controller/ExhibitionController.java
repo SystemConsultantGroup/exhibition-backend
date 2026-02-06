@@ -1,62 +1,37 @@
 package kr.ac.skku.scg.exhibition.exhibition.controller;
 
-import static kr.ac.skku.scg.exhibition.exhibition.dto.ExhibitionDtos.*;
-
+import jakarta.validation.Valid;
+import java.util.List;
 import java.util.UUID;
-
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
+import kr.ac.skku.scg.exhibition.exhibition.dto.request.ExhibitionListRequest;
+import kr.ac.skku.scg.exhibition.exhibition.dto.response.ExhibitionResponse;
+import kr.ac.skku.scg.exhibition.exhibition.service.ExhibitionService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import kr.ac.skku.scg.exhibition.exhibition.service.ExhibitionService;
-import kr.ac.skku.scg.exhibition.exhibition.domain.ExhibitionServiceEntity;
-import kr.ac.skku.scg.exhibition.global.dto.PageResponse;
-import lombok.RequiredArgsConstructor;
-
+@Validated
 @RestController
 @RequestMapping("/exhibitions")
-@RequiredArgsConstructor
 public class ExhibitionController {
 
     private final ExhibitionService exhibitionService;
 
+    public ExhibitionController(ExhibitionService exhibitionService) {
+        this.exhibitionService = exhibitionService;
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ExhibitionResponse> get(@PathVariable UUID id) {
+        return ResponseEntity.ok(exhibitionService.get(id));
+    }
+
     @GetMapping
-    public ResponseEntity<PageResponse<ExhibitionResponse>> list(
-        @RequestParam(required = false) Boolean active,
-        @RequestParam(defaultValue = "1") int page,
-        @RequestParam(name = "page_size", defaultValue = "20") int pageSize
-    ) {
-        var pageable = PageRequest.of(Math.max(0, page - 1), Math.max(1, pageSize), Sort.by("createdAt").descending());
-        var result = exhibitionService.list(active, pageable);
-        var response = new PageResponse<>(result.getContent().stream().map(this::toResponse).toList(), page, pageSize, result.getTotalElements());
-        return ResponseEntity.ok(response);
-    }
-
-    @GetMapping("/{exhibitionId}")
-    public ResponseEntity<ExhibitionResponse> get(@PathVariable UUID exhibitionId) {
-        return ResponseEntity.ok(toResponse(exhibitionService.get(exhibitionId)));
-    }
-
-    private ExhibitionResponse toResponse(ExhibitionServiceEntity entity) {
-        return new ExhibitionResponse(
-            entity.getId(),
-            entity.getSlug(),
-            entity.getName(),
-            entity.getDescription(),
-            entity.getStartDate(),
-            entity.getEndDate(),
-            entity.isActive(),
-            entity.isPopupEnabled(),
-            entity.getLogoMedia() == null ? null : entity.getLogoMedia().getId(),
-            entity.getPopupImageMedia() == null ? null : entity.getPopupImageMedia().getId(),
-            entity.getIntroTitle(),
-            entity.getIntroDescription(),
-            entity.getIntroVideoMedia() == null ? null : entity.getIntroVideoMedia().getId()
-        );
+    public ResponseEntity<List<ExhibitionResponse>> list(@Valid @ModelAttribute ExhibitionListRequest request) {
+        return ResponseEntity.ok(exhibitionService.list(request));
     }
 }
