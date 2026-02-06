@@ -175,9 +175,9 @@ src/main/java/.../exhibition
 ## 4. 데이터 요구사항
 
 ### 4.1 핵심 엔티티(논리)
-- ExhibitionService: id, name, description, start_date, end_date, logo, created_at, updated_at
+- ExhibitionService: id, name, description, start_date, end_date, logo_media_id, is_active, popup_enabled, popup_image_media_id, intro_title, intro_description, intro_video_media_id, created_at, updated_at
 - Category: id, exhibition_id, parent_id, name, order_index, path, created_at, updated_at
-- Item: id, exhibition_id, category_id, title, description, author_name, author_email, visibility, thumbnail_media_id, poster_media_id, presentation_video_media_id, created_at, updated_at, published_at
+- Item: id, exhibition_id, category_id, title, description, author_name, author_email, participant_names, advisor_names, visibility, thumbnail_media_id, poster_media_id, presentation_video_media_id, created_at, updated_at, published_at
 - ItemClassification: id, exhibition_id, name, created_at
 - ItemClassificationMap: id, item_id, classification_id, created_at
 - MediaAsset: id, item_id, exhibition_id, object_key, media_type, size, checksum, created_at
@@ -193,8 +193,13 @@ src/main/java/.../exhibition
 - `description` TEXT NULL
 - `start_date` DATE NULL
 - `end_date` DATE NULL
-- `logo_object_key` VARCHAR(255) NULL
+- `logo_media_id` UUID FK -> media_assets.id NULL
 - `is_active` BOOLEAN NOT NULL DEFAULT true
+- `popup_enabled` BOOLEAN NOT NULL DEFAULT false
+- `popup_image_media_id` UUID FK -> media_assets.id NULL
+- `intro_title` VARCHAR(200) NULL
+- `intro_description` TEXT NULL
+- `intro_video_media_id` UUID FK -> media_assets.id NULL
 - `created_at` TIMESTAMP NOT NULL
 - `updated_at` TIMESTAMP NOT NULL
 
@@ -220,6 +225,8 @@ src/main/java/.../exhibition
 - `description` TEXT NULL
 - `author_name` VARCHAR(100) NULL
 - `author_email` VARCHAR(200) NULL
+- `participant_names` TEXT NULL
+- `advisor_names` TEXT NULL
 - `visibility` VARCHAR(20) NOT NULL DEFAULT 'public'
 - `thumbnail_media_id` UUID FK -> media_assets.id NULL
 - `poster_media_id` UUID FK -> media_assets.id NULL
@@ -295,6 +302,8 @@ src/main/java/.../exhibition
 - 카테고리는 계층 구조(자기 참조 parent_id)이다.
 - 하나의 전시 서비스는 여러 항목을 가진다.
 - 하나의 항목은 여러 미디어 자산을 가진다.
+- 하나의 전시 서비스는 로고/팝업 이미지/인트로 비디오를 media_assets FK(media ref)로 참조할 수 있다.
+- 하나의 항목은 썸네일/포스터/발표영상을 media_assets FK(media ref)로 참조할 수 있다.
 - 하나의 사용자는 여러 OAuth 계정을 가진다.
 
 ## 5. 외부 인터페이스 요구사항
@@ -340,7 +349,13 @@ src/main/java/.../exhibition
       "description": "Capstone projects and portfolios",
       "start_date": "2026-02-10",
       "end_date": "2026-03-01",
-      "is_active": true
+      "is_active": true,
+      "popup_enabled": false,
+      "logo_media_id": null,
+      "popup_image_media_id": null,
+      "intro_title": "CSE 2026 Intro",
+      "intro_description": "Welcome to the graduation exhibition",
+      "intro_video_media_id": null
     }
   ],
   "page": 1,
@@ -357,7 +372,13 @@ src/main/java/.../exhibition
   "name": "CSE Graduation Exhibition 2026",
   "description": "Capstone projects and portfolios",
   "start_date": "2026-02-10",
-  "end_date": "2026-03-01"
+  "end_date": "2026-03-01",
+  "logo_media_id": null,
+  "popup_enabled": false,
+  "popup_image_media_id": null,
+  "intro_title": "CSE 2026 Intro",
+  "intro_description": "Welcome to the graduation exhibition",
+  "intro_video_media_id": null
 }
 ```
 - `GET /exhibitions/{exhibitionId}`
@@ -409,6 +430,8 @@ src/main/java/.../exhibition
       "category_id": "c2",
       "title": "Smart Campus",
       "summary": "IoT project",
+      "participant_names": "Kim,Park,Choi",
+      "advisor_names": "Prof. Lee,Prof. Han",
       "visibility": "public",
       "published_at": "2026-02-12T09:00:00Z"
     }
@@ -429,6 +452,8 @@ src/main/java/.../exhibition
   "description": "Full description",
   "author_name": "Lee",
   "author_email": "lee@example.com",
+  "participant_names": "Kim,Park,Choi",
+  "advisor_names": "Prof. Lee,Prof. Han",
   "visibility": "public"
 }
 ```

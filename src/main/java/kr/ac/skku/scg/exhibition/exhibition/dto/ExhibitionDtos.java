@@ -20,10 +20,11 @@ public final class ExhibitionDtos {
         LocalDate endDate,
         boolean isActive,
         boolean popupEnabled,
-        String popupImageUrl,
+        UUID logoMediaId,
+        UUID popupImageMediaId,
         String introTitle,
         String introDescription,
-        String introVideoUrl
+        UUID introVideoMediaId
     ) {
     }
 
@@ -33,7 +34,7 @@ public final class ExhibitionDtos {
         String description,
         LocalDate startDate,
         LocalDate endDate,
-        String logoObjectKey
+        UUID logoMediaId
     ) {
     }
 
@@ -43,20 +44,20 @@ public final class ExhibitionDtos {
         LocalDate startDate,
         LocalDate endDate,
         Boolean isActive,
-        String logoObjectKey
+        UUID logoMediaId
     ) {
     }
 
     public record PatchPopupRequest(
         Boolean popupEnabled,
-        String popupImageUrl
+        UUID popupImageMediaId
     ) {
     }
 
     public record PatchIntroRequest(
         String introTitle,
         String introDescription,
-        String introVideoUrl
+        UUID introVideoMediaId
     ) {
     }
 }

@@ -59,9 +59,9 @@ public class ItemController {
             item.getAuthorEmail(),
             item.getParticipantNames(),
             item.getAdvisorNames(),
-            item.getThumbnailMediaId(),
-            item.getPosterMediaId(),
-            item.getPresentationVideoMediaId(),
+            item.getThumbnailMedia() == null ? null : item.getThumbnailMedia().getId(),
+            item.getPosterMedia() == null ? null : item.getPosterMedia().getId(),
+            item.getPresentationVideoMedia() == null ? null : item.getPresentationVideoMedia().getId(),
             item.getVisibility().name().toLowerCase(),
             item.getPublishedAt()
         );

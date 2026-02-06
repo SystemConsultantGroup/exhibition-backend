@@ -52,10 +52,11 @@ public class ExhibitionController {
             entity.getEndDate(),
             entity.isActive(),
             entity.isPopupEnabled(),
-            entity.getPopupImageUrl(),
+            entity.getLogoMedia() == null ? null : entity.getLogoMedia().getId(),
+            entity.getPopupImageMedia() == null ? null : entity.getPopupImageMedia().getId(),
             entity.getIntroTitle(),
             entity.getIntroDescription(),
-            entity.getIntroVideoUrl()
+            entity.getIntroVideoMedia() == null ? null : entity.getIntroVideoMedia().getId()
         );
     }
 }

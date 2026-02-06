@@ -625,24 +625,29 @@ Host: localhost:8080</code></pre>
 <td class="tableblock halign-left valign-top"><p class="tableblock">팝업 활성</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>items[].popupImageUrl</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>items[].logoMediaId</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Null</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">팝업 이미지 URL</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">로고 미디어 ID</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>items[].popupImageMediaId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Null</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">팝업 이미지 미디어 ID</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>items[].introTitle</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Null</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">소개 제목</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">인트로 타이틀</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>items[].introDescription</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Null</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">소개 설명</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">인트로 설명</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>items[].introVideoUrl</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>items[].introVideoMediaId</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Null</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">소개 영상 URL</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">인트로 비디오 미디어 ID</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>page</code></p></td>
@@ -674,11 +679,11 @@ Cache-Control: no-cache, no-store, max-age=0, must-revalidate
 Pragma: no-cache
 Expires: 0
 X-Frame-Options: DENY
-Content-Length: 426
+Content-Length: 460
 
 {
   "items" : [ {
-    "id" : "6ba883bd-514f-444c-ba56-c1764f55d7c7",
+    "id" : "e8ad065c-7d4e-4d40-b87c-c648a6292d51",
     "slug" : "cse-2026",
     "name" : "CSE 2026",
     "description" : "desc",
@@ -686,10 +691,11 @@ Content-Length: 426
     "endDate" : "2026-03-01",
     "isActive" : true,
     "popupEnabled" : false,
-    "popupImageUrl" : null,
+    "logoMediaId" : null,
+    "popupImageMediaId" : null,
     "introTitle" : null,
     "introDescription" : null,
-    "introVideoUrl" : null
+    "introVideoMediaId" : null
   } ],
   "page" : 1,
   "pageSize" : 20,
@@ -704,7 +710,7 @@ Content-Length: 426
 <div class="content">
 <pre class="highlight nowrap"><code class="language-json" data-lang="json">{
   "items" : [ {
-    "id" : "6ba883bd-514f-444c-ba56-c1764f55d7c7",
+    "id" : "e8ad065c-7d4e-4d40-b87c-c648a6292d51",
     "slug" : "cse-2026",
     "name" : "CSE 2026",
     "description" : "desc",
@@ -712,10 +718,11 @@ Content-Length: 426
     "endDate" : "2026-03-01",
     "isActive" : true,
     "popupEnabled" : false,
-    "popupImageUrl" : null,
+    "logoMediaId" : null,
+    "popupImageMediaId" : null,
     "introTitle" : null,
     "introDescription" : null,
-    "introVideoUrl" : null
+    "introVideoMediaId" : null
   } ],
   "page" : 1,
   "pageSize" : 20,
@@ -752,7 +759,7 @@ Content-Length: 426
 <h4 id="_요청_예시_2">2.2.2. 요청 예시</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /exhibitions/192fd1be-f368-42f6-a013-b61249c634ac HTTP/1.1
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /exhibitions/5e3679e5-7a56-4ff8-9dca-65b93b043881 HTTP/1.1
 Accept: application/json
 Host: localhost:8080</code></pre>
 </div>
@@ -770,10 +777,10 @@ Cache-Control: no-cache, no-store, max-age=0, must-revalidate
 Pragma: no-cache
 Expires: 0
 X-Frame-Options: DENY
-Content-Length: 332
+Content-Length: 364
 
 {
-  "id" : "192fd1be-f368-42f6-a013-b61249c634ac",
+  "id" : "5e3679e5-7a56-4ff8-9dca-65b93b043881",
   "slug" : "cse-2026",
   "name" : "CSE 2026",
   "description" : "desc",
@@ -781,10 +788,11 @@ Content-Length: 332
   "endDate" : "2026-03-01",
   "isActive" : true,
   "popupEnabled" : false,
-  "popupImageUrl" : null,
+  "logoMediaId" : null,
+  "popupImageMediaId" : null,
   "introTitle" : null,
   "introDescription" : null,
-  "introVideoUrl" : null
+  "introVideoMediaId" : null
 }</code></pre>
 </div>
 </div>
@@ -794,7 +802,7 @@ Content-Length: 332
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-json" data-lang="json">{
-  "id" : "192fd1be-f368-42f6-a013-b61249c634ac",
+  "id" : "5e3679e5-7a56-4ff8-9dca-65b93b043881",
   "slug" : "cse-2026",
   "name" : "CSE 2026",
   "description" : "desc",
@@ -802,10 +810,11 @@ Content-Length: 332
   "endDate" : "2026-03-01",
   "isActive" : true,
   "popupEnabled" : false,
-  "popupImageUrl" : null,
+  "logoMediaId" : null,
+  "popupImageMediaId" : null,
   "introTitle" : null,
   "introDescription" : null,
-  "introVideoUrl" : null
+  "introVideoMediaId" : null
 }</code></pre>
 </div>
 </div>
@@ -843,7 +852,7 @@ Content-Length: 332
 <h4 id="_요청_예시_3">3.1.2. 요청 예시</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /exhibitions/c4a4df0b-9eb3-4b89-9768-76ad4098afb5/categories/tree HTTP/1.1
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /exhibitions/40eb166a-62e5-4d7e-91c8-649ff76769d1/categories/tree HTTP/1.1
 Host: localhost:8080</code></pre>
 </div>
 </div>
@@ -863,7 +872,7 @@ X-Frame-Options: DENY
 Content-Length: 149
 
 [ {
-  "id" : "1fa0be72-d4d6-4683-9c20-91249686ef41",
+  "id" : "20b29024-1fe4-4ef0-9488-1c22474395e4",
   "name" : "Software",
   "orderIndex" : 0,
   "path" : "a",
@@ -878,7 +887,7 @@ Content-Length: 149
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-json" data-lang="json">[ {
-  "id" : "1fa0be72-d4d6-4683-9c20-91249686ef41",
+  "id" : "20b29024-1fe4-4ef0-9488-1c22474395e4",
   "name" : "Software",
   "orderIndex" : 0,
   "path" : "a",
@@ -966,7 +975,7 @@ Content-Length: 149
 <h4 id="_요청_예시_4">4.1.3. 요청 예시</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /exhibitions/77ab0ccb-ba7f-4520-8cdb-a435a9db17ef/items HTTP/1.1
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /exhibitions/b4473a72-5424-499f-bbcc-aa9e78f8afab/items HTTP/1.1
 Host: localhost:8080</code></pre>
 </div>
 </div>
@@ -983,18 +992,23 @@ Cache-Control: no-cache, no-store, max-age=0, must-revalidate
 Pragma: no-cache
 Expires: 0
 X-Frame-Options: DENY
-Content-Length: 427
+Content-Length: 583
 
 {
   "items" : [ {
-    "id" : "4ce24e21-edee-4fa5-822f-cbe465de0ad4",
-    "exhibitionId" : "77ab0ccb-ba7f-4520-8cdb-a435a9db17ef",
-    "categoryId" : "b24f2b7c-e24e-44e1-99bc-80316e4214bf",
+    "id" : "b373b1e6-3246-420b-9e7d-7f5a3048212b",
+    "exhibitionId" : "b4473a72-5424-499f-bbcc-aa9e78f8afab",
+    "categoryId" : "d0a459dd-0731-416b-8e58-7800ddd57ba6",
     "title" : "Smart Campus",
     "summary" : null,
     "description" : null,
     "authorName" : null,
     "authorEmail" : null,
+    "participantNames" : null,
+    "advisorNames" : null,
+    "thumbnailMediaId" : null,
+    "posterMediaId" : null,
+    "presentationVideoMediaId" : null,
     "visibility" : "public",
     "publishedAt" : null
   } ],
@@ -1011,14 +1025,19 @@ Content-Length: 427
 <div class="content">
 <pre class="highlight nowrap"><code class="language-json" data-lang="json">{
   "items" : [ {
-    "id" : "4ce24e21-edee-4fa5-822f-cbe465de0ad4",
-    "exhibitionId" : "77ab0ccb-ba7f-4520-8cdb-a435a9db17ef",
-    "categoryId" : "b24f2b7c-e24e-44e1-99bc-80316e4214bf",
+    "id" : "b373b1e6-3246-420b-9e7d-7f5a3048212b",
+    "exhibitionId" : "b4473a72-5424-499f-bbcc-aa9e78f8afab",
+    "categoryId" : "d0a459dd-0731-416b-8e58-7800ddd57ba6",
     "title" : "Smart Campus",
     "summary" : null,
     "description" : null,
     "authorName" : null,
     "authorEmail" : null,
+    "participantNames" : null,
+    "advisorNames" : null,
+    "thumbnailMediaId" : null,
+    "posterMediaId" : null,
+    "presentationVideoMediaId" : null,
     "visibility" : "public",
     "publishedAt" : null
   } ],
@@ -1057,7 +1076,7 @@ Content-Length: 427
 <h4 id="_요청_예시_5">4.2.2. 요청 예시</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /items/6f79b105-6bbc-4e1c-82ed-62cd061d1d5e HTTP/1.1
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /items/9d63510a-a212-4b71-910f-b8a83209346a HTTP/1.1
 Host: localhost:8080</code></pre>
 </div>
 </div>
@@ -1074,17 +1093,22 @@ Cache-Control: no-cache, no-store, max-age=0, must-revalidate
 Pragma: no-cache
 Expires: 0
 X-Frame-Options: DENY
-Content-Length: 337
+Content-Length: 483
 
 {
-  "id" : "6f79b105-6bbc-4e1c-82ed-62cd061d1d5e",
-  "exhibitionId" : "4df1d18a-1d9c-4bf4-bac8-d927267535b3",
-  "categoryId" : "e071346d-120c-4402-9f92-4e3c53d95fba",
+  "id" : "9d63510a-a212-4b71-910f-b8a83209346a",
+  "exhibitionId" : "0f6c712d-4a2e-45d1-b08e-cbdb35c66404",
+  "categoryId" : "94a52266-b798-4d4b-8cec-9ade50fefb6b",
   "title" : "Smart Campus",
   "summary" : null,
   "description" : null,
   "authorName" : null,
   "authorEmail" : null,
+  "participantNames" : null,
+  "advisorNames" : null,
+  "thumbnailMediaId" : null,
+  "posterMediaId" : null,
+  "presentationVideoMediaId" : null,
   "visibility" : "public",
   "publishedAt" : null
 }</code></pre>
@@ -1096,14 +1120,19 @@ Content-Length: 337
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-json" data-lang="json">{
-  "id" : "6f79b105-6bbc-4e1c-82ed-62cd061d1d5e",
-  "exhibitionId" : "4df1d18a-1d9c-4bf4-bac8-d927267535b3",
-  "categoryId" : "e071346d-120c-4402-9f92-4e3c53d95fba",
+  "id" : "9d63510a-a212-4b71-910f-b8a83209346a",
+  "exhibitionId" : "0f6c712d-4a2e-45d1-b08e-cbdb35c66404",
+  "categoryId" : "94a52266-b798-4d4b-8cec-9ade50fefb6b",
   "title" : "Smart Campus",
   "summary" : null,
   "description" : null,
   "authorName" : null,
   "authorEmail" : null,
+  "participantNames" : null,
+  "advisorNames" : null,
+  "thumbnailMediaId" : null,
+  "posterMediaId" : null,
+  "presentationVideoMediaId" : null,
   "visibility" : "public",
   "publishedAt" : null
 }</code></pre>
@@ -1143,7 +1172,7 @@ Content-Length: 337
 <h4 id="_요청_예시_6">5.1.2. 요청 예시</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /exhibitions/17a7301d-6478-4f47-bb98-43b2416e80bd/classifications HTTP/1.1
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /exhibitions/d7775bb7-95a1-4dc6-aa7e-95e4ea05d9ef/classifications HTTP/1.1
 Host: localhost:8080</code></pre>
 </div>
 </div>
@@ -1163,8 +1192,8 @@ X-Frame-Options: DENY
 Content-Length: 134
 
 [ {
-  "id" : "ed3e4fe3-ad2e-4fa2-9f96-55131b1950a6",
-  "exhibitionId" : "17a7301d-6478-4f47-bb98-43b2416e80bd",
+  "id" : "8992f580-36c2-4bc3-b0fa-31388c002fcd",
+  "exhibitionId" : "d7775bb7-95a1-4dc6-aa7e-95e4ea05d9ef",
   "name" : "Paper"
 } ]</code></pre>
 </div>
@@ -1175,8 +1204,8 @@ Content-Length: 134
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-json" data-lang="json">[ {
-  "id" : "ed3e4fe3-ad2e-4fa2-9f96-55131b1950a6",
-  "exhibitionId" : "17a7301d-6478-4f47-bb98-43b2416e80bd",
+  "id" : "8992f580-36c2-4bc3-b0fa-31388c002fcd",
+  "exhibitionId" : "d7775bb7-95a1-4dc6-aa7e-95e4ea05d9ef",
   "name" : "Paper"
 } ]</code></pre>
 </div>
@@ -1215,7 +1244,7 @@ Content-Length: 134
 <h4 id="_요청_예시_7">6.1.2. 요청 예시</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /items/6de2bb94-edae-42bd-82ee-7a82a42b8a14/media HTTP/1.1
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /items/0663c9f2-dd41-4a58-adec-d940921712a0/media HTTP/1.1
 Host: localhost:8080</code></pre>
 </div>
 </div>
@@ -1235,9 +1264,9 @@ X-Frame-Options: DENY
 Content-Length: 284
 
 [ {
-  "id" : "02bbefc3-5ede-4906-9eec-e9a8ea4be87b",
-  "itemId" : "6de2bb94-edae-42bd-82ee-7a82a42b8a14",
-  "exhibitionId" : "747ca39c-2f41-4a21-8a1c-65f12877ee6b",
+  "id" : "96fd528b-ce6d-4134-82ca-ff6b0d1d478e",
+  "itemId" : "0663c9f2-dd41-4a58-adec-d940921712a0",
+  "exhibitionId" : "cb7264d8-792a-46ce-afa7-180d02afbd2c",
   "objectKey" : "exhibitions/a/items/b/cover.jpg",
   "mediaType" : "image/jpeg",
   "size" : 3,
@@ -1251,9 +1280,9 @@ Content-Length: 284
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-json" data-lang="json">[ {
-  "id" : "02bbefc3-5ede-4906-9eec-e9a8ea4be87b",
-  "itemId" : "6de2bb94-edae-42bd-82ee-7a82a42b8a14",
-  "exhibitionId" : "747ca39c-2f41-4a21-8a1c-65f12877ee6b",
+  "id" : "96fd528b-ce6d-4134-82ca-ff6b0d1d478e",
+  "itemId" : "0663c9f2-dd41-4a58-adec-d940921712a0",
+  "exhibitionId" : "cb7264d8-792a-46ce-afa7-180d02afbd2c",
   "objectKey" : "exhibitions/a/items/b/cover.jpg",
   "mediaType" : "image/jpeg",
   "size" : 3,
@@ -1290,7 +1319,7 @@ Content-Length: 284
 <h4 id="_요청_예시_8">6.2.2. 요청 예시</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /media/3e9b40cb-abf1-45a1-970a-1747c2e40b07 HTTP/1.1
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /media/8d445fe9-f3c6-4c80-9231-5848a0408240 HTTP/1.1
 Host: localhost:8080</code></pre>
 </div>
 </div>
@@ -1301,7 +1330,7 @@ Host: localhost:8080</code></pre>
 <div class="content">
 <pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 200 OK
 Content-Type: image/jpeg
-Content-Disposition: inline; filename="3e9b40cb-abf1-45a1-970a-1747c2e40b07"
+Content-Disposition: inline; filename="8d445fe9-f3c6-4c80-9231-5848a0408240"
 Content-Length: 3
 X-Content-Type-Options: nosniff
 X-XSS-Protection: 0

@@ -10,9 +10,13 @@ import org.hibernate.annotations.UuidGenerator;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
+import kr.ac.skku.scg.exhibition.media.domain.MediaAssetEntity;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -39,8 +43,9 @@ public class ExhibitionServiceEntity {
 
     private LocalDate endDate;
 
-    @Column(length = 255)
-    private String logoObjectKey;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "logo_media_id")
+    private MediaAssetEntity logoMedia;
 
     @Column(nullable = false)
     private boolean isActive = true;
@@ -48,17 +53,19 @@ public class ExhibitionServiceEntity {
     @Column(nullable = false)
     private boolean popupEnabled = false;
 
-    @Column(length = 255)
-    private String popupImageUrl;
-
-    @Column(length = 255)
-    private String introVideoUrl;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "popup_image_media_id")
+    private MediaAssetEntity popupImageMedia;
 
     @Column(length = 200)
     private String introTitle;
 
     @Column(columnDefinition = "TEXT")
     private String introDescription;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "intro_video_media_id")
+    private MediaAssetEntity introVideoMedia;
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)

@@ -20,6 +20,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import kr.ac.skku.scg.exhibition.category.domain.CategoryEntity;
 import kr.ac.skku.scg.exhibition.exhibition.domain.ExhibitionServiceEntity;
+import kr.ac.skku.scg.exhibition.media.domain.MediaAssetEntity;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -68,14 +69,17 @@ public class ItemEntity {
     @Column(columnDefinition = "TEXT")
     private String advisorNames;
 
-    @Column(name = "thumbnail_media_id")
-    private UUID thumbnailMediaId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "thumbnail_media_id")
+    private MediaAssetEntity thumbnailMedia;
 
-    @Column(name = "poster_media_id")
-    private UUID posterMediaId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "poster_media_id")
+    private MediaAssetEntity posterMedia;
 
-    @Column(name = "presentation_video_media_id")
-    private UUID presentationVideoMediaId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "presentation_video_media_id")
+    private MediaAssetEntity presentationVideoMedia;
 
     @Enumerated(EnumType.STRING)
     @Column(length = 20, nullable = false)

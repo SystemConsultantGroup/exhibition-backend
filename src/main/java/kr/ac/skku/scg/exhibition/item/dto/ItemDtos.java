@@ -38,6 +38,8 @@ public final class ItemDtos {
         String description,
         @Size(max = 100) String authorName,
         @Email @Size(max = 200) String authorEmail,
+        String participantNames,
+        String advisorNames,
         String visibility,
         Instant publishedAt
     ) {
@@ -50,6 +52,8 @@ public final class ItemDtos {
         String description,
         @Size(max = 100) String authorName,
         @Email @Size(max = 200) String authorEmail,
+        String participantNames,
+        String advisorNames,
         String visibility,
         Instant publishedAt
     ) {
