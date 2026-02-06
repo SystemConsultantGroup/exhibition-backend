@@ -57,6 +57,11 @@ public class ItemController {
             item.getDescription(),
             item.getAuthorName(),
             item.getAuthorEmail(),
+            item.getParticipantNames(),
+            item.getAdvisorNames(),
+            item.getThumbnailMediaId(),
+            item.getPosterMediaId(),
+            item.getPresentationVideoMediaId(),
             item.getVisibility().name().toLowerCase(),
             item.getPublishedAt()
         );

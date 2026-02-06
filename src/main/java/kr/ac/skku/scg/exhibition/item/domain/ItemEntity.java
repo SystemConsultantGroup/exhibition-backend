@@ -62,6 +62,21 @@ public class ItemEntity {
     @Column(length = 200)
     private String authorEmail;
 
+    @Column(columnDefinition = "TEXT")
+    private String participantNames;
+
+    @Column(columnDefinition = "TEXT")
+    private String advisorNames;
+
+    @Column(name = "thumbnail_media_id")
+    private UUID thumbnailMediaId;
+
+    @Column(name = "poster_media_id")
+    private UUID posterMediaId;
+
+    @Column(name = "presentation_video_media_id")
+    private UUID presentationVideoMediaId;
+
     @Enumerated(EnumType.STRING)
     @Column(length = 20, nullable = false)
     private ItemVisibility visibility = ItemVisibility.PUBLIC;

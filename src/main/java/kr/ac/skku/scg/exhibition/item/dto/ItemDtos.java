@@ -21,6 +21,11 @@ public final class ItemDtos {
         String description,
         String authorName,
         String authorEmail,
+        String participantNames,
+        String advisorNames,
+        UUID thumbnailMediaId,
+        UUID posterMediaId,
+        UUID presentationVideoMediaId,
         String visibility,
         Instant publishedAt
     ) {
