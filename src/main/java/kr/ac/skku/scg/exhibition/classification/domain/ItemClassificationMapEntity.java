@@ -11,37 +11,38 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.time.Instant;
 import java.util.UUID;
-import kr.ac.skku.scg.exhibition.exhibition.domain.ExhibitionEntity;
+import kr.ac.skku.scg.exhibition.item.domain.ItemEntity;
 
 @Entity
 @Table(
-        name = "item_classifications",
+        name = "item_classification_map",
         uniqueConstraints = {
-                @UniqueConstraint(name = "uk_item_classification_exhibition_name", columnNames = {"exhibition_id", "name"})
+                @UniqueConstraint(name = "uk_item_classification_map_item_classification", columnNames = {"item_id", "classification_id"})
         }
 )
-public class ItemClassificationEntity {
+public class ItemClassificationMapEntity {
 
     @Id
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "exhibition_id")
-    private ExhibitionEntity exhibition;
+    @JoinColumn(name = "item_id", nullable = false)
+    private ItemEntity item;
 
-    @Column(nullable = false, length = 100)
-    private String name;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "classification_id", nullable = false)
+    private ItemClassificationEntity classification;
 
     @Column(nullable = false)
     private Instant createdAt;
 
-    protected ItemClassificationEntity() {
+    protected ItemClassificationMapEntity() {
     }
 
-    public ItemClassificationEntity(UUID id, ExhibitionEntity exhibition, String name) {
+    public ItemClassificationMapEntity(UUID id, ItemEntity item, ItemClassificationEntity classification) {
         this.id = id;
-        this.exhibition = exhibition;
-        this.name = name;
+        this.item = item;
+        this.classification = classification;
     }
 
     @PrePersist
@@ -53,12 +54,12 @@ public class ItemClassificationEntity {
         return id;
     }
 
-    public ExhibitionEntity getExhibition() {
-        return exhibition;
+    public ItemEntity getItem() {
+        return item;
     }
 
-    public String getName() {
-        return name;
+    public ItemClassificationEntity getClassification() {
+        return classification;
     }
 
     public Instant getCreatedAt() {

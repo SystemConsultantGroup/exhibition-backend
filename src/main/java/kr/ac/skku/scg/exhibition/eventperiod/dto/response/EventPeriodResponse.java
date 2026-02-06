@@ -8,8 +8,6 @@ public record EventPeriodResponse(
         UUID exhibitionId,
         String name,
         Instant startTime,
-        Instant endTime,
-        Instant createdAt,
-        Instant updatedAt
+        Instant endTime
 ) {
 }

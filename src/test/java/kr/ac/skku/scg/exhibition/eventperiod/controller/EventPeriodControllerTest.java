@@ -47,8 +47,7 @@ class EventPeriodControllerTest {
         UUID exhibitionId = UUID.randomUUID();
         when(eventPeriodService.get(id)).thenReturn(new EventPeriodResponse(
                 id, exhibitionId, "2025-2학기",
-                Instant.parse("2025-09-01T00:00:00Z"), Instant.parse("2025-12-31T00:00:00Z"),
-                Instant.now(), Instant.now()));
+                Instant.parse("2025-09-01T00:00:00Z"), Instant.parse("2025-12-31T00:00:00Z")));
 
         mockMvc.perform(get("/event-periods/{id}", id))
                 .andExpect(status().isOk())
@@ -64,9 +63,7 @@ class EventPeriodControllerTest {
                                 fieldWithPath("exhibitionId").description("전시 ID"),
                                 fieldWithPath("name").description("이벤트 기간명"),
                                 fieldWithPath("startTime").description("시작 시각"),
-                                fieldWithPath("endTime").description("종료 시각"),
-                                fieldWithPath("createdAt").description("생성 일시"),
-                                fieldWithPath("updatedAt").description("수정 일시")
+                                fieldWithPath("endTime").description("종료 시각")
                         )));
     }
 
@@ -75,8 +72,7 @@ class EventPeriodControllerTest {
         UUID exhibitionId = UUID.randomUUID();
         when(eventPeriodService.list(any())).thenReturn(List.of(new EventPeriodResponse(
                 UUID.randomUUID(), exhibitionId, "2025-1학기",
-                Instant.parse("2025-03-01T00:00:00Z"), Instant.parse("2025-06-30T00:00:00Z"),
-                Instant.now(), Instant.now())));
+                Instant.parse("2025-03-01T00:00:00Z"), Instant.parse("2025-06-30T00:00:00Z"))));
 
         mockMvc.perform(get("/event-periods").param("exhibitionId", exhibitionId.toString()))
                 .andExpect(status().isOk())
@@ -94,8 +90,6 @@ class EventPeriodControllerTest {
                                 fieldWithPath("items[].name").description("이벤트 기간명"),
                                 fieldWithPath("items[].startTime").description("시작 시각"),
                                 fieldWithPath("items[].endTime").description("종료 시각"),
-                                fieldWithPath("items[].createdAt").description("생성 일시"),
-                                fieldWithPath("items[].updatedAt").description("수정 일시"),
                                 fieldWithPath("page").description("페이지 번호"),
                                 fieldWithPath("pageSize").description("페이지 크기"),
                                 fieldWithPath("total").description("전체 건수")

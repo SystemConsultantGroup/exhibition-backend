@@ -1,14 +1,12 @@
-package kr.ac.skku.scg.exhibition.media.dto.request;
+package kr.ac.skku.scg.exhibition.board.dto.request;
 
 import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
 
-public class MediaListRequest {
+public class BoardListRequest {
 
     @NotNull
     private UUID exhibitionId;
-
-    private UUID itemId;
 
     public UUID getExhibitionId() {
         return exhibitionId;
@@ -16,13 +14,5 @@ public class MediaListRequest {
 
     public void setExhibitionId(UUID exhibitionId) {
         this.exhibitionId = exhibitionId;
-    }
-
-    public UUID getItemId() {
-        return itemId;
-    }
-
-    public void setItemId(UUID itemId) {
-        this.itemId = itemId;
     }
 }

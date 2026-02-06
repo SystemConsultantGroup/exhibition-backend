@@ -6,18 +6,17 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
-import java.time.Instant;
 import java.util.UUID;
 import kr.ac.skku.scg.exhibition.category.domain.CategoryEntity;
 import kr.ac.skku.scg.exhibition.eventperiod.domain.EventPeriodEntity;
 import kr.ac.skku.scg.exhibition.exhibition.domain.ExhibitionEntity;
+import kr.ac.skku.scg.exhibition.global.entity.BaseEntity;
+import kr.ac.skku.scg.exhibition.media.domain.MediaAssetEntity;
 
 @Entity
 @Table(name = "items")
-public class ItemEntity {
+public class ItemEntity extends BaseEntity {
 
     @Id
     private UUID id;
@@ -37,14 +36,26 @@ public class ItemEntity {
     @Column(nullable = false, length = 200)
     private String title;
 
-    @Column(nullable = false)
+    @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Column(nullable = false)
-    private Instant createdAt;
+    @Column(columnDefinition = "TEXT")
+    private String participantNames;
 
-    @Column(nullable = false)
-    private Instant updatedAt;
+    @Column(columnDefinition = "TEXT")
+    private String advisorNames;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "thumbnail_media_id")
+    private MediaAssetEntity thumbnailMedia;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "poster_media_id")
+    private MediaAssetEntity posterMedia;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "presentation_video_media_id")
+    private MediaAssetEntity presentationVideoMedia;
 
     protected ItemEntity() {
     }
@@ -57,18 +68,6 @@ public class ItemEntity {
         this.eventPeriod = eventPeriod;
         this.title = title;
         this.description = description;
-    }
-
-    @PrePersist
-    void onCreate() {
-        Instant now = Instant.now();
-        createdAt = now;
-        updatedAt = now;
-    }
-
-    @PreUpdate
-    void onUpdate() {
-        updatedAt = Instant.now();
     }
 
     public UUID getId() {
@@ -95,11 +94,24 @@ public class ItemEntity {
         return description;
     }
 
-    public Instant getCreatedAt() {
-        return createdAt;
+    public String getParticipantNames() {
+        return participantNames;
     }
 
-    public Instant getUpdatedAt() {
-        return updatedAt;
+    public String getAdvisorNames() {
+        return advisorNames;
     }
+
+    public MediaAssetEntity getThumbnailMedia() {
+        return thumbnailMedia;
+    }
+
+    public MediaAssetEntity getPosterMedia() {
+        return posterMedia;
+    }
+
+    public MediaAssetEntity getPresentationVideoMedia() {
+        return presentationVideoMedia;
+    }
+
 }

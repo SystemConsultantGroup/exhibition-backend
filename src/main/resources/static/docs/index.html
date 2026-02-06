@@ -482,11 +482,15 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_단일_이벤트_기간_조회">6.2. 단일 이벤트 기간 조회</a></li>
 </ul>
 </li>
-<li><a href="#_미디어media">7. 미디어(Media)</a>
+<li><a href="#_게시판board">7. 게시판(Board)</a>
 <ul class="sectlevel2">
-<li><a href="#_항목별_미디어_목록_조회">7.1. 항목별 미디어 목록 조회</a></li>
-<li><a href="#_단일_미디어_조회">7.2. 단일 미디어 조회</a></li>
-<li><a href="#_미디어_파일_다운로드">7.3. 미디어 파일 다운로드</a></li>
+<li><a href="#_게시판_목록_조회">7.1. 게시판 목록 조회</a></li>
+<li><a href="#_단일_게시판_조회">7.2. 단일 게시판 조회</a></li>
+</ul>
+</li>
+<li><a href="#_미디어media">8. 미디어(Media)</a>
+<ul class="sectlevel2">
+<li><a href="#_미디어_파일_다운로드">8.1. 미디어 파일 다운로드</a></li>
 </ul>
 </li>
 </ul>
@@ -536,7 +540,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sect2">
 <h3 id="_파일_다운로드_응답">1.3. 파일 다운로드 응답</h3>
 <div class="paragraph">
-<p>파일 조회 API(<code>/media/{id}/file</code>)는 JSON이 아닌 바이너리 본문을 반환하며, `Content-Type`은 파일 형식에 따라 달라집니다.</p>
+<p>파일 조회 API(<code>/media/{id}</code>)는 JSON이 아닌 바이너리 본문을 반환하며, `Content-Type`은 파일 형식에 따라 달라집니다.</p>
 </div>
 </div>
 </div>
@@ -570,8 +574,8 @@ Host: localhost:8080</code></pre>
 </thead>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>active</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">활성 전시 여부</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>q</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">전시명 검색어</p></td>
 </tr>
 </tbody>
 </table>
@@ -593,6 +597,11 @@ Host: localhost:8080</code></pre>
 </thead>
 <tbody>
 <tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>items</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Array</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">전시 목록</p></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>items[].id</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">전시 ID</p></td>
@@ -600,7 +609,7 @@ Host: localhost:8080</code></pre>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>items[].slug</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">슬러그</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">전시 slug</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>items[].name</code></p></td>
@@ -610,27 +619,7 @@ Host: localhost:8080</code></pre>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>items[].description</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">설명</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>items[].startDate</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">시작일</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>items[].endDate</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">종료일</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>items[].isActive</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Boolean</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">활성 여부</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>items[].popupEnabled</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Boolean</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">팝업 활성</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">전시 설명</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>items[].logoMediaId</code></p></td>
@@ -638,14 +627,24 @@ Host: localhost:8080</code></pre>
 <td class="tableblock halign-left valign-top"><p class="tableblock">로고 미디어 ID</p></td>
 </tr>
 <tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>items[].popupEnabled</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Boolean</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">팝업 사용 여부</p></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>items[].popupImageMediaId</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Null</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">팝업 이미지 미디어 ID</p></td>
 </tr>
 <tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>items[].popupUrl</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Null</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">팝업 링크 URL</p></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>items[].introTitle</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Null</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">인트로 타이틀</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">인트로 제목</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>items[].introDescription</code></p></td>
@@ -660,7 +659,7 @@ Host: localhost:8080</code></pre>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>page</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">페이지</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">페이지 번호</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>pageSize</code></p></td>
@@ -670,7 +669,7 @@ Host: localhost:8080</code></pre>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>total</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">총 개수</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">전체 건수</p></td>
 </tr>
 </tbody>
 </table>
@@ -687,15 +686,21 @@ Cache-Control: no-cache, no-store, max-age=0, must-revalidate
 Pragma: no-cache
 Expires: 0
 X-Frame-Options: DENY
-Content-Length: 276
+Content-Length: 399
 
 {
   "items" : [ {
-    "id" : "fe950638-ce8e-4b28-b3a8-c3bd77c1efd5",
+    "id" : "6dc700f4-7607-4b6f-878b-9d3acc7bdf3f",
     "slug" : "cse-2026",
     "name" : "CSE 2026",
-    "createdAt" : "2026-02-06T12:01:14.989768874Z",
-    "updatedAt" : "2026-02-06T12:01:14.989802831Z"
+    "description" : "설명",
+    "logoMediaId" : null,
+    "popupEnabled" : false,
+    "popupImageMediaId" : null,
+    "popupUrl" : null,
+    "introTitle" : null,
+    "introDescription" : null,
+    "introVideoMediaId" : null
   } ],
   "page" : 1,
   "pageSize" : 1,
@@ -710,11 +715,17 @@ Content-Length: 276
 <div class="content">
 <pre class="highlight nowrap"><code class="language-json" data-lang="json">{
   "items" : [ {
-    "id" : "fe950638-ce8e-4b28-b3a8-c3bd77c1efd5",
+    "id" : "6dc700f4-7607-4b6f-878b-9d3acc7bdf3f",
     "slug" : "cse-2026",
     "name" : "CSE 2026",
-    "createdAt" : "2026-02-06T12:01:14.989768874Z",
-    "updatedAt" : "2026-02-06T12:01:14.989802831Z"
+    "description" : "설명",
+    "logoMediaId" : null,
+    "popupEnabled" : false,
+    "popupImageMediaId" : null,
+    "popupUrl" : null,
+    "introTitle" : null,
+    "introDescription" : null,
+    "introVideoMediaId" : null
   } ],
   "page" : 1,
   "pageSize" : 1,
@@ -751,13 +762,87 @@ Content-Length: 276
 <h4 id="_요청_예시_2">2.2.2. 요청 예시</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /exhibitions/09b98006-9ad7-4050-a956-303514aef061 HTTP/1.1
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /exhibitions/f7ad7cba-96c6-493c-9be5-5744ad27b502 HTTP/1.1
 Host: localhost:8080</code></pre>
 </div>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_응답_예시_2">2.2.3. 응답 예시</h4>
+<h4 id="_응답_필드_2">2.2.3. 응답 필드</h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">경로</th>
+<th class="tableblock halign-left valign-top">타입</th>
+<th class="tableblock halign-left valign-top">설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>id</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">전시 ID</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>slug</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">전시 slug</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>name</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">전시명</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>description</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">전시 설명</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>logoMediaId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Null</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">로고 미디어 ID</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>popupEnabled</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Boolean</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">팝업 사용 여부</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>popupImageMediaId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Null</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">팝업 이미지 미디어 ID</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>popupUrl</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Null</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">팝업 링크 URL</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>introTitle</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Null</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">인트로 제목</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>introDescription</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Null</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">인트로 설명</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>introVideoMediaId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Null</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">인트로 비디오 미디어 ID</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_응답_예시_2">2.2.4. 응답 예시</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 200 OK
@@ -768,28 +853,40 @@ Cache-Control: no-cache, no-store, max-age=0, must-revalidate
 Pragma: no-cache
 Expires: 0
 X-Frame-Options: DENY
-Content-Length: 197
+Content-Length: 308
 
 {
-  "id" : "09b98006-9ad7-4050-a956-303514aef061",
+  "id" : "f7ad7cba-96c6-493c-9be5-5744ad27b502",
   "slug" : "cse-2026",
   "name" : "CSE 2026",
-  "createdAt" : "2026-02-06T12:01:14.960285012Z",
-  "updatedAt" : "2026-02-06T12:01:14.960288529Z"
+  "description" : "설명",
+  "logoMediaId" : null,
+  "popupEnabled" : false,
+  "popupImageMediaId" : null,
+  "popupUrl" : null,
+  "introTitle" : null,
+  "introDescription" : null,
+  "introVideoMediaId" : null
 }</code></pre>
 </div>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_응답_본문json_2">2.2.4. 응답 본문(JSON)</h4>
+<h4 id="_응답_본문json_2">2.2.5. 응답 본문(JSON)</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-json" data-lang="json">{
-  "id" : "09b98006-9ad7-4050-a956-303514aef061",
+  "id" : "f7ad7cba-96c6-493c-9be5-5744ad27b502",
   "slug" : "cse-2026",
   "name" : "CSE 2026",
-  "createdAt" : "2026-02-06T12:01:14.960285012Z",
-  "updatedAt" : "2026-02-06T12:01:14.960288529Z"
+  "description" : "설명",
+  "logoMediaId" : null,
+  "popupEnabled" : false,
+  "popupImageMediaId" : null,
+  "popupUrl" : null,
+  "introTitle" : null,
+  "introDescription" : null,
+  "introVideoMediaId" : null
 }</code></pre>
 </div>
 </div>
@@ -806,13 +903,67 @@ Content-Length: 197
 <h4 id="_요청_예시_3">3.1.1. 요청 예시</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /categories?exhibitionId=ea2ee2ad-c274-4d89-b268-2b82564daa61 HTTP/1.1
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /categories?exhibitionId=aa518f6d-990d-4eff-b3c9-c760462e85d2 HTTP/1.1
 Host: localhost:8080</code></pre>
 </div>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_응답_예시_3">3.1.2. 응답 예시</h4>
+<h4 id="_응답_필드_3">3.1.2. 응답 필드</h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">경로</th>
+<th class="tableblock halign-left valign-top">타입</th>
+<th class="tableblock halign-left valign-top">설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>items</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Array</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">카테고리 목록</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>items[].id</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">카테고리 ID</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>items[].exhibitionId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">전시 ID</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>items[].name</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">카테고리명</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>page</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">페이지 번호</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>pageSize</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">페이지 크기</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>total</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">전체 건수</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_응답_예시_3">3.1.3. 응답 예시</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 200 OK
@@ -823,15 +974,13 @@ Cache-Control: no-cache, no-store, max-age=0, must-revalidate
 Pragma: no-cache
 Expires: 0
 X-Frame-Options: DENY
-Content-Length: 306
+Content-Length: 202
 
 {
   "items" : [ {
-    "id" : "36d2d51c-63be-490c-8041-b220b43818e3",
-    "exhibitionId" : "ea2ee2ad-c274-4d89-b268-2b82564daa61",
-    "name" : "AI",
-    "createdAt" : "2026-02-06T12:01:13.058244870Z",
-    "updatedAt" : "2026-02-06T12:01:13.058246286Z"
+    "id" : "f5fd9f78-a417-42da-8908-7092ed9ffbeb",
+    "exhibitionId" : "aa518f6d-990d-4eff-b3c9-c760462e85d2",
+    "name" : "AI"
   } ],
   "page" : 1,
   "pageSize" : 1,
@@ -841,16 +990,14 @@ Content-Length: 306
 </div>
 </div>
 <div class="sect3">
-<h4 id="_응답_본문json_3">3.1.3. 응답 본문(JSON)</h4>
+<h4 id="_응답_본문json_3">3.1.4. 응답 본문(JSON)</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-json" data-lang="json">{
   "items" : [ {
-    "id" : "36d2d51c-63be-490c-8041-b220b43818e3",
-    "exhibitionId" : "ea2ee2ad-c274-4d89-b268-2b82564daa61",
-    "name" : "AI",
-    "createdAt" : "2026-02-06T12:01:13.058244870Z",
-    "updatedAt" : "2026-02-06T12:01:13.058246286Z"
+    "id" : "f5fd9f78-a417-42da-8908-7092ed9ffbeb",
+    "exhibitionId" : "aa518f6d-990d-4eff-b3c9-c760462e85d2",
+    "name" : "AI"
   } ],
   "page" : 1,
   "pageSize" : 1,
@@ -866,13 +1013,47 @@ Content-Length: 306
 <h4 id="_요청_예시_4">3.2.1. 요청 예시</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /categories/d47fc171-6ee2-4c73-9892-784b4ff2bb41 HTTP/1.1
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /categories/5f76908c-7e8b-4c9f-a4a2-8fdedd615261 HTTP/1.1
 Host: localhost:8080</code></pre>
 </div>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_응답_예시_4">3.2.2. 응답 예시</h4>
+<h4 id="_응답_필드_4">3.2.2. 응답 필드</h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">경로</th>
+<th class="tableblock halign-left valign-top">타입</th>
+<th class="tableblock halign-left valign-top">설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>id</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">카테고리 ID</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>exhibitionId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">전시 ID</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>name</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">카테고리명</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_응답_예시_4">3.2.3. 응답 예시</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 200 OK
@@ -883,28 +1064,24 @@ Cache-Control: no-cache, no-store, max-age=0, must-revalidate
 Pragma: no-cache
 Expires: 0
 X-Frame-Options: DENY
-Content-Length: 228
+Content-Length: 128
 
 {
-  "id" : "d47fc171-6ee2-4c73-9892-784b4ff2bb41",
-  "exhibitionId" : "794068fd-9c9f-42a4-85b1-ffa0c47ce5db",
-  "name" : "Web",
-  "createdAt" : "2026-02-06T12:01:12.693474024Z",
-  "updatedAt" : "2026-02-06T12:01:12.693475735Z"
+  "id" : "5f76908c-7e8b-4c9f-a4a2-8fdedd615261",
+  "exhibitionId" : "28a68739-52d5-467b-8fa8-cb62917e8e40",
+  "name" : "Web"
 }</code></pre>
 </div>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_응답_본문json_4">3.2.3. 응답 본문(JSON)</h4>
+<h4 id="_응답_본문json_4">3.2.4. 응답 본문(JSON)</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-json" data-lang="json">{
-  "id" : "d47fc171-6ee2-4c73-9892-784b4ff2bb41",
-  "exhibitionId" : "794068fd-9c9f-42a4-85b1-ffa0c47ce5db",
-  "name" : "Web",
-  "createdAt" : "2026-02-06T12:01:12.693474024Z",
-  "updatedAt" : "2026-02-06T12:01:12.693475735Z"
+  "id" : "5f76908c-7e8b-4c9f-a4a2-8fdedd615261",
+  "exhibitionId" : "28a68739-52d5-467b-8fa8-cb62917e8e40",
+  "name" : "Web"
 }</code></pre>
 </div>
 </div>
@@ -918,7 +1095,7 @@ Content-Length: 228
 <div class="sect2">
 <h3 id="_항목_목록_조회">4.1. 항목 목록 조회</h3>
 <div class="sect3">
-<h4 id="_경로_파라미터_2">4.1.1. 경로 파라미터</h4>
+<h4 id="_쿼리_파라미터_2">4.1.1. 쿼리 파라미터</h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 50%;">
@@ -932,65 +1109,122 @@ Content-Length: 228
 </thead>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>id</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>exhibitionId</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">전시 ID</p></td>
 </tr>
-</tbody>
-</table>
-</div>
-<div class="sect3">
-<h4 id="_쿼리_파라미터_2">4.1.2. 쿼리 파라미터</h4>
-<table class="tableblock frame-all grid-all stretch">
-<colgroup>
-<col style="width: 50%;">
-<col style="width: 50%;">
-</colgroup>
-<thead>
 <tr>
-<th class="tableblock halign-left valign-top">이름</th>
-<th class="tableblock halign-left valign-top">설명</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>category_id</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>categoryId</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">카테고리 ID</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>q</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">검색어</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>visibility</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">노출 타입</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>published</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">게시 여부</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>classification</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">분류명</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>page</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">페이지</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>page_size</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">페이지 크기</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>eventPeriodId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">이벤트 기간 ID</p></td>
 </tr>
 </tbody>
 </table>
 </div>
 <div class="sect3">
-<h4 id="_요청_예시_5">4.1.3. 요청 예시</h4>
+<h4 id="_요청_예시_5">4.1.2. 요청 예시</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /items?exhibitionId=02f77b30-af70-45f3-88e2-998b412e6135 HTTP/1.1
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /items?exhibitionId=1a7b523e-1451-4369-849a-8977e19b27f3 HTTP/1.1
 Host: localhost:8080</code></pre>
 </div>
 </div>
+</div>
+<div class="sect3">
+<h4 id="_응답_필드_5">4.1.3. 응답 필드</h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">경로</th>
+<th class="tableblock halign-left valign-top">타입</th>
+<th class="tableblock halign-left valign-top">설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>items</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Array</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">아이템 목록</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>items[].id</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">아이템 ID</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>items[].exhibitionId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">전시 ID</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>items[].categoryId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">카테고리 ID</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>items[].eventPeriodId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Null</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">이벤트 기간 ID</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>items[].title</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">제목</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>items[].description</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">설명</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>items[].participantNames</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">참여자명</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>items[].advisorNames</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">지도교수명</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>items[].thumbnailMediaId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Null</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">썸네일 미디어 ID</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>items[].posterMediaId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Null</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">포스터 미디어 ID</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>items[].presentationVideoMediaId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Null</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">발표 영상 미디어 ID</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>page</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">페이지 번호</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>pageSize</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">페이지 크기</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>total</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">전체 건수</p></td>
+</tr>
+</tbody>
+</table>
 </div>
 <div class="sect3">
 <h4 id="_응답_예시_5">4.1.4. 응답 예시</h4>
@@ -1004,18 +1238,21 @@ Cache-Control: no-cache, no-store, max-age=0, must-revalidate
 Pragma: no-cache
 Expires: 0
 X-Frame-Options: DENY
-Content-Length: 432
+Content-Length: 498
 
 {
   "items" : [ {
-    "id" : "11725dba-58af-4571-856f-e78034018161",
-    "exhibitionId" : "02f77b30-af70-45f3-88e2-998b412e6135",
-    "categoryId" : "9120347e-85f7-475a-a246-c3a1b9ae5711",
+    "id" : "d651a9f1-c49a-4460-b2c2-c2a99d8f7c43",
+    "exhibitionId" : "1a7b523e-1451-4369-849a-8977e19b27f3",
+    "categoryId" : "fb4c4daa-11da-40de-b54f-ce8901f8a560",
     "eventPeriodId" : null,
     "title" : "Smart Campus",
     "description" : "desc",
-    "createdAt" : "2026-02-06T12:01:15.793667410Z",
-    "updatedAt" : "2026-02-06T12:01:15.793671071Z"
+    "participantNames" : "홍길동",
+    "advisorNames" : "김교수",
+    "thumbnailMediaId" : null,
+    "posterMediaId" : null,
+    "presentationVideoMediaId" : null
   } ],
   "page" : 1,
   "pageSize" : 1,
@@ -1030,14 +1267,17 @@ Content-Length: 432
 <div class="content">
 <pre class="highlight nowrap"><code class="language-json" data-lang="json">{
   "items" : [ {
-    "id" : "11725dba-58af-4571-856f-e78034018161",
-    "exhibitionId" : "02f77b30-af70-45f3-88e2-998b412e6135",
-    "categoryId" : "9120347e-85f7-475a-a246-c3a1b9ae5711",
+    "id" : "d651a9f1-c49a-4460-b2c2-c2a99d8f7c43",
+    "exhibitionId" : "1a7b523e-1451-4369-849a-8977e19b27f3",
+    "categoryId" : "fb4c4daa-11da-40de-b54f-ce8901f8a560",
     "eventPeriodId" : null,
     "title" : "Smart Campus",
     "description" : "desc",
-    "createdAt" : "2026-02-06T12:01:15.793667410Z",
-    "updatedAt" : "2026-02-06T12:01:15.793671071Z"
+    "participantNames" : "홍길동",
+    "advisorNames" : "김교수",
+    "thumbnailMediaId" : null,
+    "posterMediaId" : null,
+    "presentationVideoMediaId" : null
   } ],
   "page" : 1,
   "pageSize" : 1,
@@ -1050,7 +1290,7 @@ Content-Length: 432
 <div class="sect2">
 <h3 id="_단일_항목_조회">4.2. 단일 항목 조회</h3>
 <div class="sect3">
-<h4 id="_경로_파라미터_3">4.2.1. 경로 파라미터</h4>
+<h4 id="_경로_파라미터_2">4.2.1. 경로 파라미터</h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 50%;">
@@ -1065,7 +1305,7 @@ Content-Length: 432
 <tbody>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>id</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">항목 ID</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">아이템 ID</p></td>
 </tr>
 </tbody>
 </table>
@@ -1074,13 +1314,87 @@ Content-Length: 432
 <h4 id="_요청_예시_6">4.2.2. 요청 예시</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /items/55465e45-d73e-424e-ba78-31499949cf84 HTTP/1.1
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /items/9c1f04fc-352d-4aaf-8d7e-49b870b29195 HTTP/1.1
 Host: localhost:8080</code></pre>
 </div>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_응답_예시_6">4.2.3. 응답 예시</h4>
+<h4 id="_응답_필드_6">4.2.3. 응답 필드</h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">경로</th>
+<th class="tableblock halign-left valign-top">타입</th>
+<th class="tableblock halign-left valign-top">설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>id</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">아이템 ID</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>exhibitionId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">전시 ID</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>categoryId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">카테고리 ID</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>eventPeriodId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">이벤트 기간 ID</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>title</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">제목</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>description</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">설명</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>participantNames</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">참여자명</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>advisorNames</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">지도교수명</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>thumbnailMediaId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Null</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">썸네일 미디어 ID</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>posterMediaId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Null</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">포스터 미디어 ID</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>presentationVideoMediaId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Null</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">발표 영상 미디어 ID</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_응답_예시_6">4.2.4. 응답 예시</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 200 OK
@@ -1091,34 +1405,40 @@ Cache-Control: no-cache, no-store, max-age=0, must-revalidate
 Pragma: no-cache
 Expires: 0
 X-Frame-Options: DENY
-Content-Length: 381
+Content-Length: 441
 
 {
-  "id" : "55465e45-d73e-424e-ba78-31499949cf84",
-  "exhibitionId" : "79bd29d0-c9a1-41c3-b2fb-64feb3349a8d",
-  "categoryId" : "15c71ab5-bdb9-4084-9f68-066d1a0ab066",
-  "eventPeriodId" : "721e1d5a-ebf1-4eda-b00d-8e5e79d51bf2",
+  "id" : "9c1f04fc-352d-4aaf-8d7e-49b870b29195",
+  "exhibitionId" : "28c5653e-ab66-4e3b-8798-d48e17329b4c",
+  "categoryId" : "72b1763c-55d5-4233-b9b1-c474ddba3b54",
+  "eventPeriodId" : "9e4f36a4-2069-4049-ae2d-f3d016fc19cd",
   "title" : "Smart Campus",
   "description" : "desc",
-  "createdAt" : "2026-02-06T12:01:15.695995485Z",
-  "updatedAt" : "2026-02-06T12:01:15.695998479Z"
+  "participantNames" : "홍길동",
+  "advisorNames" : "김교수",
+  "thumbnailMediaId" : null,
+  "posterMediaId" : null,
+  "presentationVideoMediaId" : null
 }</code></pre>
 </div>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_응답_본문json_6">4.2.4. 응답 본문(JSON)</h4>
+<h4 id="_응답_본문json_6">4.2.5. 응답 본문(JSON)</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-json" data-lang="json">{
-  "id" : "55465e45-d73e-424e-ba78-31499949cf84",
-  "exhibitionId" : "79bd29d0-c9a1-41c3-b2fb-64feb3349a8d",
-  "categoryId" : "15c71ab5-bdb9-4084-9f68-066d1a0ab066",
-  "eventPeriodId" : "721e1d5a-ebf1-4eda-b00d-8e5e79d51bf2",
+  "id" : "9c1f04fc-352d-4aaf-8d7e-49b870b29195",
+  "exhibitionId" : "28c5653e-ab66-4e3b-8798-d48e17329b4c",
+  "categoryId" : "72b1763c-55d5-4233-b9b1-c474ddba3b54",
+  "eventPeriodId" : "9e4f36a4-2069-4049-ae2d-f3d016fc19cd",
   "title" : "Smart Campus",
   "description" : "desc",
-  "createdAt" : "2026-02-06T12:01:15.695995485Z",
-  "updatedAt" : "2026-02-06T12:01:15.695998479Z"
+  "participantNames" : "홍길동",
+  "advisorNames" : "김교수",
+  "thumbnailMediaId" : null,
+  "posterMediaId" : null,
+  "presentationVideoMediaId" : null
 }</code></pre>
 </div>
 </div>
@@ -1135,13 +1455,67 @@ Content-Length: 381
 <h4 id="_요청_예시_7">5.1.1. 요청 예시</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /classifications?exhibitionId=36fe4fdf-d9a9-49ec-8d2b-0a8b98797925 HTTP/1.1
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /classifications?exhibitionId=4813e194-98a4-4497-8a88-822c9a3525ff HTTP/1.1
 Host: localhost:8080</code></pre>
 </div>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_응답_예시_7">5.1.2. 응답 예시</h4>
+<h4 id="_응답_필드_7">5.1.2. 응답 필드</h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">경로</th>
+<th class="tableblock halign-left valign-top">타입</th>
+<th class="tableblock halign-left valign-top">설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>items</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Array</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">분류 목록</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>items[].id</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">분류 ID</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>items[].exhibitionId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">전시 ID</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>items[].name</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">분류명</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>page</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">페이지 번호</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>pageSize</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">페이지 크기</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>total</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">전체 건수</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_응답_예시_7">5.1.3. 응답 예시</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 200 OK
@@ -1152,14 +1526,13 @@ Cache-Control: no-cache, no-store, max-age=0, must-revalidate
 Pragma: no-cache
 Expires: 0
 X-Frame-Options: DENY
-Content-Length: 258
+Content-Length: 206
 
 {
   "items" : [ {
-    "id" : "8f288548-755f-48b1-94c7-826e2e443eee",
-    "exhibitionId" : "36fe4fdf-d9a9-49ec-8d2b-0a8b98797925",
-    "name" : "작품",
-    "createdAt" : "2026-02-06T12:01:13.845242182Z"
+    "id" : "81cf4f47-1c7a-44d0-92ed-1b99b4e6b9cc",
+    "exhibitionId" : "4813e194-98a4-4497-8a88-822c9a3525ff",
+    "name" : "작품"
   } ],
   "page" : 1,
   "pageSize" : 1,
@@ -1169,15 +1542,14 @@ Content-Length: 258
 </div>
 </div>
 <div class="sect3">
-<h4 id="_응답_본문json_7">5.1.3. 응답 본문(JSON)</h4>
+<h4 id="_응답_본문json_7">5.1.4. 응답 본문(JSON)</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-json" data-lang="json">{
   "items" : [ {
-    "id" : "8f288548-755f-48b1-94c7-826e2e443eee",
-    "exhibitionId" : "36fe4fdf-d9a9-49ec-8d2b-0a8b98797925",
-    "name" : "작품",
-    "createdAt" : "2026-02-06T12:01:13.845242182Z"
+    "id" : "81cf4f47-1c7a-44d0-92ed-1b99b4e6b9cc",
+    "exhibitionId" : "4813e194-98a4-4497-8a88-822c9a3525ff",
+    "name" : "작품"
   } ],
   "page" : 1,
   "pageSize" : 1,
@@ -1193,13 +1565,47 @@ Content-Length: 258
 <h4 id="_요청_예시_8">5.2.1. 요청 예시</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /classifications/70361e12-45f5-4c65-8be3-ac359fbc321f HTTP/1.1
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /classifications/e1a82031-1e15-4fdb-aa28-6c3e83179c31 HTTP/1.1
 Host: localhost:8080</code></pre>
 </div>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_응답_예시_8">5.2.2. 응답 예시</h4>
+<h4 id="_응답_필드_8">5.2.2. 응답 필드</h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">경로</th>
+<th class="tableblock halign-left valign-top">타입</th>
+<th class="tableblock halign-left valign-top">설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>id</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">분류 ID</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>exhibitionId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">전시 ID</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>name</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">분류명</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_응답_예시_8">5.2.3. 응답 예시</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 200 OK
@@ -1210,26 +1616,24 @@ Cache-Control: no-cache, no-store, max-age=0, must-revalidate
 Pragma: no-cache
 Expires: 0
 X-Frame-Options: DENY
-Content-Length: 181
+Content-Length: 131
 
 {
-  "id" : "70361e12-45f5-4c65-8be3-ac359fbc321f",
-  "exhibitionId" : "c96de190-8769-4902-8790-ce1791889006",
-  "name" : "논문",
-  "createdAt" : "2026-02-06T12:01:13.809859772Z"
+  "id" : "e1a82031-1e15-4fdb-aa28-6c3e83179c31",
+  "exhibitionId" : "7d6a0a7f-7e93-48fc-b540-df26155d1eb5",
+  "name" : "논문"
 }</code></pre>
 </div>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_응답_본문json_8">5.2.3. 응답 본문(JSON)</h4>
+<h4 id="_응답_본문json_8">5.2.4. 응답 본문(JSON)</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-json" data-lang="json">{
-  "id" : "70361e12-45f5-4c65-8be3-ac359fbc321f",
-  "exhibitionId" : "c96de190-8769-4902-8790-ce1791889006",
-  "name" : "논문",
-  "createdAt" : "2026-02-06T12:01:13.809859772Z"
+  "id" : "e1a82031-1e15-4fdb-aa28-6c3e83179c31",
+  "exhibitionId" : "7d6a0a7f-7e93-48fc-b540-df26155d1eb5",
+  "name" : "논문"
 }</code></pre>
 </div>
 </div>
@@ -1246,13 +1650,77 @@ Content-Length: 181
 <h4 id="_요청_예시_9">6.1.1. 요청 예시</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /event-periods?exhibitionId=6eed86e5-c7bb-4f3a-b34e-f304f465259d HTTP/1.1
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /event-periods?exhibitionId=cb38fa5c-df48-4fae-a948-1c363e8c2ded HTTP/1.1
 Host: localhost:8080</code></pre>
 </div>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_응답_예시_9">6.1.2. 응답 예시</h4>
+<h4 id="_응답_필드_9">6.1.2. 응답 필드</h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">경로</th>
+<th class="tableblock halign-left valign-top">타입</th>
+<th class="tableblock halign-left valign-top">설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>items</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Array</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">이벤트 기간 목록</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>items[].id</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">이벤트 기간 ID</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>items[].exhibitionId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">전시 ID</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>items[].name</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">이벤트 기간명</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>items[].startTime</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">시작 시각</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>items[].endTime</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">종료 시각</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>page</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">페이지 번호</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>pageSize</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">페이지 크기</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>total</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">전체 건수</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_응답_예시_9">6.1.3. 응답 예시</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 200 OK
@@ -1263,17 +1731,15 @@ Cache-Control: no-cache, no-store, max-age=0, must-revalidate
 Pragma: no-cache
 Expires: 0
 X-Frame-Options: DENY
-Content-Length: 398
+Content-Length: 294
 
 {
   "items" : [ {
-    "id" : "a0cac6f1-6e88-4a1c-9306-500ade18173c",
-    "exhibitionId" : "6eed86e5-c7bb-4f3a-b34e-f304f465259d",
+    "id" : "44c1ca7b-0eab-4335-b80e-ac63fa9ee7ba",
+    "exhibitionId" : "cb38fa5c-df48-4fae-a948-1c363e8c2ded",
     "name" : "2025-1학기",
     "startTime" : "2025-03-01T00:00:00Z",
-    "endTime" : "2025-06-30T00:00:00Z",
-    "createdAt" : "2026-02-06T12:01:14.359356997Z",
-    "updatedAt" : "2026-02-06T12:01:14.359357588Z"
+    "endTime" : "2025-06-30T00:00:00Z"
   } ],
   "page" : 1,
   "pageSize" : 1,
@@ -1283,18 +1749,16 @@ Content-Length: 398
 </div>
 </div>
 <div class="sect3">
-<h4 id="_응답_본문json_9">6.1.3. 응답 본문(JSON)</h4>
+<h4 id="_응답_본문json_9">6.1.4. 응답 본문(JSON)</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-json" data-lang="json">{
   "items" : [ {
-    "id" : "a0cac6f1-6e88-4a1c-9306-500ade18173c",
-    "exhibitionId" : "6eed86e5-c7bb-4f3a-b34e-f304f465259d",
+    "id" : "44c1ca7b-0eab-4335-b80e-ac63fa9ee7ba",
+    "exhibitionId" : "cb38fa5c-df48-4fae-a948-1c363e8c2ded",
     "name" : "2025-1학기",
     "startTime" : "2025-03-01T00:00:00Z",
-    "endTime" : "2025-06-30T00:00:00Z",
-    "createdAt" : "2026-02-06T12:01:14.359356997Z",
-    "updatedAt" : "2026-02-06T12:01:14.359357588Z"
+    "endTime" : "2025-06-30T00:00:00Z"
   } ],
   "page" : 1,
   "pageSize" : 1,
@@ -1310,13 +1774,57 @@ Content-Length: 398
 <h4 id="_요청_예시_10">6.2.1. 요청 예시</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /event-periods/3d370f7e-c6c4-413a-896c-f18452d5f57a HTTP/1.1
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /event-periods/55171d11-76d5-4cb8-a97d-4f0d95e6a956 HTTP/1.1
 Host: localhost:8080</code></pre>
 </div>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_응답_예시_10">6.2.2. 응답 예시</h4>
+<h4 id="_응답_필드_10">6.2.2. 응답 필드</h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">경로</th>
+<th class="tableblock halign-left valign-top">타입</th>
+<th class="tableblock halign-left valign-top">설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>id</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">이벤트 기간 ID</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>exhibitionId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">전시 ID</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>name</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">이벤트 기간명</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>startTime</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">시작 시각</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>endTime</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">종료 시각</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_응답_예시_10">6.2.3. 응답 예시</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 200 OK
@@ -1327,32 +1835,28 @@ Cache-Control: no-cache, no-store, max-age=0, must-revalidate
 Pragma: no-cache
 Expires: 0
 X-Frame-Options: DENY
-Content-Length: 315
+Content-Length: 215
 
 {
-  "id" : "3d370f7e-c6c4-413a-896c-f18452d5f57a",
-  "exhibitionId" : "d2cafa46-21fe-42e4-a313-7a41ef4960de",
+  "id" : "55171d11-76d5-4cb8-a97d-4f0d95e6a956",
+  "exhibitionId" : "230f988d-2428-43ff-9165-35e5d57ff4a4",
   "name" : "2025-2학기",
   "startTime" : "2025-09-01T00:00:00Z",
-  "endTime" : "2025-12-31T00:00:00Z",
-  "createdAt" : "2026-02-06T12:01:14.319631877Z",
-  "updatedAt" : "2026-02-06T12:01:14.319632427Z"
+  "endTime" : "2025-12-31T00:00:00Z"
 }</code></pre>
 </div>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_응답_본문json_10">6.2.3. 응답 본문(JSON)</h4>
+<h4 id="_응답_본문json_10">6.2.4. 응답 본문(JSON)</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-json" data-lang="json">{
-  "id" : "3d370f7e-c6c4-413a-896c-f18452d5f57a",
-  "exhibitionId" : "d2cafa46-21fe-42e4-a313-7a41ef4960de",
+  "id" : "55171d11-76d5-4cb8-a97d-4f0d95e6a956",
+  "exhibitionId" : "230f988d-2428-43ff-9165-35e5d57ff4a4",
   "name" : "2025-2학기",
   "startTime" : "2025-09-01T00:00:00Z",
-  "endTime" : "2025-12-31T00:00:00Z",
-  "createdAt" : "2026-02-06T12:01:14.319631877Z",
-  "updatedAt" : "2026-02-06T12:01:14.319632427Z"
+  "endTime" : "2025-12-31T00:00:00Z"
 }</code></pre>
 </div>
 </div>
@@ -1361,21 +1865,100 @@ Content-Length: 315
 </div>
 </div>
 <div class="sect1">
-<h2 id="_미디어media">7. 미디어(Media)</h2>
+<h2 id="_게시판board">7. 게시판(Board)</h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="_항목별_미디어_목록_조회">7.1. 항목별 미디어 목록 조회</h3>
+<h3 id="_게시판_목록_조회">7.1. 게시판 목록 조회</h3>
 <div class="sect3">
 <h4 id="_요청_예시_11">7.1.1. 요청 예시</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /media?exhibitionId=abb97303-f02c-4b20-ab35-456214700c69 HTTP/1.1
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /boards?exhibitionId=a47204d8-6613-45c7-84b2-bb090ed3e252 HTTP/1.1
 Host: localhost:8080</code></pre>
 </div>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_응답_예시_11">7.1.2. 응답 예시</h4>
+<h4 id="_응답_필드_11">7.1.2. 응답 필드</h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">경로</th>
+<th class="tableblock halign-left valign-top">타입</th>
+<th class="tableblock halign-left valign-top">설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>items</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Array</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">게시판 목록</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>items[].id</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">게시판 글 ID</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>items[].exhibitionId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">전시 ID</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>items[].title</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">제목</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>items[].content</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">내용</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>items[].attachmentMediaIds</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Array</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">첨부 미디어 ID 목록</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>items[].authorUserId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">작성자 사용자 ID</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>items[].createdAt</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">생성 일시</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>items[].updatedAt</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">수정 일시</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>page</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">페이지 번호</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>pageSize</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">페이지 크기</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>total</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">전체 건수</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_응답_예시_11">7.1.3. 응답 예시</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 200 OK
@@ -1386,17 +1969,18 @@ Cache-Control: no-cache, no-store, max-age=0, must-revalidate
 Pragma: no-cache
 Expires: 0
 X-Frame-Options: DENY
-Content-Length: 333
+Content-Length: 434
 
 {
   "items" : [ {
-    "id" : "a001725f-26dd-499a-8da4-57c7ae3acabe",
-    "exhibitionId" : "abb97303-f02c-4b20-ab35-456214700c69",
-    "itemId" : null,
-    "objectKey" : "a.jpg",
-    "mediaType" : "image/jpeg",
-    "size" : 123,
-    "createdAt" : "2026-02-06T12:01:17.099834829Z"
+    "id" : "9ef63bb6-9e93-4770-bef3-cc7554b301ad",
+    "exhibitionId" : "a47204d8-6613-45c7-84b2-bb090ed3e252",
+    "title" : "공지",
+    "content" : "안내 내용",
+    "attachmentMediaIds" : [ ],
+    "authorUserId" : "d9c22480-fba3-49b7-843e-5c959bc3aad6",
+    "createdAt" : "2026-02-06T13:44:26.351833896Z",
+    "updatedAt" : "2026-02-06T13:44:26.351836Z"
   } ],
   "page" : 1,
   "pageSize" : 1,
@@ -1406,18 +1990,19 @@ Content-Length: 333
 </div>
 </div>
 <div class="sect3">
-<h4 id="_응답_본문json_11">7.1.3. 응답 본문(JSON)</h4>
+<h4 id="_응답_본문json_11">7.1.4. 응답 본문(JSON)</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-json" data-lang="json">{
   "items" : [ {
-    "id" : "a001725f-26dd-499a-8da4-57c7ae3acabe",
-    "exhibitionId" : "abb97303-f02c-4b20-ab35-456214700c69",
-    "itemId" : null,
-    "objectKey" : "a.jpg",
-    "mediaType" : "image/jpeg",
-    "size" : 123,
-    "createdAt" : "2026-02-06T12:01:17.099834829Z"
+    "id" : "9ef63bb6-9e93-4770-bef3-cc7554b301ad",
+    "exhibitionId" : "a47204d8-6613-45c7-84b2-bb090ed3e252",
+    "title" : "공지",
+    "content" : "안내 내용",
+    "attachmentMediaIds" : [ ],
+    "authorUserId" : "d9c22480-fba3-49b7-843e-5c959bc3aad6",
+    "createdAt" : "2026-02-06T13:44:26.351833896Z",
+    "updatedAt" : "2026-02-06T13:44:26.351836Z"
   } ],
   "page" : 1,
   "pageSize" : 1,
@@ -1428,18 +2013,77 @@ Content-Length: 333
 </div>
 </div>
 <div class="sect2">
-<h3 id="_단일_미디어_조회">7.2. 단일 미디어 조회</h3>
+<h3 id="_단일_게시판_조회">7.2. 단일 게시판 조회</h3>
 <div class="sect3">
 <h4 id="_요청_예시_12">7.2.1. 요청 예시</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /media/84425feb-82c2-4724-b24e-55d1e1ac87e6 HTTP/1.1
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /boards/c00c7e1a-444f-4599-83ec-51eee77b3b6f HTTP/1.1
 Host: localhost:8080</code></pre>
 </div>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_응답_예시_12">7.2.2. 응답 예시</h4>
+<h4 id="_응답_필드_12">7.2.2. 응답 필드</h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">경로</th>
+<th class="tableblock halign-left valign-top">타입</th>
+<th class="tableblock halign-left valign-top">설명</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>id</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">게시판 글 ID</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>exhibitionId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">전시 ID</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>title</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">제목</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>content</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">내용</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>attachmentMediaIds</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Array</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">첨부 미디어 ID 목록</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>authorUserId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">작성자 사용자 ID</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>createdAt</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">생성 일시</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>updatedAt</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">수정 일시</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_응답_예시_12">7.2.3. 응답 예시</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 200 OK
@@ -1450,56 +2094,87 @@ Cache-Control: no-cache, no-store, max-age=0, must-revalidate
 Pragma: no-cache
 Expires: 0
 X-Frame-Options: DENY
-Content-Length: 284
+Content-Length: 391
 
 {
-  "id" : "84425feb-82c2-4724-b24e-55d1e1ac87e6",
-  "exhibitionId" : "8a4b1415-f309-4a98-815a-890dd50834b1",
-  "itemId" : "1c7f554c-429e-4811-9925-39aa8ca2d952",
-  "objectKey" : "a.jpg",
-  "mediaType" : "image/jpeg",
-  "size" : 123,
-  "createdAt" : "2026-02-06T12:01:16.888016503Z"
+  "id" : "c00c7e1a-444f-4599-83ec-51eee77b3b6f",
+  "exhibitionId" : "eaad3f9b-3a42-4856-9043-e9f324ba5115",
+  "title" : "공지",
+  "content" : "안내 내용",
+  "attachmentMediaIds" : [ "2c1d8ac5-da53-4d17-97b3-f6ea27f3ed14" ],
+  "authorUserId" : "a7a533ed-5276-47c3-b366-70f8380eb895",
+  "createdAt" : "2026-02-06T13:44:25.836290628Z",
+  "updatedAt" : "2026-02-06T13:44:25.836292451Z"
 }</code></pre>
 </div>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_응답_본문json_12">7.2.3. 응답 본문(JSON)</h4>
+<h4 id="_응답_본문json_12">7.2.4. 응답 본문(JSON)</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-json" data-lang="json">{
-  "id" : "84425feb-82c2-4724-b24e-55d1e1ac87e6",
-  "exhibitionId" : "8a4b1415-f309-4a98-815a-890dd50834b1",
-  "itemId" : "1c7f554c-429e-4811-9925-39aa8ca2d952",
-  "objectKey" : "a.jpg",
-  "mediaType" : "image/jpeg",
-  "size" : 123,
-  "createdAt" : "2026-02-06T12:01:16.888016503Z"
+  "id" : "c00c7e1a-444f-4599-83ec-51eee77b3b6f",
+  "exhibitionId" : "eaad3f9b-3a42-4856-9043-e9f324ba5115",
+  "title" : "공지",
+  "content" : "안내 내용",
+  "attachmentMediaIds" : [ "2c1d8ac5-da53-4d17-97b3-f6ea27f3ed14" ],
+  "authorUserId" : "a7a533ed-5276-47c3-b366-70f8380eb895",
+  "createdAt" : "2026-02-06T13:44:25.836290628Z",
+  "updatedAt" : "2026-02-06T13:44:25.836292451Z"
 }</code></pre>
 </div>
 </div>
 </div>
 </div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_미디어media">8. 미디어(Media)</h2>
+<div class="sectionbody">
 <div class="sect2">
-<h3 id="_미디어_파일_다운로드">7.3. 미디어 파일 다운로드</h3>
+<h3 id="_미디어_파일_다운로드">8.1. 미디어 파일 다운로드</h3>
 <div class="sect3">
-<h4 id="_요청_예시_13">7.3.1. 요청 예시</h4>
+<h4 id="_요청_예시_13">8.1.1. 요청 예시</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /media/20fe74e1-e9e1-46ca-9283-066c7a8bf389/file HTTP/1.1
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /media/0f7fda48-ecbb-45f2-aa46-564f21dc86a3 HTTP/1.1
 Host: localhost:8080</code></pre>
 </div>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_응답_예시_13">7.3.2. 응답 예시</h4>
+<h4 id="_응답_항목헤더">8.1.2. 응답 항목(헤더)</h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Name</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Content-Type</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">미디어 MIME 타입</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Content-Length</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">파일 바이트 크기</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_응답_예시_13">8.1.3. 응답 예시</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 200 OK
 Content-Type: image/jpeg
 Content-Length: 3
-Content-Disposition: attachment; filename="a.jpg"
 Accept-Ranges: bytes
 X-Content-Type-Options: nosniff
 X-XSS-Protection: 0
@@ -1513,7 +2188,7 @@ X-Frame-Options: DENY
 </div>
 </div>
 <div class="sect3">
-<h4 id="_응답_본문바이너리">7.3.3. 응답 본문(바이너리)</h4>
+<h4 id="_응답_본문바이너리">8.1.4. 응답 본문(바이너리)</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-jpeg" data-lang="jpeg"></code></pre>
@@ -1527,7 +2202,7 @@ X-Frame-Options: DENY
 <div id="footer">
 <div id="footer-text">
 Version 0.0.1-SNAPSHOT<br>
-Last updated 2026-02-06 20:55:22 +0900
+Last updated 2026-02-06 22:44:08 +0900
 </div>
 </div>
 </body>

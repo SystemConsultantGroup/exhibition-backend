@@ -25,7 +25,7 @@ public class MediaAssetEntity {
     private ItemEntity item;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "exhibition_id")
+    @JoinColumn(name = "exhibition_id", nullable = false)
     private ExhibitionEntity exhibition;
 
     @Column(nullable = false, length = 255)

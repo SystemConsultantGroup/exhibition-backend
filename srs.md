@@ -176,7 +176,7 @@ src/main/java/.../exhibition
 
 ### 4.2 관계형 스키마(상세)
 
-#### 4.2.1 `exhibition_services`
+#### 4.2.1 `exhibition`
 - `id` UUID PK
 - `slug` VARCHAR(64) UNIQUE NOT NULL
 - `name` VARCHAR(128) UNIQUE NOT NULL
@@ -229,7 +229,7 @@ src/main/java/.../exhibition
 
 #### 4.2.6 `media_assets`
 - `id` UUID PK
-- `item_id` UUID FK -> items.id NOT NULL
+- `item_id` UUID FK -> items.id
 - `exhibition_id` UUID FK -> exhibition_services.id NOT NULL
 - `object_key` VARCHAR(255) NOT NULL
 - `media_type` VARCHAR(50) NOT NULL

@@ -36,7 +36,6 @@ public class ClassificationService {
         return new ClassificationResponse(
                 classification.getId(),
                 classification.getExhibition().getId(),
-                classification.getName(),
-                classification.getCreatedAt());
+                classification.getName());
     }
 }

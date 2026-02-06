@@ -36,8 +36,6 @@ public class CategoryService {
         return new CategoryResponse(
                 category.getId(),
                 category.getExhibition().getId(),
-                category.getName(),
-                category.getCreatedAt(),
-                category.getUpdatedAt());
+                category.getName());
     }
 }

@@ -42,6 +42,10 @@ public class ItemService {
 
     private ItemResponse toResponse(ItemEntity item) {
         UUID eventPeriodId = item.getEventPeriod() == null ? null : item.getEventPeriod().getId();
+        UUID thumbnailMediaId = item.getThumbnailMedia() == null ? null : item.getThumbnailMedia().getId();
+        UUID posterMediaId = item.getPosterMedia() == null ? null : item.getPosterMedia().getId();
+        UUID presentationVideoMediaId = item.getPresentationVideoMedia() == null ? null : item.getPresentationVideoMedia().getId();
+
         return new ItemResponse(
                 item.getId(),
                 item.getExhibition().getId(),
@@ -49,7 +53,10 @@ public class ItemService {
                 eventPeriodId,
                 item.getTitle(),
                 item.getDescription(),
-                item.getCreatedAt(),
-                item.getUpdatedAt());
+                item.getParticipantNames(),
+                item.getAdvisorNames(),
+                thumbnailMediaId,
+                posterMediaId,
+                presentationVideoMediaId);
     }
 }

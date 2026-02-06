@@ -15,7 +15,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import kr.ac.skku.scg.exhibition.classification.dto.response.ClassificationResponse;
@@ -45,7 +44,7 @@ class ClassificationControllerTest {
     void getById() throws Exception {
         UUID id = UUID.randomUUID();
         UUID exhibitionId = UUID.randomUUID();
-        when(classificationService.get(id)).thenReturn(new ClassificationResponse(id, exhibitionId, "논문", Instant.now()));
+        when(classificationService.get(id)).thenReturn(new ClassificationResponse(id, exhibitionId, "논문"));
 
         mockMvc.perform(get("/classifications/{id}", id))
                 .andExpect(status().isOk())
@@ -59,8 +58,7 @@ class ClassificationControllerTest {
                         responseFields(
                                 fieldWithPath("id").description("분류 ID"),
                                 fieldWithPath("exhibitionId").description("전시 ID"),
-                                fieldWithPath("name").description("분류명"),
-                                fieldWithPath("createdAt").description("생성 일시")
+                                fieldWithPath("name").description("분류명")
                         )));
     }
 
@@ -68,7 +66,7 @@ class ClassificationControllerTest {
     void list() throws Exception {
         UUID exhibitionId = UUID.randomUUID();
         when(classificationService.list(any())).thenReturn(List.of(
-                new ClassificationResponse(UUID.randomUUID(), exhibitionId, "작품", Instant.now())
+                new ClassificationResponse(UUID.randomUUID(), exhibitionId, "작품")
         ));
 
         mockMvc.perform(get("/classifications").param("exhibitionId", exhibitionId.toString()))
@@ -85,7 +83,6 @@ class ClassificationControllerTest {
                                 fieldWithPath("items[].id").description("분류 ID"),
                                 fieldWithPath("items[].exhibitionId").description("전시 ID"),
                                 fieldWithPath("items[].name").description("분류명"),
-                                fieldWithPath("items[].createdAt").description("생성 일시"),
                                 fieldWithPath("page").description("페이지 번호"),
                                 fieldWithPath("pageSize").description("페이지 크기"),
                                 fieldWithPath("total").description("전체 건수")

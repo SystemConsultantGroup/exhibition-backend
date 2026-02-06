@@ -38,8 +38,6 @@ public class EventPeriodService {
                 eventPeriod.getExhibition().getId(),
                 eventPeriod.getName(),
                 eventPeriod.getStartTime(),
-                eventPeriod.getEndTime(),
-                eventPeriod.getCreatedAt(),
-                eventPeriod.getUpdatedAt());
+                eventPeriod.getEndTime());
     }
 }

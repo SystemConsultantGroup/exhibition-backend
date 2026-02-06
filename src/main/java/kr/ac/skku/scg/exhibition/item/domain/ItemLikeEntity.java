@@ -1,4 +1,4 @@
-package kr.ac.skku.scg.exhibition.classification.domain;
+package kr.ac.skku.scg.exhibition.item.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -11,37 +11,38 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.time.Instant;
 import java.util.UUID;
-import kr.ac.skku.scg.exhibition.exhibition.domain.ExhibitionEntity;
+import kr.ac.skku.scg.exhibition.user.domain.UserEntity;
 
 @Entity
 @Table(
-        name = "item_classifications",
+        name = "item_likes",
         uniqueConstraints = {
-                @UniqueConstraint(name = "uk_item_classification_exhibition_name", columnNames = {"exhibition_id", "name"})
+                @UniqueConstraint(name = "uk_item_likes_item_user", columnNames = {"item_id", "user_id"})
         }
 )
-public class ItemClassificationEntity {
+public class ItemLikeEntity {
 
     @Id
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "exhibition_id")
-    private ExhibitionEntity exhibition;
+    @JoinColumn(name = "item_id", nullable = false)
+    private ItemEntity item;
 
-    @Column(nullable = false, length = 100)
-    private String name;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", nullable = false)
+    private UserEntity user;
 
     @Column(nullable = false)
     private Instant createdAt;
 
-    protected ItemClassificationEntity() {
+    protected ItemLikeEntity() {
     }
 
-    public ItemClassificationEntity(UUID id, ExhibitionEntity exhibition, String name) {
+    public ItemLikeEntity(UUID id, ItemEntity item, UserEntity user) {
         this.id = id;
-        this.exhibition = exhibition;
-        this.name = name;
+        this.item = item;
+        this.user = user;
     }
 
     @PrePersist
@@ -53,12 +54,12 @@ public class ItemClassificationEntity {
         return id;
     }
 
-    public ExhibitionEntity getExhibition() {
-        return exhibition;
+    public ItemEntity getItem() {
+        return item;
     }
 
-    public String getName() {
-        return name;
+    public UserEntity getUser() {
+        return user;
     }
 
     public Instant getCreatedAt() {

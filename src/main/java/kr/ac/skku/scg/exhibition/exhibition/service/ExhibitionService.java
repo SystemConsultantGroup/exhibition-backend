@@ -35,11 +35,21 @@ public class ExhibitionService {
     }
 
     private ExhibitionResponse toResponse(ExhibitionEntity exhibition) {
+        UUID logoMediaId = exhibition.getLogoMedia() == null ? null : exhibition.getLogoMedia().getId();
+        UUID popupImageMediaId = exhibition.getPopupImageMedia() == null ? null : exhibition.getPopupImageMedia().getId();
+        UUID introVideoMediaId = exhibition.getIntroVideoMedia() == null ? null : exhibition.getIntroVideoMedia().getId();
+
         return new ExhibitionResponse(
                 exhibition.getId(),
                 exhibition.getSlug(),
                 exhibition.getName(),
-                exhibition.getCreatedAt(),
-                exhibition.getUpdatedAt());
+                exhibition.getDescription(),
+                logoMediaId,
+                exhibition.isPopupEnabled(),
+                popupImageMediaId,
+                exhibition.getPopupUrl(),
+                exhibition.getIntroTitle(),
+                exhibition.getIntroDescription(),
+                introVideoMediaId);
     }
 }
