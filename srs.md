@@ -53,7 +53,8 @@
 - 파일 저장을 위해 MinIO와 연동해야 한다.
 - 프론트엔드 연동을 위한 API 엔드포인트를 제공해야 한다.
 - 복잡한 쿼리는 QueryDSL을 사용해야 한다.
-- 환경변수 설정은 `application.yml`을 `application-prod`와 `application-dev`로 분리해야 한다.
+- 환경변수 설정은 `application.yml` 형식으로 관리하고, 필요 시 `application-prod.yml`와 `application-dev.yml`로 분리해야 한다.
+- MySQL 접속 정보는 설정 파일에 하드코딩하지 않고 `DB_HOST`, `DB_PORT`, `DB_NAME` 환경변수(필요 시 추가 파라미터 변수 포함)로 주입해야 한다.
 - `.env`, `application-*.yml` 등 비밀정보(환경변수, 키, 토큰)를 포함할 수 있는 파일은 반드시 `.gitignore`에 포함해야 하며, 원격 저장소에 커밋되어서는 안 된다.
 - 개발 시 도메인형 디렉터리 구조를 사용해야 하며, 레이어형(예: controller/service/repository 전역 분리) 단독 구조는 지양한다.
 - 개발 시 각 함수에 간단한 주석을 작성해야 한다.
