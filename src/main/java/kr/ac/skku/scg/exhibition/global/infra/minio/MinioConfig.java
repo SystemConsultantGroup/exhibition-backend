@@ -12,8 +12,12 @@ public class MinioConfig {
 
     @Bean
     MinioClient minioClient(MinioProperties properties) {
+        String rawEndpoint = properties.endpoint();
+        boolean secure = rawEndpoint.startsWith("https://");
+        String host = rawEndpoint.replaceFirst("^https?://", "");
+
         return MinioClient.builder()
-            .endpoint(properties.endpoint())
+            .endpoint(host, properties.port(), secure)
             .credentials(properties.accessKey(), properties.secretKey())
             .build();
     }

@@ -180,7 +180,7 @@ src/main/java/.../exhibition
 - Item: id, exhibition_id, category_id, title, description, author_name, author_email, participant_names, advisor_names, visibility, thumbnail_media_id, poster_media_id, presentation_video_media_id, created_at, updated_at, published_at
 - ItemClassification: id, exhibition_id, name, created_at
 - ItemClassificationMap: id, item_id, classification_id, created_at
-- MediaAsset: id, item_id, exhibition_id, object_key, media_type, size, checksum, created_at
+- MediaAsset: id, item_id, exhibition_id, object_key, media_type, size, created_at
 - User: id, name, role, email, created_at, updated_at, last_login_at
 - OAuthAccount: id, user_id, provider, subject, email, created_at, updated_at
 
@@ -262,7 +262,6 @@ src/main/java/.../exhibition
 - `object_key` VARCHAR(255) NOT NULL
 - `media_type` VARCHAR(50) NOT NULL
 - `size` BIGINT NOT NULL
-- `checksum` VARCHAR(128) NULL
 - `created_at` TIMESTAMP NOT NULL
 - 인덱스: (`exhibition_id`, `item_id`)
 - 고유 제약: (`exhibition_id`, `object_key`)

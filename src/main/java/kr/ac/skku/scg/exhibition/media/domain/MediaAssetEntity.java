@@ -54,9 +54,6 @@ public class MediaAssetEntity {
     @Column(nullable = false)
     private long size;
 
-    @Column(length = 128)
-    private String checksum;
-
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private Instant createdAt;

@@ -28,19 +28,17 @@ SRS(`srs.md`) 기준으로 전시/카테고리/항목/분류/미디어를 관리
 
 | 변수명 | 기본값 | 설명 |
 |---|---|---|
-| `DB_HOST` | `localhost` | MySQL 호스트 |
-| `DB_PORT` | `3306` | MySQL 포트 |
-| `DB_NAME` | `exhibition` | MySQL 데이터베이스 이름 |
-| `DB_USERNAME` | `root` | MySQL 사용자명 |
-| `DB_PASSWORD` | `root` | MySQL 비밀번호 |
-| `DB_PARAMS` | `useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC` | JDBC 쿼리 파라미터 |
-| `MINIO_ENDPOINT` | `http://localhost:9000` | MinIO 엔드포인트 |
+| `SPRING_DATASOURCE_URL` | `jdbc:mysql://localhost:3306/exhibition?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC` | MySQL JDBC URL |
+| `SPRING_DATASOURCE_USERNAME` | `root` | MySQL 사용자명 |
+| `SPRING_DATASOURCE_PASSWORD` | `root` | MySQL 비밀번호 |
+| `MINIO_ENDPOINT` | `http://localhost` | MinIO 엔드포인트(스킴+호스트) |
+| `MINIO_PORT` | `9000` | MinIO 포트 |
 | `MINIO_ACCESS_KEY` | `minioadmin` | MinIO Access Key |
 | `MINIO_SECRET_KEY` | `minioadmin` | MinIO Secret Key |
 | `MINIO_BUCKET` | `exhibition` | MinIO 버킷명 |
 
 참고:
-- JDBC URL은 `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_PARAMS`를 조합해 생성됩니다.
+- Spring Boot는 `spring.datasource.url`이 필요하므로 `SPRING_DATASOURCE_URL`을 반드시 설정해야 합니다.
 - 테스트는 `src/test/resources/application.yml`의 H2 in-memory DB 설정을 사용합니다.
 
 ## 실행 방법
@@ -53,13 +51,11 @@ SRS(`srs.md`) 기준으로 전시/카테고리/항목/분류/미디어를 관리
 ### 2) 환경 변수 설정 (예시)
 
 ```bash
-export DB_HOST=localhost
-export DB_PORT=3306
-export DB_NAME=exhibition
-export DB_USERNAME=root
-export DB_PASSWORD=root
-export DB_PARAMS='useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC'
-export MINIO_ENDPOINT=http://localhost:9000
+export SPRING_DATASOURCE_URL='jdbc:mysql://localhost:3306/exhibition?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC'
+export SPRING_DATASOURCE_USERNAME=root
+export SPRING_DATASOURCE_PASSWORD=root
+export MINIO_ENDPOINT=http://localhost
+export MINIO_PORT=9000
 export MINIO_ACCESS_KEY=minioadmin
 export MINIO_SECRET_KEY=minioadmin
 export MINIO_BUCKET=exhibition

@@ -5,6 +5,4 @@ spring:
     active: prod
     group:
       prod: common
-      dev:
-        - common
-        - dev
+      dev: dev
