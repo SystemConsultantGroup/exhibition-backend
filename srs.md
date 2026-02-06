@@ -174,29 +174,17 @@ src/main/java/.../exhibition
 
 ## 4. 데이터 요구사항
 
-### 4.1 핵심 엔티티(논리)
-- ExhibitionService: id, name, description, start_date, end_date, logo_media_id, is_active, popup_enabled, popup_image_media_id, intro_title, intro_description, intro_video_media_id, created_at, updated_at
-- Category: id, exhibition_id, parent_id, name, order_index, path, created_at, updated_at
-- Item: id, exhibition_id, category_id, title, description, author_name, author_email, participant_names, advisor_names, visibility, thumbnail_media_id, poster_media_id, presentation_video_media_id, created_at, updated_at, published_at
-- ItemClassification: id, exhibition_id, name, created_at
-- ItemClassificationMap: id, item_id, classification_id, created_at
-- MediaAsset: id, item_id, exhibition_id, object_key, media_type, size, created_at
-- User: id, name, role, email, created_at, updated_at, last_login_at
-- OAuthAccount: id, user_id, provider, subject, email, created_at, updated_at
-
 ### 4.2 관계형 스키마(상세)
 
 #### 4.2.1 `exhibition_services`
 - `id` UUID PK
 - `slug` VARCHAR(64) UNIQUE NOT NULL
-- `name` VARCHAR(128) NOT NULL
+- `name` VARCHAR(128) UNIQUE NOT NULL
 - `description` TEXT NULL
-- `start_date` DATE NULL
-- `end_date` DATE NULL
 - `logo_media_id` UUID FK -> media_assets.id NULL
-- `is_active` BOOLEAN NOT NULL DEFAULT true
 - `popup_enabled` BOOLEAN NOT NULL DEFAULT false
 - `popup_image_media_id` UUID FK -> media_assets.id NULL
+- `popup_url` TEXT null
 - `intro_title` VARCHAR(200) NULL
 - `intro_description` TEXT NULL
 - `intro_video_media_id` UUID FK -> media_assets.id NULL
@@ -206,37 +194,23 @@ src/main/java/.../exhibition
 #### 4.2.2 `categories`
 - `id` UUID PK
 - `exhibition_id` UUID FK -> exhibition_services.id NOT NULL
-- `parent_id` UUID FK -> categories.id NULL
 - `name` VARCHAR(128) NOT NULL
-- `order_index` INT NOT NULL DEFAULT 0
-- `path` VARCHAR(512) NOT NULL
-- `depth` INT NOT NULL DEFAULT 0
 - `created_at` TIMESTAMP NOT NULL
 - `updated_at` TIMESTAMP NOT NULL
-- 인덱스: (`exhibition_id`, `parent_id`)
-- 인덱스: (`exhibition_id`, `path`)
 
 #### 4.2.3 `items`
 - `id` UUID PK
 - `exhibition_id` UUID FK -> exhibition_services.id NOT NULL
 - `category_id` UUID FK -> categories.id NOT NULL
 - `title` VARCHAR(200) NOT NULL
-- `summary` TEXT NULL
 - `description` TEXT NULL
-- `author_name` VARCHAR(100) NULL
-- `author_email` VARCHAR(200) NULL
 - `participant_names` TEXT NULL
 - `advisor_names` TEXT NULL
-- `visibility` VARCHAR(20) NOT NULL DEFAULT 'public'
 - `thumbnail_media_id` UUID FK -> media_assets.id NULL
 - `poster_media_id` UUID FK -> media_assets.id NULL
 - `presentation_video_media_id` UUID FK -> media_assets.id NULL
-- `published_at` TIMESTAMP NULL
 - `created_at` TIMESTAMP NOT NULL
 - `updated_at` TIMESTAMP NOT NULL
-- 인덱스: (`exhibition_id`, `category_id`)
-- 인덱스: (`exhibition_id`, `published_at`)
-- 인덱스: (`exhibition_id`, `title`)
 
 #### 4.2.4 `item_classifications`
 - `id` UUID PK
@@ -244,7 +218,6 @@ src/main/java/.../exhibition
 - `name` VARCHAR(100) NOT NULL
 - `created_at` TIMESTAMP NOT NULL
 - 고유 제약: (`exhibition_id`, `name`)
-- 인덱스: (`exhibition_id`)
 
 #### 4.2.5 `item_classification_map`
 - `id` UUID PK
@@ -252,10 +225,8 @@ src/main/java/.../exhibition
 - `classification_id` UUID FK -> item_classifications.id NOT NULL
 - `created_at` TIMESTAMP NOT NULL
 - 고유 제약: (`item_id`, `classification_id`)
-- 인덱스: (`item_id`)
-- 인덱스: (`classification_id`)
 
-#### 4.2.4 `media_assets`
+#### 4.2.6 `media_assets`
 - `id` UUID PK
 - `item_id` UUID FK -> items.id NOT NULL
 - `exhibition_id` UUID FK -> exhibition_services.id NOT NULL
@@ -263,43 +234,52 @@ src/main/java/.../exhibition
 - `media_type` VARCHAR(50) NOT NULL
 - `size` BIGINT NOT NULL
 - `created_at` TIMESTAMP NOT NULL
-- 인덱스: (`exhibition_id`, `item_id`)
 - 고유 제약: (`exhibition_id`, `object_key`)
 
-#### 4.2.5 `item_likes`
+#### 4.2.7 `item_likes`
 - `id` UUID PK
 - `item_id` UUID FK -> items.id NOT NULL
 - `user_id` UUID FK -> users.id NOT NULL
 - `created_at` TIMESTAMP NOT NULL
 - 고유 제약: (`item_id`, `user_id`)
-- 인덱스: (`item_id`)
-- 인덱스: (`user_id`)
 
-#### 4.2.6 `users`
+#### 4.2.8 `users`
 - `id` UUID PK
+- `ci` VARCHAR(200) NOT NULL
 - `name` VARCHAR(100) NOT NULL
 - `email` VARCHAR(200) NULL
 - `role` VARCHAR(20) NOT NULL DEFAULT 'visitor'
 - `created_at` TIMESTAMP NOT NULL
 - `updated_at` TIMESTAMP NOT NULL
 - `last_login_at` TIMESTAMP NULL
-- 고유 제약: (`email`)
+- 고유 제약: (`email`, `ci`)
 
-#### 4.2.7 `oauth_accounts`
+#### 4.2.9 `boards`
 - `id` UUID PK
-- `user_id` UUID FK -> users.id NOT NULL
-- `provider` VARCHAR(50) NOT NULL
-- `subject` VARCHAR(200) NOT NULL
-- `email` VARCHAR(200) NULL
+- `exhibition_id` UUID FK -> exhibition_services.id NOT NULL
+- `title` VARCHAR(200) NOT NULL
+- `content` TEXT NOT NULL
+- `attachment_media_id` UUID FK -> media_assets.id NULL
+- `author_user_id` UUID FK -> users.id NOT NULL
 - `created_at` TIMESTAMP NOT NULL
 - `updated_at` TIMESTAMP NOT NULL
-- 고유 제약: (`provider`, `subject`)
-- 인덱스: (`user_id`)
+- 작성 권한: Admin, SubAdmin(할당된 전시)
+
+#### 4.2.10 `event_periods`
+- `id` UUID PK
+- `exhibition_id` UUID FK -> exhibition_services.id NOT NULL
+- `name` VARCHAR(50) NOT NULL (예: `2025-2학기`, `2025-1학기`)
+- `start_time` TIMESTAMP NOT NULL
+- `end_time` TIMESTAMP NOT NULL
+- 고유 제약: (`exhibition_id`, `name`)
+- 체크 제약: `start_time < end_time`
 
 ### 4.3 관계
 - 하나의 전시 서비스는 여러 카테고리를 가진다.
 - 카테고리는 계층 구조(자기 참조 parent_id)이다.
 - 하나의 전시 서비스는 여러 항목을 가진다.
+- 하나의 전시 서비스는 여러 게시판 글(boards)을 가진다.
+- 하나의 전시 서비스는 여러 행사 시기(event_periods)를 가진다.
 - 하나의 항목은 여러 미디어 자산을 가진다.
 - 하나의 전시 서비스는 로고/팝업 이미지/인트로 비디오를 media_assets FK(media ref)로 참조할 수 있다.
 - 하나의 항목은 썸네일/포스터/발표영상을 media_assets FK(media ref)로 참조할 수 있다.
