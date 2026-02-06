@@ -460,7 +460,8 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </li>
 <li><a href="#_카테고리category">3. 카테고리(Category)</a>
 <ul class="sectlevel2">
-<li><a href="#_카테고리_트리_조회">3.1. 카테고리 트리 조회</a></li>
+<li><a href="#_카테고리_목록_조회">3.1. 카테고리 목록 조회</a></li>
+<li><a href="#_단일_카테고리_조회">3.2. 단일 카테고리 조회</a></li>
 </ul>
 </li>
 <li><a href="#_항목item">4. 항목(Item)</a>
@@ -472,12 +473,20 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_분류classification">5. 분류(Classification)</a>
 <ul class="sectlevel2">
 <li><a href="#_분류_목록_조회">5.1. 분류 목록 조회</a></li>
+<li><a href="#_단일_분류_조회">5.2. 단일 분류 조회</a></li>
 </ul>
 </li>
-<li><a href="#_미디어media">6. 미디어(Media)</a>
+<li><a href="#_이벤트_기간event_period">6. 이벤트 기간(Event Period)</a>
 <ul class="sectlevel2">
-<li><a href="#_항목별_미디어_목록_조회">6.1. 항목별 미디어 목록 조회</a></li>
-<li><a href="#_단일_미디어_조회">6.2. 단일 미디어 조회</a></li>
+<li><a href="#_이벤트_기간_목록_조회">6.1. 이벤트 기간 목록 조회</a></li>
+<li><a href="#_단일_이벤트_기간_조회">6.2. 단일 이벤트 기간 조회</a></li>
+</ul>
+</li>
+<li><a href="#_미디어media">7. 미디어(Media)</a>
+<ul class="sectlevel2">
+<li><a href="#_항목별_미디어_목록_조회">7.1. 항목별 미디어 목록 조회</a></li>
+<li><a href="#_단일_미디어_조회">7.2. 단일 미디어 조회</a></li>
+<li><a href="#_미디어_파일_다운로드">7.3. 미디어 파일 다운로드</a></li>
 </ul>
 </li>
 </ul>
@@ -527,7 +536,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sect2">
 <h3 id="_파일_다운로드_응답">1.3. 파일 다운로드 응답</h3>
 <div class="paragraph">
-<p>파일 조회 API(<code>/media/{id}</code>)는 JSON이 아닌 바이너리 본문을 반환하며, `Content-Type`은 파일 형식에 따라 달라집니다.</p>
+<p>파일 조회 API(<code>/media/{id}/file</code>)는 JSON이 아닌 바이너리 본문을 반환하며, `Content-Type`은 파일 형식에 따라 달라집니다.</p>
 </div>
 </div>
 </div>
@@ -541,8 +550,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h4 id="_요청_예시">2.1.1. 요청 예시</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /exhibitions?active=true HTTP/1.1
-Accept: application/json
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /exhibitions?q=cse HTTP/1.1
 Host: localhost:8080</code></pre>
 </div>
 </div>
@@ -679,26 +687,18 @@ Cache-Control: no-cache, no-store, max-age=0, must-revalidate
 Pragma: no-cache
 Expires: 0
 X-Frame-Options: DENY
-Content-Length: 460
+Content-Length: 276
 
 {
   "items" : [ {
-    "id" : "e8ad065c-7d4e-4d40-b87c-c648a6292d51",
+    "id" : "fe950638-ce8e-4b28-b3a8-c3bd77c1efd5",
     "slug" : "cse-2026",
     "name" : "CSE 2026",
-    "description" : "desc",
-    "startDate" : "2026-02-01",
-    "endDate" : "2026-03-01",
-    "isActive" : true,
-    "popupEnabled" : false,
-    "logoMediaId" : null,
-    "popupImageMediaId" : null,
-    "introTitle" : null,
-    "introDescription" : null,
-    "introVideoMediaId" : null
+    "createdAt" : "2026-02-06T12:01:14.989768874Z",
+    "updatedAt" : "2026-02-06T12:01:14.989802831Z"
   } ],
   "page" : 1,
-  "pageSize" : 20,
+  "pageSize" : 1,
   "total" : 1
 }</code></pre>
 </div>
@@ -710,22 +710,14 @@ Content-Length: 460
 <div class="content">
 <pre class="highlight nowrap"><code class="language-json" data-lang="json">{
   "items" : [ {
-    "id" : "e8ad065c-7d4e-4d40-b87c-c648a6292d51",
+    "id" : "fe950638-ce8e-4b28-b3a8-c3bd77c1efd5",
     "slug" : "cse-2026",
     "name" : "CSE 2026",
-    "description" : "desc",
-    "startDate" : "2026-02-01",
-    "endDate" : "2026-03-01",
-    "isActive" : true,
-    "popupEnabled" : false,
-    "logoMediaId" : null,
-    "popupImageMediaId" : null,
-    "introTitle" : null,
-    "introDescription" : null,
-    "introVideoMediaId" : null
+    "createdAt" : "2026-02-06T12:01:14.989768874Z",
+    "updatedAt" : "2026-02-06T12:01:14.989802831Z"
   } ],
   "page" : 1,
-  "pageSize" : 20,
+  "pageSize" : 1,
   "total" : 1
 }</code></pre>
 </div>
@@ -759,8 +751,7 @@ Content-Length: 460
 <h4 id="_요청_예시_2">2.2.2. 요청 예시</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /exhibitions/5e3679e5-7a56-4ff8-9dca-65b93b043881 HTTP/1.1
-Accept: application/json
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /exhibitions/09b98006-9ad7-4050-a956-303514aef061 HTTP/1.1
 Host: localhost:8080</code></pre>
 </div>
 </div>
@@ -777,22 +768,14 @@ Cache-Control: no-cache, no-store, max-age=0, must-revalidate
 Pragma: no-cache
 Expires: 0
 X-Frame-Options: DENY
-Content-Length: 364
+Content-Length: 197
 
 {
-  "id" : "5e3679e5-7a56-4ff8-9dca-65b93b043881",
+  "id" : "09b98006-9ad7-4050-a956-303514aef061",
   "slug" : "cse-2026",
   "name" : "CSE 2026",
-  "description" : "desc",
-  "startDate" : "2026-02-01",
-  "endDate" : "2026-03-01",
-  "isActive" : true,
-  "popupEnabled" : false,
-  "logoMediaId" : null,
-  "popupImageMediaId" : null,
-  "introTitle" : null,
-  "introDescription" : null,
-  "introVideoMediaId" : null
+  "createdAt" : "2026-02-06T12:01:14.960285012Z",
+  "updatedAt" : "2026-02-06T12:01:14.960288529Z"
 }</code></pre>
 </div>
 </div>
@@ -802,19 +785,11 @@ Content-Length: 364
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-json" data-lang="json">{
-  "id" : "5e3679e5-7a56-4ff8-9dca-65b93b043881",
+  "id" : "09b98006-9ad7-4050-a956-303514aef061",
   "slug" : "cse-2026",
   "name" : "CSE 2026",
-  "description" : "desc",
-  "startDate" : "2026-02-01",
-  "endDate" : "2026-03-01",
-  "isActive" : true,
-  "popupEnabled" : false,
-  "logoMediaId" : null,
-  "popupImageMediaId" : null,
-  "introTitle" : null,
-  "introDescription" : null,
-  "introVideoMediaId" : null
+  "createdAt" : "2026-02-06T12:01:14.960285012Z",
+  "updatedAt" : "2026-02-06T12:01:14.960288529Z"
 }</code></pre>
 </div>
 </div>
@@ -826,39 +801,18 @@ Content-Length: 364
 <h2 id="_카테고리category">3. 카테고리(Category)</h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="_카테고리_트리_조회">3.1. 카테고리 트리 조회</h3>
+<h3 id="_카테고리_목록_조회">3.1. 카테고리 목록 조회</h3>
 <div class="sect3">
-<h4 id="_경로_파라미터_2">3.1.1. 경로 파라미터</h4>
-<table class="tableblock frame-all grid-all stretch">
-<colgroup>
-<col style="width: 50%;">
-<col style="width: 50%;">
-</colgroup>
-<thead>
-<tr>
-<th class="tableblock halign-left valign-top">이름</th>
-<th class="tableblock halign-left valign-top">설명</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>id</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">전시 ID</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="sect3">
-<h4 id="_요청_예시_3">3.1.2. 요청 예시</h4>
+<h4 id="_요청_예시_3">3.1.1. 요청 예시</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /exhibitions/40eb166a-62e5-4d7e-91c8-649ff76769d1/categories/tree HTTP/1.1
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /categories?exhibitionId=ea2ee2ad-c274-4d89-b268-2b82564daa61 HTTP/1.1
 Host: localhost:8080</code></pre>
 </div>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_응답_예시_3">3.1.3. 응답 예시</h4>
+<h4 id="_응답_예시_3">3.1.2. 응답 예시</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 200 OK
@@ -869,31 +823,89 @@ Cache-Control: no-cache, no-store, max-age=0, must-revalidate
 Pragma: no-cache
 Expires: 0
 X-Frame-Options: DENY
-Content-Length: 149
+Content-Length: 306
 
-[ {
-  "id" : "20b29024-1fe4-4ef0-9488-1c22474395e4",
-  "name" : "Software",
-  "orderIndex" : 0,
-  "path" : "a",
-  "depth" : 0,
-  "children" : [ ]
-} ]</code></pre>
+{
+  "items" : [ {
+    "id" : "36d2d51c-63be-490c-8041-b220b43818e3",
+    "exhibitionId" : "ea2ee2ad-c274-4d89-b268-2b82564daa61",
+    "name" : "AI",
+    "createdAt" : "2026-02-06T12:01:13.058244870Z",
+    "updatedAt" : "2026-02-06T12:01:13.058246286Z"
+  } ],
+  "page" : 1,
+  "pageSize" : 1,
+  "total" : 1
+}</code></pre>
 </div>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_응답_본문json_3">3.1.4. 응답 본문(JSON)</h4>
+<h4 id="_응답_본문json_3">3.1.3. 응답 본문(JSON)</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-json" data-lang="json">[ {
-  "id" : "20b29024-1fe4-4ef0-9488-1c22474395e4",
-  "name" : "Software",
-  "orderIndex" : 0,
-  "path" : "a",
-  "depth" : 0,
-  "children" : [ ]
-} ]</code></pre>
+<pre class="highlight nowrap"><code class="language-json" data-lang="json">{
+  "items" : [ {
+    "id" : "36d2d51c-63be-490c-8041-b220b43818e3",
+    "exhibitionId" : "ea2ee2ad-c274-4d89-b268-2b82564daa61",
+    "name" : "AI",
+    "createdAt" : "2026-02-06T12:01:13.058244870Z",
+    "updatedAt" : "2026-02-06T12:01:13.058246286Z"
+  } ],
+  "page" : 1,
+  "pageSize" : 1,
+  "total" : 1
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_단일_카테고리_조회">3.2. 단일 카테고리 조회</h3>
+<div class="sect3">
+<h4 id="_요청_예시_4">3.2.1. 요청 예시</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /categories/d47fc171-6ee2-4c73-9892-784b4ff2bb41 HTTP/1.1
+Host: localhost:8080</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_응답_예시_4">3.2.2. 응답 예시</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 200 OK
+Content-Type: application/json
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+X-Frame-Options: DENY
+Content-Length: 228
+
+{
+  "id" : "d47fc171-6ee2-4c73-9892-784b4ff2bb41",
+  "exhibitionId" : "794068fd-9c9f-42a4-85b1-ffa0c47ce5db",
+  "name" : "Web",
+  "createdAt" : "2026-02-06T12:01:12.693474024Z",
+  "updatedAt" : "2026-02-06T12:01:12.693475735Z"
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_응답_본문json_4">3.2.3. 응답 본문(JSON)</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-json" data-lang="json">{
+  "id" : "d47fc171-6ee2-4c73-9892-784b4ff2bb41",
+  "exhibitionId" : "794068fd-9c9f-42a4-85b1-ffa0c47ce5db",
+  "name" : "Web",
+  "createdAt" : "2026-02-06T12:01:12.693474024Z",
+  "updatedAt" : "2026-02-06T12:01:12.693475735Z"
+}</code></pre>
 </div>
 </div>
 </div>
@@ -906,7 +918,7 @@ Content-Length: 149
 <div class="sect2">
 <h3 id="_항목_목록_조회">4.1. 항목 목록 조회</h3>
 <div class="sect3">
-<h4 id="_경로_파라미터_3">4.1.1. 경로 파라미터</h4>
+<h4 id="_경로_파라미터_2">4.1.1. 경로 파라미터</h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 50%;">
@@ -972,16 +984,16 @@ Content-Length: 149
 </table>
 </div>
 <div class="sect3">
-<h4 id="_요청_예시_4">4.1.3. 요청 예시</h4>
+<h4 id="_요청_예시_5">4.1.3. 요청 예시</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /exhibitions/b4473a72-5424-499f-bbcc-aa9e78f8afab/items HTTP/1.1
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /items?exhibitionId=02f77b30-af70-45f3-88e2-998b412e6135 HTTP/1.1
 Host: localhost:8080</code></pre>
 </div>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_응답_예시_4">4.1.4. 응답 예시</h4>
+<h4 id="_응답_예시_5">4.1.4. 응답 예시</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 200 OK
@@ -992,57 +1004,43 @@ Cache-Control: no-cache, no-store, max-age=0, must-revalidate
 Pragma: no-cache
 Expires: 0
 X-Frame-Options: DENY
-Content-Length: 583
+Content-Length: 432
 
 {
   "items" : [ {
-    "id" : "b373b1e6-3246-420b-9e7d-7f5a3048212b",
-    "exhibitionId" : "b4473a72-5424-499f-bbcc-aa9e78f8afab",
-    "categoryId" : "d0a459dd-0731-416b-8e58-7800ddd57ba6",
+    "id" : "11725dba-58af-4571-856f-e78034018161",
+    "exhibitionId" : "02f77b30-af70-45f3-88e2-998b412e6135",
+    "categoryId" : "9120347e-85f7-475a-a246-c3a1b9ae5711",
+    "eventPeriodId" : null,
     "title" : "Smart Campus",
-    "summary" : null,
-    "description" : null,
-    "authorName" : null,
-    "authorEmail" : null,
-    "participantNames" : null,
-    "advisorNames" : null,
-    "thumbnailMediaId" : null,
-    "posterMediaId" : null,
-    "presentationVideoMediaId" : null,
-    "visibility" : "public",
-    "publishedAt" : null
+    "description" : "desc",
+    "createdAt" : "2026-02-06T12:01:15.793667410Z",
+    "updatedAt" : "2026-02-06T12:01:15.793671071Z"
   } ],
   "page" : 1,
-  "pageSize" : 20,
+  "pageSize" : 1,
   "total" : 1
 }</code></pre>
 </div>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_응답_본문json_4">4.1.5. 응답 본문(JSON)</h4>
+<h4 id="_응답_본문json_5">4.1.5. 응답 본문(JSON)</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-json" data-lang="json">{
   "items" : [ {
-    "id" : "b373b1e6-3246-420b-9e7d-7f5a3048212b",
-    "exhibitionId" : "b4473a72-5424-499f-bbcc-aa9e78f8afab",
-    "categoryId" : "d0a459dd-0731-416b-8e58-7800ddd57ba6",
+    "id" : "11725dba-58af-4571-856f-e78034018161",
+    "exhibitionId" : "02f77b30-af70-45f3-88e2-998b412e6135",
+    "categoryId" : "9120347e-85f7-475a-a246-c3a1b9ae5711",
+    "eventPeriodId" : null,
     "title" : "Smart Campus",
-    "summary" : null,
-    "description" : null,
-    "authorName" : null,
-    "authorEmail" : null,
-    "participantNames" : null,
-    "advisorNames" : null,
-    "thumbnailMediaId" : null,
-    "posterMediaId" : null,
-    "presentationVideoMediaId" : null,
-    "visibility" : "public",
-    "publishedAt" : null
+    "description" : "desc",
+    "createdAt" : "2026-02-06T12:01:15.793667410Z",
+    "updatedAt" : "2026-02-06T12:01:15.793671071Z"
   } ],
   "page" : 1,
-  "pageSize" : 20,
+  "pageSize" : 1,
   "total" : 1
 }</code></pre>
 </div>
@@ -1052,7 +1050,7 @@ Content-Length: 583
 <div class="sect2">
 <h3 id="_단일_항목_조회">4.2. 단일 항목 조회</h3>
 <div class="sect3">
-<h4 id="_경로_파라미터_4">4.2.1. 경로 파라미터</h4>
+<h4 id="_경로_파라미터_3">4.2.1. 경로 파라미터</h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 50%;">
@@ -1073,16 +1071,16 @@ Content-Length: 583
 </table>
 </div>
 <div class="sect3">
-<h4 id="_요청_예시_5">4.2.2. 요청 예시</h4>
+<h4 id="_요청_예시_6">4.2.2. 요청 예시</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /items/9d63510a-a212-4b71-910f-b8a83209346a HTTP/1.1
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /items/55465e45-d73e-424e-ba78-31499949cf84 HTTP/1.1
 Host: localhost:8080</code></pre>
 </div>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_응답_예시_5">4.2.3. 응답 예시</h4>
+<h4 id="_응답_예시_6">4.2.3. 응답 예시</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 200 OK
@@ -1093,48 +1091,34 @@ Cache-Control: no-cache, no-store, max-age=0, must-revalidate
 Pragma: no-cache
 Expires: 0
 X-Frame-Options: DENY
-Content-Length: 483
+Content-Length: 381
 
 {
-  "id" : "9d63510a-a212-4b71-910f-b8a83209346a",
-  "exhibitionId" : "0f6c712d-4a2e-45d1-b08e-cbdb35c66404",
-  "categoryId" : "94a52266-b798-4d4b-8cec-9ade50fefb6b",
+  "id" : "55465e45-d73e-424e-ba78-31499949cf84",
+  "exhibitionId" : "79bd29d0-c9a1-41c3-b2fb-64feb3349a8d",
+  "categoryId" : "15c71ab5-bdb9-4084-9f68-066d1a0ab066",
+  "eventPeriodId" : "721e1d5a-ebf1-4eda-b00d-8e5e79d51bf2",
   "title" : "Smart Campus",
-  "summary" : null,
-  "description" : null,
-  "authorName" : null,
-  "authorEmail" : null,
-  "participantNames" : null,
-  "advisorNames" : null,
-  "thumbnailMediaId" : null,
-  "posterMediaId" : null,
-  "presentationVideoMediaId" : null,
-  "visibility" : "public",
-  "publishedAt" : null
+  "description" : "desc",
+  "createdAt" : "2026-02-06T12:01:15.695995485Z",
+  "updatedAt" : "2026-02-06T12:01:15.695998479Z"
 }</code></pre>
 </div>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_응답_본문json_5">4.2.4. 응답 본문(JSON)</h4>
+<h4 id="_응답_본문json_6">4.2.4. 응답 본문(JSON)</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-json" data-lang="json">{
-  "id" : "9d63510a-a212-4b71-910f-b8a83209346a",
-  "exhibitionId" : "0f6c712d-4a2e-45d1-b08e-cbdb35c66404",
-  "categoryId" : "94a52266-b798-4d4b-8cec-9ade50fefb6b",
+  "id" : "55465e45-d73e-424e-ba78-31499949cf84",
+  "exhibitionId" : "79bd29d0-c9a1-41c3-b2fb-64feb3349a8d",
+  "categoryId" : "15c71ab5-bdb9-4084-9f68-066d1a0ab066",
+  "eventPeriodId" : "721e1d5a-ebf1-4eda-b00d-8e5e79d51bf2",
   "title" : "Smart Campus",
-  "summary" : null,
-  "description" : null,
-  "authorName" : null,
-  "authorEmail" : null,
-  "participantNames" : null,
-  "advisorNames" : null,
-  "thumbnailMediaId" : null,
-  "posterMediaId" : null,
-  "presentationVideoMediaId" : null,
-  "visibility" : "public",
-  "publishedAt" : null
+  "description" : "desc",
+  "createdAt" : "2026-02-06T12:01:15.695995485Z",
+  "updatedAt" : "2026-02-06T12:01:15.695998479Z"
 }</code></pre>
 </div>
 </div>
@@ -1148,37 +1132,16 @@ Content-Length: 483
 <div class="sect2">
 <h3 id="_분류_목록_조회">5.1. 분류 목록 조회</h3>
 <div class="sect3">
-<h4 id="_경로_파라미터_5">5.1.1. 경로 파라미터</h4>
-<table class="tableblock frame-all grid-all stretch">
-<colgroup>
-<col style="width: 50%;">
-<col style="width: 50%;">
-</colgroup>
-<thead>
-<tr>
-<th class="tableblock halign-left valign-top">이름</th>
-<th class="tableblock halign-left valign-top">설명</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>id</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">전시 ID</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="sect3">
-<h4 id="_요청_예시_6">5.1.2. 요청 예시</h4>
+<h4 id="_요청_예시_7">5.1.1. 요청 예시</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /exhibitions/d7775bb7-95a1-4dc6-aa7e-95e4ea05d9ef/classifications HTTP/1.1
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /classifications?exhibitionId=36fe4fdf-d9a9-49ec-8d2b-0a8b98797925 HTTP/1.1
 Host: localhost:8080</code></pre>
 </div>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_응답_예시_6">5.1.3. 응답 예시</h4>
+<h4 id="_응답_예시_7">5.1.2. 응답 예시</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 200 OK
@@ -1189,25 +1152,85 @@ Cache-Control: no-cache, no-store, max-age=0, must-revalidate
 Pragma: no-cache
 Expires: 0
 X-Frame-Options: DENY
-Content-Length: 134
+Content-Length: 258
 
-[ {
-  "id" : "8992f580-36c2-4bc3-b0fa-31388c002fcd",
-  "exhibitionId" : "d7775bb7-95a1-4dc6-aa7e-95e4ea05d9ef",
-  "name" : "Paper"
-} ]</code></pre>
+{
+  "items" : [ {
+    "id" : "8f288548-755f-48b1-94c7-826e2e443eee",
+    "exhibitionId" : "36fe4fdf-d9a9-49ec-8d2b-0a8b98797925",
+    "name" : "작품",
+    "createdAt" : "2026-02-06T12:01:13.845242182Z"
+  } ],
+  "page" : 1,
+  "pageSize" : 1,
+  "total" : 1
+}</code></pre>
 </div>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_응답_본문json_6">5.1.4. 응답 본문(JSON)</h4>
+<h4 id="_응답_본문json_7">5.1.3. 응답 본문(JSON)</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-json" data-lang="json">[ {
-  "id" : "8992f580-36c2-4bc3-b0fa-31388c002fcd",
-  "exhibitionId" : "d7775bb7-95a1-4dc6-aa7e-95e4ea05d9ef",
-  "name" : "Paper"
-} ]</code></pre>
+<pre class="highlight nowrap"><code class="language-json" data-lang="json">{
+  "items" : [ {
+    "id" : "8f288548-755f-48b1-94c7-826e2e443eee",
+    "exhibitionId" : "36fe4fdf-d9a9-49ec-8d2b-0a8b98797925",
+    "name" : "작품",
+    "createdAt" : "2026-02-06T12:01:13.845242182Z"
+  } ],
+  "page" : 1,
+  "pageSize" : 1,
+  "total" : 1
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_단일_분류_조회">5.2. 단일 분류 조회</h3>
+<div class="sect3">
+<h4 id="_요청_예시_8">5.2.1. 요청 예시</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /classifications/70361e12-45f5-4c65-8be3-ac359fbc321f HTTP/1.1
+Host: localhost:8080</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_응답_예시_8">5.2.2. 응답 예시</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 200 OK
+Content-Type: application/json
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+X-Frame-Options: DENY
+Content-Length: 181
+
+{
+  "id" : "70361e12-45f5-4c65-8be3-ac359fbc321f",
+  "exhibitionId" : "c96de190-8769-4902-8790-ce1791889006",
+  "name" : "논문",
+  "createdAt" : "2026-02-06T12:01:13.809859772Z"
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_응답_본문json_8">5.2.3. 응답 본문(JSON)</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-json" data-lang="json">{
+  "id" : "70361e12-45f5-4c65-8be3-ac359fbc321f",
+  "exhibitionId" : "c96de190-8769-4902-8790-ce1791889006",
+  "name" : "논문",
+  "createdAt" : "2026-02-06T12:01:13.809859772Z"
+}</code></pre>
 </div>
 </div>
 </div>
@@ -1215,42 +1238,208 @@ Content-Length: 134
 </div>
 </div>
 <div class="sect1">
-<h2 id="_미디어media">6. 미디어(Media)</h2>
+<h2 id="_이벤트_기간event_period">6. 이벤트 기간(Event Period)</h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="_항목별_미디어_목록_조회">6.1. 항목별 미디어 목록 조회</h3>
+<h3 id="_이벤트_기간_목록_조회">6.1. 이벤트 기간 목록 조회</h3>
 <div class="sect3">
-<h4 id="_경로_파라미터_6">6.1.1. 경로 파라미터</h4>
-<table class="tableblock frame-all grid-all stretch">
-<colgroup>
-<col style="width: 50%;">
-<col style="width: 50%;">
-</colgroup>
-<thead>
-<tr>
-<th class="tableblock halign-left valign-top">이름</th>
-<th class="tableblock halign-left valign-top">설명</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>id</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">항목 ID</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="sect3">
-<h4 id="_요청_예시_7">6.1.2. 요청 예시</h4>
+<h4 id="_요청_예시_9">6.1.1. 요청 예시</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /items/0663c9f2-dd41-4a58-adec-d940921712a0/media HTTP/1.1
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /event-periods?exhibitionId=6eed86e5-c7bb-4f3a-b34e-f304f465259d HTTP/1.1
 Host: localhost:8080</code></pre>
 </div>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_응답_예시_7">6.1.3. 응답 예시</h4>
+<h4 id="_응답_예시_9">6.1.2. 응답 예시</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 200 OK
+Content-Type: application/json
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+X-Frame-Options: DENY
+Content-Length: 398
+
+{
+  "items" : [ {
+    "id" : "a0cac6f1-6e88-4a1c-9306-500ade18173c",
+    "exhibitionId" : "6eed86e5-c7bb-4f3a-b34e-f304f465259d",
+    "name" : "2025-1학기",
+    "startTime" : "2025-03-01T00:00:00Z",
+    "endTime" : "2025-06-30T00:00:00Z",
+    "createdAt" : "2026-02-06T12:01:14.359356997Z",
+    "updatedAt" : "2026-02-06T12:01:14.359357588Z"
+  } ],
+  "page" : 1,
+  "pageSize" : 1,
+  "total" : 1
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_응답_본문json_9">6.1.3. 응답 본문(JSON)</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-json" data-lang="json">{
+  "items" : [ {
+    "id" : "a0cac6f1-6e88-4a1c-9306-500ade18173c",
+    "exhibitionId" : "6eed86e5-c7bb-4f3a-b34e-f304f465259d",
+    "name" : "2025-1학기",
+    "startTime" : "2025-03-01T00:00:00Z",
+    "endTime" : "2025-06-30T00:00:00Z",
+    "createdAt" : "2026-02-06T12:01:14.359356997Z",
+    "updatedAt" : "2026-02-06T12:01:14.359357588Z"
+  } ],
+  "page" : 1,
+  "pageSize" : 1,
+  "total" : 1
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_단일_이벤트_기간_조회">6.2. 단일 이벤트 기간 조회</h3>
+<div class="sect3">
+<h4 id="_요청_예시_10">6.2.1. 요청 예시</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /event-periods/3d370f7e-c6c4-413a-896c-f18452d5f57a HTTP/1.1
+Host: localhost:8080</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_응답_예시_10">6.2.2. 응답 예시</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 200 OK
+Content-Type: application/json
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+X-Frame-Options: DENY
+Content-Length: 315
+
+{
+  "id" : "3d370f7e-c6c4-413a-896c-f18452d5f57a",
+  "exhibitionId" : "d2cafa46-21fe-42e4-a313-7a41ef4960de",
+  "name" : "2025-2학기",
+  "startTime" : "2025-09-01T00:00:00Z",
+  "endTime" : "2025-12-31T00:00:00Z",
+  "createdAt" : "2026-02-06T12:01:14.319631877Z",
+  "updatedAt" : "2026-02-06T12:01:14.319632427Z"
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_응답_본문json_10">6.2.3. 응답 본문(JSON)</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-json" data-lang="json">{
+  "id" : "3d370f7e-c6c4-413a-896c-f18452d5f57a",
+  "exhibitionId" : "d2cafa46-21fe-42e4-a313-7a41ef4960de",
+  "name" : "2025-2학기",
+  "startTime" : "2025-09-01T00:00:00Z",
+  "endTime" : "2025-12-31T00:00:00Z",
+  "createdAt" : "2026-02-06T12:01:14.319631877Z",
+  "updatedAt" : "2026-02-06T12:01:14.319632427Z"
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_미디어media">7. 미디어(Media)</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_항목별_미디어_목록_조회">7.1. 항목별 미디어 목록 조회</h3>
+<div class="sect3">
+<h4 id="_요청_예시_11">7.1.1. 요청 예시</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /media?exhibitionId=abb97303-f02c-4b20-ab35-456214700c69 HTTP/1.1
+Host: localhost:8080</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_응답_예시_11">7.1.2. 응답 예시</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 200 OK
+Content-Type: application/json
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+X-Frame-Options: DENY
+Content-Length: 333
+
+{
+  "items" : [ {
+    "id" : "a001725f-26dd-499a-8da4-57c7ae3acabe",
+    "exhibitionId" : "abb97303-f02c-4b20-ab35-456214700c69",
+    "itemId" : null,
+    "objectKey" : "a.jpg",
+    "mediaType" : "image/jpeg",
+    "size" : 123,
+    "createdAt" : "2026-02-06T12:01:17.099834829Z"
+  } ],
+  "page" : 1,
+  "pageSize" : 1,
+  "total" : 1
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_응답_본문json_11">7.1.3. 응답 본문(JSON)</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-json" data-lang="json">{
+  "items" : [ {
+    "id" : "a001725f-26dd-499a-8da4-57c7ae3acabe",
+    "exhibitionId" : "abb97303-f02c-4b20-ab35-456214700c69",
+    "itemId" : null,
+    "objectKey" : "a.jpg",
+    "mediaType" : "image/jpeg",
+    "size" : 123,
+    "createdAt" : "2026-02-06T12:01:17.099834829Z"
+  } ],
+  "page" : 1,
+  "pageSize" : 1,
+  "total" : 1
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_단일_미디어_조회">7.2. 단일 미디어 조회</h3>
+<div class="sect3">
+<h4 id="_요청_예시_12">7.2.1. 요청 예시</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /media/84425feb-82c2-4724-b24e-55d1e1ac87e6 HTTP/1.1
+Host: localhost:8080</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_응답_예시_12">7.2.2. 응답 예시</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 200 OK
@@ -1263,75 +1452,55 @@ Expires: 0
 X-Frame-Options: DENY
 Content-Length: 284
 
-[ {
-  "id" : "96fd528b-ce6d-4134-82ca-ff6b0d1d478e",
-  "itemId" : "0663c9f2-dd41-4a58-adec-d940921712a0",
-  "exhibitionId" : "cb7264d8-792a-46ce-afa7-180d02afbd2c",
-  "objectKey" : "exhibitions/a/items/b/cover.jpg",
+{
+  "id" : "84425feb-82c2-4724-b24e-55d1e1ac87e6",
+  "exhibitionId" : "8a4b1415-f309-4a98-815a-890dd50834b1",
+  "itemId" : "1c7f554c-429e-4811-9925-39aa8ca2d952",
+  "objectKey" : "a.jpg",
   "mediaType" : "image/jpeg",
-  "size" : 3,
-  "createdAt" : null
-} ]</code></pre>
+  "size" : 123,
+  "createdAt" : "2026-02-06T12:01:16.888016503Z"
+}</code></pre>
 </div>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_응답_본문json_7">6.1.4. 응답 본문(JSON)</h4>
+<h4 id="_응답_본문json_12">7.2.3. 응답 본문(JSON)</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-json" data-lang="json">[ {
-  "id" : "96fd528b-ce6d-4134-82ca-ff6b0d1d478e",
-  "itemId" : "0663c9f2-dd41-4a58-adec-d940921712a0",
-  "exhibitionId" : "cb7264d8-792a-46ce-afa7-180d02afbd2c",
-  "objectKey" : "exhibitions/a/items/b/cover.jpg",
+<pre class="highlight nowrap"><code class="language-json" data-lang="json">{
+  "id" : "84425feb-82c2-4724-b24e-55d1e1ac87e6",
+  "exhibitionId" : "8a4b1415-f309-4a98-815a-890dd50834b1",
+  "itemId" : "1c7f554c-429e-4811-9925-39aa8ca2d952",
+  "objectKey" : "a.jpg",
   "mediaType" : "image/jpeg",
-  "size" : 3,
-  "createdAt" : null
-} ]</code></pre>
+  "size" : 123,
+  "createdAt" : "2026-02-06T12:01:16.888016503Z"
+}</code></pre>
 </div>
 </div>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_단일_미디어_조회">6.2. 단일 미디어 조회</h3>
+<h3 id="_미디어_파일_다운로드">7.3. 미디어 파일 다운로드</h3>
 <div class="sect3">
-<h4 id="_경로_파라미터_7">6.2.1. 경로 파라미터</h4>
-<table class="tableblock frame-all grid-all stretch">
-<colgroup>
-<col style="width: 50%;">
-<col style="width: 50%;">
-</colgroup>
-<thead>
-<tr>
-<th class="tableblock halign-left valign-top">이름</th>
-<th class="tableblock halign-left valign-top">설명</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>id</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">미디어 ID</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="sect3">
-<h4 id="_요청_예시_8">6.2.2. 요청 예시</h4>
+<h4 id="_요청_예시_13">7.3.1. 요청 예시</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /media/8d445fe9-f3c6-4c80-9231-5848a0408240 HTTP/1.1
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /media/20fe74e1-e9e1-46ca-9283-066c7a8bf389/file HTTP/1.1
 Host: localhost:8080</code></pre>
 </div>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_응답_예시_8">6.2.3. 응답 예시</h4>
+<h4 id="_응답_예시_13">7.3.2. 응답 예시</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 200 OK
 Content-Type: image/jpeg
-Content-Disposition: inline; filename="8d445fe9-f3c6-4c80-9231-5848a0408240"
 Content-Length: 3
+Content-Disposition: attachment; filename="a.jpg"
+Accept-Ranges: bytes
 X-Content-Type-Options: nosniff
 X-XSS-Protection: 0
 Cache-Control: no-cache, no-store, max-age=0, must-revalidate
@@ -1339,15 +1508,15 @@ Pragma: no-cache
 Expires: 0
 X-Frame-Options: DENY
 
-abc</code></pre>
+</code></pre>
 </div>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_응답_본문바이너리">6.2.4. 응답 본문(바이너리)</h4>
+<h4 id="_응답_본문바이너리">7.3.3. 응답 본문(바이너리)</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-jpeg" data-lang="jpeg">abc</code></pre>
+<pre class="highlight nowrap"><code class="language-jpeg" data-lang="jpeg"></code></pre>
 </div>
 </div>
 </div>
@@ -1358,7 +1527,7 @@ abc</code></pre>
 <div id="footer">
 <div id="footer-text">
 Version 0.0.1-SNAPSHOT<br>
-Last updated 2026-02-06 14:21:19 +0900
+Last updated 2026-02-06 20:55:22 +0900
 </div>
 </div>
 </body>

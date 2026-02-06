@@ -202,6 +202,7 @@ src/main/java/.../exhibition
 - `id` UUID PK
 - `exhibition_id` UUID FK -> exhibition_services.id NOT NULL
 - `category_id` UUID FK -> categories.id NOT NULL
+- `event_period_id` UUID FK -> event_periods.id NULL
 - `title` VARCHAR(200) NOT NULL
 - `description` TEXT NULL
 - `participant_names` TEXT NULL
@@ -280,6 +281,8 @@ src/main/java/.../exhibition
 - 하나의 전시 서비스는 여러 항목을 가진다.
 - 하나의 전시 서비스는 여러 게시판 글(boards)을 가진다.
 - 하나의 전시 서비스는 여러 행사 시기(event_periods)를 가진다.
+- 하나의 행사 시기(event_period)는 여러 항목(items)을 가질 수 있다.
+- 하나의 항목(items)은 0 또는 1개의 행사 시기(event_period)를 참조할 수 있다.
 - 하나의 항목은 여러 미디어 자산을 가진다.
 - 하나의 전시 서비스는 로고/팝업 이미지/인트로 비디오를 media_assets FK(media ref)로 참조할 수 있다.
 - 하나의 항목은 썸네일/포스터/발표영상을 media_assets FK(media ref)로 참조할 수 있다.

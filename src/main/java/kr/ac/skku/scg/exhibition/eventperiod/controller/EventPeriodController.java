@@ -6,6 +6,8 @@ import java.util.UUID;
 import kr.ac.skku.scg.exhibition.eventperiod.dto.request.EventPeriodListRequest;
 import kr.ac.skku.scg.exhibition.eventperiod.dto.response.EventPeriodResponse;
 import kr.ac.skku.scg.exhibition.eventperiod.service.EventPeriodService;
+import kr.ac.skku.scg.exhibition.global.dto.ListResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,13 +19,10 @@ import org.springframework.web.bind.annotation.RestController;
 @Validated
 @RestController
 @RequestMapping("/event-periods")
+@RequiredArgsConstructor
 public class EventPeriodController {
 
     private final EventPeriodService eventPeriodService;
-
-    public EventPeriodController(EventPeriodService eventPeriodService) {
-        this.eventPeriodService = eventPeriodService;
-    }
 
     @GetMapping("/{id}")
     public ResponseEntity<EventPeriodResponse> get(@PathVariable UUID id) {
@@ -31,7 +30,8 @@ public class EventPeriodController {
     }
 
     @GetMapping
-    public ResponseEntity<List<EventPeriodResponse>> list(@Valid @ModelAttribute EventPeriodListRequest request) {
-        return ResponseEntity.ok(eventPeriodService.list(request));
+    public ResponseEntity<ListResponse<EventPeriodResponse>> list(@Valid @ModelAttribute EventPeriodListRequest request) {
+        List<EventPeriodResponse> items = eventPeriodService.list(request);
+        return ResponseEntity.ok(ListResponse.of(items));
     }
 }

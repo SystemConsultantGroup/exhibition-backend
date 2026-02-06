@@ -3,9 +3,11 @@ package kr.ac.skku.scg.exhibition.item.controller;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
+import kr.ac.skku.scg.exhibition.global.dto.ListResponse;
 import kr.ac.skku.scg.exhibition.item.dto.request.ItemListRequest;
 import kr.ac.skku.scg.exhibition.item.dto.response.ItemResponse;
 import kr.ac.skku.scg.exhibition.item.service.ItemService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,13 +19,10 @@ import org.springframework.web.bind.annotation.RestController;
 @Validated
 @RestController
 @RequestMapping("/items")
+@RequiredArgsConstructor
 public class ItemController {
 
     private final ItemService itemService;
-
-    public ItemController(ItemService itemService) {
-        this.itemService = itemService;
-    }
 
     @GetMapping("/{id}")
     public ResponseEntity<ItemResponse> get(@PathVariable UUID id) {
@@ -31,7 +30,8 @@ public class ItemController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ItemResponse>> list(@Valid @ModelAttribute ItemListRequest request) {
-        return ResponseEntity.ok(itemService.list(request));
+    public ResponseEntity<ListResponse<ItemResponse>> list(@Valid @ModelAttribute ItemListRequest request) {
+        List<ItemResponse> items = itemService.list(request);
+        return ResponseEntity.ok(ListResponse.of(items));
     }
 }

@@ -6,6 +6,8 @@ import java.util.UUID;
 import kr.ac.skku.scg.exhibition.classification.dto.request.ClassificationListRequest;
 import kr.ac.skku.scg.exhibition.classification.dto.response.ClassificationResponse;
 import kr.ac.skku.scg.exhibition.classification.service.ClassificationService;
+import kr.ac.skku.scg.exhibition.global.dto.ListResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,13 +19,10 @@ import org.springframework.web.bind.annotation.RestController;
 @Validated
 @RestController
 @RequestMapping("/classifications")
+@RequiredArgsConstructor
 public class ClassificationController {
 
     private final ClassificationService classificationService;
-
-    public ClassificationController(ClassificationService classificationService) {
-        this.classificationService = classificationService;
-    }
 
     @GetMapping("/{id}")
     public ResponseEntity<ClassificationResponse> get(@PathVariable UUID id) {
@@ -31,7 +30,8 @@ public class ClassificationController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ClassificationResponse>> list(@Valid @ModelAttribute ClassificationListRequest request) {
-        return ResponseEntity.ok(classificationService.list(request));
+    public ResponseEntity<ListResponse<ClassificationResponse>> list(@Valid @ModelAttribute ClassificationListRequest request) {
+        List<ClassificationResponse> items = classificationService.list(request);
+        return ResponseEntity.ok(ListResponse.of(items));
     }
 }

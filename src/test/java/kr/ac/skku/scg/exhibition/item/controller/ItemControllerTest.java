@@ -3,6 +3,9 @@ package kr.ac.skku.scg.exhibition.item.controller;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessRequest;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessResponse;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -49,7 +52,7 @@ class ItemControllerTest {
         mockMvc.perform(get("/items/{id}", id))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(id.toString()))
-                .andDo(document("items-get"));
+                .andDo(document("items-get", preprocessRequest(prettyPrint()), preprocessResponse(prettyPrint())));
     }
 
     @Test
@@ -61,7 +64,7 @@ class ItemControllerTest {
 
         mockMvc.perform(get("/items").param("exhibitionId", exhibitionId.toString()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].title").value("Smart Campus"))
-                .andDo(document("items-list"));
+                .andExpect(jsonPath("$.items[0].title").value("Smart Campus"))
+                .andDo(document("items-list", preprocessRequest(prettyPrint()), preprocessResponse(prettyPrint())));
     }
 }

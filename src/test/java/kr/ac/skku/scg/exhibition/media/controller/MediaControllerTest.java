@@ -3,6 +3,9 @@ package kr.ac.skku.scg.exhibition.media.controller;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessRequest;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessResponse;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -44,7 +47,7 @@ class MediaControllerTest {
         mockMvc.perform(get("/media/{id}", id))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(id.toString()))
-                .andDo(document("media-get"));
+                .andDo(document("media-get", preprocessRequest(prettyPrint()), preprocessResponse(prettyPrint())));
     }
 
     @Test
@@ -56,8 +59,8 @@ class MediaControllerTest {
 
         mockMvc.perform(get("/media").param("exhibitionId", exhibitionId.toString()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].objectKey").value("a.jpg"))
-                .andDo(document("media-list"));
+                .andExpect(jsonPath("$.items[0].objectKey").value("a.jpg"))
+                .andDo(document("media-list", preprocessRequest(prettyPrint()), preprocessResponse(prettyPrint())));
     }
 
     @Test
@@ -68,6 +71,6 @@ class MediaControllerTest {
         mockMvc.perform(get("/media/{id}/file", id))
                 .andExpect(status().isOk())
                 .andExpect(header().string("Content-Disposition", org.hamcrest.Matchers.containsString("a.jpg")))
-                .andDo(document("media-get-file"));
+                .andDo(document("media-get-file", preprocessRequest(prettyPrint()), preprocessResponse(prettyPrint())));
     }
 }

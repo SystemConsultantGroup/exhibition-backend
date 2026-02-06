@@ -3,6 +3,14 @@ package kr.ac.skku.scg.exhibition.exhibition.controller;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessRequest;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessResponse;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
+import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -41,7 +49,19 @@ class ExhibitionControllerTest {
         mockMvc.perform(get("/exhibitions/{id}", id))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(id.toString()))
-                .andDo(document("exhibitions-get"));
+                .andDo(document("exhibitions-get",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        pathParameters(
+                                parameterWithName("id").description("전시 ID")
+                        ),
+                        responseFields(
+                                fieldWithPath("id").description("전시 ID"),
+                                fieldWithPath("slug").description("전시 slug"),
+                                fieldWithPath("name").description("전시명"),
+                                fieldWithPath("createdAt").description("생성 일시"),
+                                fieldWithPath("updatedAt").description("수정 일시")
+                        )));
     }
 
     @Test
@@ -52,7 +72,23 @@ class ExhibitionControllerTest {
 
         mockMvc.perform(get("/exhibitions").param("q", "cse"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].name").value("CSE 2026"))
-                .andDo(document("exhibitions-list"));
+                .andExpect(jsonPath("$.items[0].name").value("CSE 2026"))
+                .andDo(document("exhibitions-list",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        queryParameters(
+                                parameterWithName("q").optional().description("전시명 검색어")
+                        ),
+                        responseFields(
+                                fieldWithPath("items").description("전시 목록"),
+                                fieldWithPath("items[].id").description("전시 ID"),
+                                fieldWithPath("items[].slug").description("전시 slug"),
+                                fieldWithPath("items[].name").description("전시명"),
+                                fieldWithPath("items[].createdAt").description("생성 일시"),
+                                fieldWithPath("items[].updatedAt").description("수정 일시"),
+                                fieldWithPath("page").description("페이지 번호"),
+                                fieldWithPath("pageSize").description("페이지 크기"),
+                                fieldWithPath("total").description("전체 건수")
+                        )));
     }
 }

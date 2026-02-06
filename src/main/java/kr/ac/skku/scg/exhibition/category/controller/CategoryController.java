@@ -6,6 +6,8 @@ import java.util.UUID;
 import kr.ac.skku.scg.exhibition.category.dto.request.CategoryListRequest;
 import kr.ac.skku.scg.exhibition.category.dto.response.CategoryResponse;
 import kr.ac.skku.scg.exhibition.category.service.CategoryService;
+import kr.ac.skku.scg.exhibition.global.dto.ListResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,13 +19,10 @@ import org.springframework.web.bind.annotation.RestController;
 @Validated
 @RestController
 @RequestMapping("/categories")
+@RequiredArgsConstructor
 public class CategoryController {
 
     private final CategoryService categoryService;
-
-    public CategoryController(CategoryService categoryService) {
-        this.categoryService = categoryService;
-    }
 
     @GetMapping("/{id}")
     public ResponseEntity<CategoryResponse> get(@PathVariable UUID id) {
@@ -31,7 +30,8 @@ public class CategoryController {
     }
 
     @GetMapping
-    public ResponseEntity<List<CategoryResponse>> list(@Valid @ModelAttribute CategoryListRequest request) {
-        return ResponseEntity.ok(categoryService.list(request));
+    public ResponseEntity<ListResponse<CategoryResponse>> list(@Valid @ModelAttribute CategoryListRequest request) {
+        List<CategoryResponse> items = categoryService.list(request);
+        return ResponseEntity.ok(ListResponse.of(items));
     }
 }

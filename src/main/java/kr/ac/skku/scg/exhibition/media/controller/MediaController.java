@@ -3,10 +3,12 @@ package kr.ac.skku.scg.exhibition.media.controller;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
+import kr.ac.skku.scg.exhibition.global.dto.ListResponse;
 import kr.ac.skku.scg.exhibition.media.dto.request.MediaListRequest;
 import kr.ac.skku.scg.exhibition.media.dto.response.MediaFileResponse;
 import kr.ac.skku.scg.exhibition.media.dto.response.MediaResponse;
 import kr.ac.skku.scg.exhibition.media.service.MediaService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
@@ -22,13 +24,10 @@ import org.springframework.web.bind.annotation.RestController;
 @Validated
 @RestController
 @RequestMapping("/media")
+@RequiredArgsConstructor
 public class MediaController {
 
     private final MediaService mediaService;
-
-    public MediaController(MediaService mediaService) {
-        this.mediaService = mediaService;
-    }
 
     @GetMapping("/{id}")
     public ResponseEntity<MediaResponse> get(@PathVariable UUID id) {
@@ -53,7 +52,8 @@ public class MediaController {
     }
 
     @GetMapping
-    public ResponseEntity<List<MediaResponse>> list(@Valid @ModelAttribute MediaListRequest request) {
-        return ResponseEntity.ok(mediaService.list(request));
+    public ResponseEntity<ListResponse<MediaResponse>> list(@Valid @ModelAttribute MediaListRequest request) {
+        List<MediaResponse> items = mediaService.list(request);
+        return ResponseEntity.ok(ListResponse.of(items));
     }
 }
