@@ -39,4 +39,5 @@ out/
 ## secrets
 .env
 src/main/resources/application-*.yml
+!src/main/resources/application-common.yml
 src/test/resources/application-*.yml
