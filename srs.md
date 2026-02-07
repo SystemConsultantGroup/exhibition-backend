@@ -43,7 +43,7 @@
 - 컨테이너화된 백엔드(Docker).
 - 쿠버네티스 배포(K8s).
 - 객체 스토리지 MinIO.
-- 관계형 데이터베이스(예: PostgreSQL 또는 MySQL).
+- 관계형 데이터베이스는 MySQL을 사용해야 한다.
 - 성능 향상을 위한 선택적 캐시(예: Redis).
 
 ### 2.5 설계 및 구현 제약
@@ -52,11 +52,44 @@
 - 쿠버네티스에 배포 가능해야 한다.
 - 파일 저장을 위해 MinIO와 연동해야 한다.
 - 프론트엔드 연동을 위한 API 엔드포인트를 제공해야 한다.
-- 환경변수 설정은 `application.yml`을 `application-prod`와 `application-dev`로 분리해야 한다.
+- 복잡한 쿼리는 QueryDSL을 사용해야 한다.
+- 환경변수 설정은 `application.yml` 형식으로 관리하고, 필요 시 `application-prod.yml`와 `application-dev.yml`로 분리해야 한다.
+- MySQL 접속 정보는 설정 파일에 하드코딩하지 않고 `DB_HOST`, `DB_PORT`, `DB_NAME` 환경변수(필요 시 추가 파라미터 변수 포함)로 주입해야 한다.
 - `.env`, `application-*.yml` 등 비밀정보(환경변수, 키, 토큰)를 포함할 수 있는 파일은 반드시 `.gitignore`에 포함해야 하며, 원격 저장소에 커밋되어서는 안 된다.
-- 개발 시 도메인형 디렉터리 구조를 사용해야 한다.
+- 개발 시 도메인형 디렉터리 구조를 사용해야 하며, 레이어형(예: controller/service/repository 전역 분리) 단독 구조는 지양한다.
 - 개발 시 각 함수에 간단한 주석을 작성해야 한다.
 - 컨트롤러와 서비스를 반드시 분리해야 한다.
+
+#### 2.5.1 디렉터리 구조 원칙(도메인형)
+- 패키지는 `exhibition`, `category`, `item`, `classification` 등 도메인 단위로 구성해야 한다.
+- 각 도메인 내부에서 `controller`, `service`, `domain`, `repository` 계층을 분리할 수 있어야 한다.
+- 공통 모듈(auth, common, config, error, infra, util 등)은 반드시 `global` 디렉터리 하위에 위치해야 한다.
+- 예시 구조:
+```text
+src/main/java/.../exhibition
+  ├─ global
+  │  ├─ auth
+  │  ├─ common
+  │  ├─ config
+  │  ├─ error
+  │  ├─ infra
+  │  └─ util
+  ├─ exhibition
+  │  ├─ controller
+  │  ├─ service
+  │  ├─ domain
+  │  └─ repository
+  ├─ category
+  │  ├─ controller
+  │  ├─ service
+  │  ├─ domain
+  │  └─ repository
+  └─ item
+     ├─ controller
+     ├─ service
+     ├─ domain
+     └─ repository
+```
 
 ### 2.6 가정 및 의존성
 - 프론트엔드는 백엔드 API를 사용한다.
@@ -132,6 +165,7 @@
 
 #### 3.2.5 유지보수성
 - NFR-8: 시스템은 API 문서(예: OpenAPI/Swagger)를 제공해야 한다.
+- NFR-8a: 시스템은 기능별 단위 테스트 코드를 기반으로 Spring REST Docs를 생성해야 한다.
 - NFR-9: 시스템은 시스템 상태 및 오류를 로깅하고 모니터링해야 한다.
 - NFR-10: 시스템의 모든 기능에 대해 단위 테스트를 수행해야 한다.
 
@@ -140,62 +174,44 @@
 
 ## 4. 데이터 요구사항
 
-### 4.1 핵심 엔티티(논리)
-- ExhibitionService: id, name, description, start_date, end_date, logo, created_at, updated_at
-- Category: id, exhibition_id, parent_id, name, order_index, path, created_at, updated_at
-- Item: id, exhibition_id, category_id, title, description, author_name, author_email, visibility, thumbnail_media_id, poster_media_id, presentation_video_media_id, created_at, updated_at, published_at
-- ItemClassification: id, exhibition_id, name, created_at
-- ItemClassificationMap: id, item_id, classification_id, created_at
-- MediaAsset: id, item_id, exhibition_id, object_key, media_type, size, checksum, created_at
-- User: id, name, role, email, created_at, updated_at, last_login_at
-- OAuthAccount: id, user_id, provider, subject, email, created_at, updated_at
-
 ### 4.2 관계형 스키마(상세)
 
-#### 4.2.1 `exhibition_services`
+#### 4.2.1 `exhibition`
 - `id` UUID PK
 - `slug` VARCHAR(64) UNIQUE NOT NULL
-- `name` VARCHAR(128) NOT NULL
+- `name` VARCHAR(128) UNIQUE NOT NULL
 - `description` TEXT NULL
-- `start_date` DATE NULL
-- `end_date` DATE NULL
-- `logo_object_key` VARCHAR(255) NULL
-- `is_active` BOOLEAN NOT NULL DEFAULT true
+- `logo_media_id` UUID FK -> media_assets.id NULL
+- `popup_enabled` BOOLEAN NOT NULL DEFAULT false
+- `popup_image_media_id` UUID FK -> media_assets.id NULL
+- `popup_url` TEXT null
+- `intro_title` VARCHAR(200) NULL
+- `intro_description` TEXT NULL
+- `intro_video_media_id` UUID FK -> media_assets.id NULL
 - `created_at` TIMESTAMP NOT NULL
 - `updated_at` TIMESTAMP NOT NULL
 
 #### 4.2.2 `categories`
 - `id` UUID PK
 - `exhibition_id` UUID FK -> exhibition_services.id NOT NULL
-- `parent_id` UUID FK -> categories.id NULL
 - `name` VARCHAR(128) NOT NULL
-- `order_index` INT NOT NULL DEFAULT 0
-- `path` VARCHAR(512) NOT NULL
-- `depth` INT NOT NULL DEFAULT 0
 - `created_at` TIMESTAMP NOT NULL
 - `updated_at` TIMESTAMP NOT NULL
-- 인덱스: (`exhibition_id`, `parent_id`)
-- 인덱스: (`exhibition_id`, `path`)
 
 #### 4.2.3 `items`
 - `id` UUID PK
 - `exhibition_id` UUID FK -> exhibition_services.id NOT NULL
 - `category_id` UUID FK -> categories.id NOT NULL
+- `event_period_id` UUID FK -> event_periods.id NULL
 - `title` VARCHAR(200) NOT NULL
-- `summary` TEXT NULL
 - `description` TEXT NULL
-- `author_name` VARCHAR(100) NULL
-- `author_email` VARCHAR(200) NULL
-- `visibility` VARCHAR(20) NOT NULL DEFAULT 'public'
+- `participant_names` TEXT NULL
+- `advisor_names` TEXT NULL
 - `thumbnail_media_id` UUID FK -> media_assets.id NULL
 - `poster_media_id` UUID FK -> media_assets.id NULL
 - `presentation_video_media_id` UUID FK -> media_assets.id NULL
-- `published_at` TIMESTAMP NULL
 - `created_at` TIMESTAMP NOT NULL
 - `updated_at` TIMESTAMP NOT NULL
-- 인덱스: (`exhibition_id`, `category_id`)
-- 인덱스: (`exhibition_id`, `published_at`)
-- 인덱스: (`exhibition_id`, `title`)
 
 #### 4.2.4 `item_classifications`
 - `id` UUID PK
@@ -203,7 +219,6 @@
 - `name` VARCHAR(100) NOT NULL
 - `created_at` TIMESTAMP NOT NULL
 - 고유 제약: (`exhibition_id`, `name`)
-- 인덱스: (`exhibition_id`)
 
 #### 4.2.5 `item_classification_map`
 - `id` UUID PK
@@ -211,56 +226,66 @@
 - `classification_id` UUID FK -> item_classifications.id NOT NULL
 - `created_at` TIMESTAMP NOT NULL
 - 고유 제약: (`item_id`, `classification_id`)
-- 인덱스: (`item_id`)
-- 인덱스: (`classification_id`)
 
-#### 4.2.4 `media_assets`
+#### 4.2.6 `media_assets`
 - `id` UUID PK
-- `item_id` UUID FK -> items.id NOT NULL
+- `item_id` UUID FK -> items.id
 - `exhibition_id` UUID FK -> exhibition_services.id NOT NULL
 - `object_key` VARCHAR(255) NOT NULL
 - `media_type` VARCHAR(50) NOT NULL
 - `size` BIGINT NOT NULL
-- `checksum` VARCHAR(128) NULL
 - `created_at` TIMESTAMP NOT NULL
-- 인덱스: (`exhibition_id`, `item_id`)
 - 고유 제약: (`exhibition_id`, `object_key`)
 
-#### 4.2.5 `item_likes`
+#### 4.2.7 `item_likes`
 - `id` UUID PK
 - `item_id` UUID FK -> items.id NOT NULL
 - `user_id` UUID FK -> users.id NOT NULL
 - `created_at` TIMESTAMP NOT NULL
 - 고유 제약: (`item_id`, `user_id`)
-- 인덱스: (`item_id`)
-- 인덱스: (`user_id`)
 
-#### 4.2.6 `users`
+#### 4.2.8 `users`
 - `id` UUID PK
+- `ci` VARCHAR(200) NOT NULL
 - `name` VARCHAR(100) NOT NULL
 - `email` VARCHAR(200) NULL
 - `role` VARCHAR(20) NOT NULL DEFAULT 'visitor'
 - `created_at` TIMESTAMP NOT NULL
 - `updated_at` TIMESTAMP NOT NULL
 - `last_login_at` TIMESTAMP NULL
-- 고유 제약: (`email`)
+- 고유 제약: (`email`, `ci`)
 
-#### 4.2.7 `oauth_accounts`
+#### 4.2.9 `boards`
 - `id` UUID PK
-- `user_id` UUID FK -> users.id NOT NULL
-- `provider` VARCHAR(50) NOT NULL
-- `subject` VARCHAR(200) NOT NULL
-- `email` VARCHAR(200) NULL
+- `exhibition_id` UUID FK -> exhibition_services.id NOT NULL
+- `title` VARCHAR(200) NOT NULL
+- `content` TEXT NOT NULL
+- `attachment_media_id` UUID FK -> media_assets.id NULL
+- `author_user_id` UUID FK -> users.id NOT NULL
 - `created_at` TIMESTAMP NOT NULL
 - `updated_at` TIMESTAMP NOT NULL
-- 고유 제약: (`provider`, `subject`)
-- 인덱스: (`user_id`)
+- 작성 권한: Admin, SubAdmin(할당된 전시)
+
+#### 4.2.10 `event_periods`
+- `id` UUID PK
+- `exhibition_id` UUID FK -> exhibition_services.id NOT NULL
+- `name` VARCHAR(50) NOT NULL (예: `2025-2학기`, `2025-1학기`)
+- `start_time` TIMESTAMP NOT NULL
+- `end_time` TIMESTAMP NOT NULL
+- 고유 제약: (`exhibition_id`, `name`)
+- 체크 제약: `start_time < end_time`
 
 ### 4.3 관계
 - 하나의 전시 서비스는 여러 카테고리를 가진다.
 - 카테고리는 계층 구조(자기 참조 parent_id)이다.
 - 하나의 전시 서비스는 여러 항목을 가진다.
+- 하나의 전시 서비스는 여러 게시판 글(boards)을 가진다.
+- 하나의 전시 서비스는 여러 행사 시기(event_periods)를 가진다.
+- 하나의 행사 시기(event_period)는 여러 항목(items)을 가질 수 있다.
+- 하나의 항목(items)은 0 또는 1개의 행사 시기(event_period)를 참조할 수 있다.
 - 하나의 항목은 여러 미디어 자산을 가진다.
+- 하나의 전시 서비스는 로고/팝업 이미지/인트로 비디오를 media_assets FK(media ref)로 참조할 수 있다.
+- 하나의 항목은 썸네일/포스터/발표영상을 media_assets FK(media ref)로 참조할 수 있다.
 - 하나의 사용자는 여러 OAuth 계정을 가진다.
 
 ## 5. 외부 인터페이스 요구사항
@@ -306,7 +331,13 @@
       "description": "Capstone projects and portfolios",
       "start_date": "2026-02-10",
       "end_date": "2026-03-01",
-      "is_active": true
+      "is_active": true,
+      "popup_enabled": false,
+      "logo_media_id": null,
+      "popup_image_media_id": null,
+      "intro_title": "CSE 2026 Intro",
+      "intro_description": "Welcome to the graduation exhibition",
+      "intro_video_media_id": null
     }
   ],
   "page": 1,
@@ -323,7 +354,13 @@
   "name": "CSE Graduation Exhibition 2026",
   "description": "Capstone projects and portfolios",
   "start_date": "2026-02-10",
-  "end_date": "2026-03-01"
+  "end_date": "2026-03-01",
+  "logo_media_id": null,
+  "popup_enabled": false,
+  "popup_image_media_id": null,
+  "intro_title": "CSE 2026 Intro",
+  "intro_description": "Welcome to the graduation exhibition",
+  "intro_video_media_id": null
 }
 ```
 - `GET /exhibitions/{exhibitionId}`
@@ -375,6 +412,8 @@
       "category_id": "c2",
       "title": "Smart Campus",
       "summary": "IoT project",
+      "participant_names": "Kim,Park,Choi",
+      "advisor_names": "Prof. Lee,Prof. Han",
       "visibility": "public",
       "published_at": "2026-02-12T09:00:00Z"
     }
@@ -395,6 +434,8 @@
   "description": "Full description",
   "author_name": "Lee",
   "author_email": "lee@example.com",
+  "participant_names": "Kim,Park,Choi",
+  "advisor_names": "Prof. Lee,Prof. Han",
   "visibility": "public"
 }
 ```

@@ -1,0 +1,194 @@
+= 전시 플랫폼 API 문서
+:toc: left
+:toclevels: 2
+:sectnums:
+
+== 공통 응답 형식
+
+이 API는 엔드포인트 성격에 따라 아래 응답 형식을 사용합니다.
+
+=== 목록 조회 응답 (페이지네이션)
+
+목록 조회 API는 `items`, `page`, `pageSize`, `total`을 포함한 페이지네이션 구조를 사용합니다.
+
+[source,json]
+----
+{
+  "items": [
+    {
+      "...": "리소스 필드"
+    }
+  ],
+  "page": 1,
+  "pageSize": 20,
+  "total": 120
+}
+----
+
+=== 단건 조회 응답
+
+단건 조회 API는 해당 리소스 객체를 그대로 반환합니다.
+
+[source,json]
+----
+{
+  "id": "uuid",
+  "...": "리소스 필드"
+}
+----
+
+=== 파일 다운로드 응답
+
+파일 조회 API(`/media/{id}`)는 JSON이 아닌 바이너리 본문을 반환하며, `Content-Type`은 파일 형식에 따라 달라집니다.
+
+== 전시(Exhibition)
+
+=== 전시 목록 조회
+==== 요청 예시
+include::{snippets}/exhibitions-list/http-request.adoc[]
+==== 쿼리 파라미터
+include::{snippets}/exhibitions-list/query-parameters.adoc[]
+==== 응답 필드
+include::{snippets}/exhibitions-list/response-fields.adoc[]
+==== 응답 예시
+include::{snippets}/exhibitions-list/http-response.adoc[]
+==== 응답 본문(JSON)
+include::{snippets}/exhibitions-list/response-body.adoc[]
+
+=== 단일 전시 조회
+==== 경로 파라미터
+include::{snippets}/exhibitions-get/path-parameters.adoc[]
+==== 요청 예시
+include::{snippets}/exhibitions-get/http-request.adoc[]
+==== 응답 필드
+include::{snippets}/exhibitions-get/response-fields.adoc[]
+==== 응답 예시
+include::{snippets}/exhibitions-get/http-response.adoc[]
+==== 응답 본문(JSON)
+include::{snippets}/exhibitions-get/response-body.adoc[]
+
+== 카테고리(Category)
+
+=== 카테고리 목록 조회
+==== 요청 예시
+include::{snippets}/categories-list/http-request.adoc[]
+==== 응답 필드
+include::{snippets}/categories-list/response-fields.adoc[]
+==== 응답 예시
+include::{snippets}/categories-list/http-response.adoc[]
+==== 응답 본문(JSON)
+include::{snippets}/categories-list/response-body.adoc[]
+
+=== 단일 카테고리 조회
+==== 요청 예시
+include::{snippets}/categories-get/http-request.adoc[]
+==== 응답 필드
+include::{snippets}/categories-get/response-fields.adoc[]
+==== 응답 예시
+include::{snippets}/categories-get/http-response.adoc[]
+==== 응답 본문(JSON)
+include::{snippets}/categories-get/response-body.adoc[]
+
+== 항목(Item)
+
+=== 항목 목록 조회
+==== 쿼리 파라미터
+include::{snippets}/items-list/query-parameters.adoc[]
+==== 요청 예시
+include::{snippets}/items-list/http-request.adoc[]
+==== 응답 필드
+include::{snippets}/items-list/response-fields.adoc[]
+==== 응답 예시
+include::{snippets}/items-list/http-response.adoc[]
+==== 응답 본문(JSON)
+include::{snippets}/items-list/response-body.adoc[]
+
+=== 단일 항목 조회
+==== 경로 파라미터
+include::{snippets}/items-get/path-parameters.adoc[]
+==== 요청 예시
+include::{snippets}/items-get/http-request.adoc[]
+==== 응답 필드
+include::{snippets}/items-get/response-fields.adoc[]
+==== 응답 예시
+include::{snippets}/items-get/http-response.adoc[]
+==== 응답 본문(JSON)
+include::{snippets}/items-get/response-body.adoc[]
+
+== 분류(Classification)
+
+=== 분류 목록 조회
+==== 요청 예시
+include::{snippets}/classifications-list/http-request.adoc[]
+==== 응답 필드
+include::{snippets}/classifications-list/response-fields.adoc[]
+==== 응답 예시
+include::{snippets}/classifications-list/http-response.adoc[]
+==== 응답 본문(JSON)
+include::{snippets}/classifications-list/response-body.adoc[]
+
+=== 단일 분류 조회
+==== 요청 예시
+include::{snippets}/classifications-get/http-request.adoc[]
+==== 응답 필드
+include::{snippets}/classifications-get/response-fields.adoc[]
+==== 응답 예시
+include::{snippets}/classifications-get/http-response.adoc[]
+==== 응답 본문(JSON)
+include::{snippets}/classifications-get/response-body.adoc[]
+
+== 이벤트 기간(Event Period)
+
+=== 이벤트 기간 목록 조회
+==== 요청 예시
+include::{snippets}/event-periods-list/http-request.adoc[]
+==== 응답 필드
+include::{snippets}/event-periods-list/response-fields.adoc[]
+==== 응답 예시
+include::{snippets}/event-periods-list/http-response.adoc[]
+==== 응답 본문(JSON)
+include::{snippets}/event-periods-list/response-body.adoc[]
+
+=== 단일 이벤트 기간 조회
+==== 요청 예시
+include::{snippets}/event-periods-get/http-request.adoc[]
+==== 응답 필드
+include::{snippets}/event-periods-get/response-fields.adoc[]
+==== 응답 예시
+include::{snippets}/event-periods-get/http-response.adoc[]
+==== 응답 본문(JSON)
+include::{snippets}/event-periods-get/response-body.adoc[]
+
+== 게시판(Board)
+
+=== 게시판 목록 조회
+==== 요청 예시
+include::{snippets}/boards-list/http-request.adoc[]
+==== 응답 필드
+include::{snippets}/boards-list/response-fields.adoc[]
+==== 응답 예시
+include::{snippets}/boards-list/http-response.adoc[]
+==== 응답 본문(JSON)
+include::{snippets}/boards-list/response-body.adoc[]
+
+=== 단일 게시판 조회
+==== 요청 예시
+include::{snippets}/boards-get/http-request.adoc[]
+==== 응답 필드
+include::{snippets}/boards-get/response-fields.adoc[]
+==== 응답 예시
+include::{snippets}/boards-get/http-response.adoc[]
+==== 응답 본문(JSON)
+include::{snippets}/boards-get/response-body.adoc[]
+
+== 미디어(Media)
+
+=== 미디어 파일 다운로드
+==== 요청 예시
+include::{snippets}/media-get-file/http-request.adoc[]
+==== 응답 항목(헤더)
+include::{snippets}/media-get-file/response-headers.adoc[]
+==== 응답 예시
+include::{snippets}/media-get-file/http-response.adoc[]
+==== 응답 본문(바이너리)
+include::{snippets}/media-get-file/response-body.adoc[]

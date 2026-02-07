@@ -31,20 +31,25 @@ ext {
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'org.springframework.boot:spring-boot-starter-data-rest'
     implementation 'org.springframework.boot:spring-boot-starter-security'
-    implementation 'org.springframework.boot:spring-boot-starter-security-oauth2-client'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-webmvc'
+    implementation 'com.querydsl:querydsl-jpa:5.1.0:jakarta'
+    implementation 'io.minio:minio:8.5.12'
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'com.mysql:mysql-connector-j'
     annotationProcessor 'org.projectlombok:lombok'
+    annotationProcessor 'com.querydsl:querydsl-apt:5.1.0:jakarta'
+    annotationProcessor 'jakarta.annotation:jakarta.annotation-api'
+    annotationProcessor 'jakarta.persistence:jakarta.persistence-api'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.boot:spring-boot-test-autoconfigure'
     testImplementation 'org.springframework.boot:spring-boot-restdocs'
     testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
-    testImplementation 'org.springframework.boot:spring-boot-starter-data-rest-test'
-    testImplementation 'org.springframework.boot:spring-boot-starter-security-oauth2-client-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-security-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
     testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
+    testRuntimeOnly 'com.h2database:h2'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
@@ -55,5 +60,16 @@ tasks.named('test') {
 
 tasks.named('asciidoctor') {
     inputs.dir snippetsDir
+    attributes 'snippets': snippetsDir
     dependsOn test
+}
+
+tasks.register('copyDocs', Copy) {
+    dependsOn tasks.named('asciidoctor')
+    from layout.buildDirectory.dir('docs/asciidoc')
+    into layout.projectDirectory.dir('src/main/resources/static/docs')
+}
+
+tasks.named('asciidoctor') {
+    finalizedBy tasks.named('copyDocs')
 }
