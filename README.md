@@ -3,7 +3,7 @@
 여러 전시 사이트를 하나의 플랫폼으로 운영하기 위한 Spring Boot 백엔드입니다.  
 SRS(`srs.md`) 기준으로 전시/카테고리/항목/분류/미디어를 관리하는 API를 제공합니다.
 
-[API Docs](https://systemconsultantgroup.github.io/exhibition-backend/src/main/resources/static/docs/index.html)
+[API Docs - 계속 업데이트 됨](https://systemconsultantgroup.github.io/exhibition-backend/src/main/resources/static/docs/index.html)
 
 ## 프로젝트 요약
 
