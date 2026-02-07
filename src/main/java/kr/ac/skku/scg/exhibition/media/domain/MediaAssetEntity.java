@@ -3,6 +3,7 @@ package kr.ac.skku.scg.exhibition.media.domain;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -10,6 +11,8 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import java.time.Instant;
 import java.util.UUID;
+import kr.ac.skku.scg.exhibition.board.domain.BoardEntity;
+import org.hibernate.annotations.UuidGenerator;
 import kr.ac.skku.scg.exhibition.exhibition.domain.ExhibitionEntity;
 import kr.ac.skku.scg.exhibition.item.domain.ItemEntity;
 
@@ -18,11 +21,17 @@ import kr.ac.skku.scg.exhibition.item.domain.ItemEntity;
 public class MediaAssetEntity {
 
     @Id
+    @GeneratedValue
+    @UuidGenerator
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "item_id")
     private ItemEntity item;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "board_id")
+    private BoardEntity board;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "exhibition_id", nullable = false)
@@ -63,6 +72,10 @@ public class MediaAssetEntity {
 
     public ItemEntity getItem() {
         return item;
+    }
+
+    public BoardEntity getBoard() {
+        return board;
     }
 
     public ExhibitionEntity getExhibition() {

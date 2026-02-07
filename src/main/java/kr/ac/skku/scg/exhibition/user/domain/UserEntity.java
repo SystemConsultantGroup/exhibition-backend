@@ -2,6 +2,7 @@ package kr.ac.skku.scg.exhibition.user.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
@@ -9,6 +10,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.time.Instant;
 import java.util.UUID;
+import org.hibernate.annotations.UuidGenerator;
 import kr.ac.skku.scg.exhibition.global.entity.BaseEntity;
 
 @Entity
@@ -22,6 +24,8 @@ import kr.ac.skku.scg.exhibition.global.entity.BaseEntity;
 public class UserEntity extends BaseEntity {
 
     @Id
+    @GeneratedValue
+    @UuidGenerator
     private UUID id;
 
     @Column(nullable = false, length = 200)

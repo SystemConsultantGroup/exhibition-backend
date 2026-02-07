@@ -3,15 +3,16 @@ package kr.ac.skku.scg.exhibition.board.domain;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import org.hibernate.annotations.UuidGenerator;
 import kr.ac.skku.scg.exhibition.exhibition.domain.ExhibitionEntity;
 import kr.ac.skku.scg.exhibition.global.entity.BaseEntity;
 import kr.ac.skku.scg.exhibition.media.domain.MediaAssetEntity;
@@ -22,6 +23,8 @@ import kr.ac.skku.scg.exhibition.user.domain.UserEntity;
 public class BoardEntity extends BaseEntity {
 
     @Id
+    @GeneratedValue
+    @UuidGenerator
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -34,12 +37,7 @@ public class BoardEntity extends BaseEntity {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-            name = "board_media_map",
-            joinColumns = @JoinColumn(name = "board_id"),
-            inverseJoinColumns = @JoinColumn(name = "media_id")
-    )
+    @OneToMany(mappedBy = "board", fetch = FetchType.LAZY)
     private List<MediaAssetEntity> attachmentMediaList = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
