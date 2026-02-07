@@ -45,8 +45,8 @@ class ExhibitionControllerTest {
         UUID id = UUID.randomUUID();
         when(exhibitionService.get(id)).thenReturn(new ExhibitionResponse(
                 id,
-                "cse-2026",
-                "CSE 2026",
+                "sw-gp",
+                "소프트웨어융합대학 졸업작품 전시회",
                 "설명",
                 null,
                 false,
@@ -64,13 +64,13 @@ class ExhibitionControllerTest {
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
                         pathParameters(
-                                parameterWithName("id").description("전시 ID")
+                                parameterWithName("id").description("전시회 ID")
                         ),
                         responseFields(
-                                fieldWithPath("id").description("전시 ID"),
-                                fieldWithPath("slug").description("전시 slug"),
-                                fieldWithPath("name").description("전시명"),
-                                fieldWithPath("description").description("전시 설명").optional(),
+                                fieldWithPath("id").description("전시회 ID"),
+                                fieldWithPath("slug").description("전시회 slug"),
+                                fieldWithPath("name").description("전시회명"),
+                                fieldWithPath("description").description("전시회 설명").optional(),
                                 fieldWithPath("logoMediaId").description("로고 미디어 ID").optional(),
                                 fieldWithPath("popupEnabled").description("팝업 사용 여부"),
                                 fieldWithPath("popupImageMediaId").description("팝업 이미지 미디어 ID").optional(),
@@ -86,8 +86,8 @@ class ExhibitionControllerTest {
         when(exhibitionService.list(any())).thenReturn(List.of(
                 new ExhibitionResponse(
                         UUID.randomUUID(),
-                        "cse-2026",
-                        "CSE 2026",
+                        "sw-gp",
+                        "소프트웨어융합대학 졸업작품 전시회",
                         "설명",
                         null,
                         false,
@@ -101,19 +101,19 @@ class ExhibitionControllerTest {
 
         mockMvc.perform(get("/exhibitions").param("q", "cse"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.items[0].name").value("CSE 2026"))
+                .andExpect(jsonPath("$.items[0].name").value("소프트웨어융합대학 졸업작품 전시회"))
                 .andDo(document("exhibitions-list",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
                         queryParameters(
-                                parameterWithName("q").optional().description("전시명 검색어")
+                                parameterWithName("q").optional().description("전시회명 검색어")
                         ),
                         responseFields(
-                                fieldWithPath("items").description("전시 목록"),
-                                fieldWithPath("items[].id").description("전시 ID"),
-                                fieldWithPath("items[].slug").description("전시 slug"),
-                                fieldWithPath("items[].name").description("전시명"),
-                                fieldWithPath("items[].description").description("전시 설명").optional(),
+                                fieldWithPath("items").description("전시회 목록"),
+                                fieldWithPath("items[].id").description("전시회 ID"),
+                                fieldWithPath("items[].slug").description("전시회 slug"),
+                                fieldWithPath("items[].name").description("전시회명"),
+                                fieldWithPath("items[].description").description("전시회 설명").optional(),
                                 fieldWithPath("items[].logoMediaId").description("로고 미디어 ID").optional(),
                                 fieldWithPath("items[].popupEnabled").description("팝업 사용 여부"),
                                 fieldWithPath("items[].popupImageMediaId").description("팝업 이미지 미디어 ID").optional(),

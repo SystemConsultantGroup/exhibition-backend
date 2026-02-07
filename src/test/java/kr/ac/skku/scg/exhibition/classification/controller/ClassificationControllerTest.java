@@ -58,7 +58,7 @@ class ClassificationControllerTest {
                         responseFields(
                                 fieldWithPath("id").description("분류 ID"),
                                 fieldWithPath("exhibitionId").description("전시 ID"),
-                                fieldWithPath("name").description("분류명")
+                                fieldWithPath("name").description("분류명: ex. 논문, 작품 등")
                         )));
     }
 
