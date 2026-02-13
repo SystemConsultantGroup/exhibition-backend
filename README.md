@@ -5,6 +5,7 @@ SRS(`srs.md`) 기준으로 전시/카테고리/항목/분류/미디어를 관리
 
 [API Docs](https://systemconsultantgroup.github.io/exhibition-backend/src/main/resources/static/docs/index.html)
 
+
 ## 프로젝트 요약
 
 - 목적: 다중 전시(테넌트형) 운영을 위한 통합 API 제공

@@ -30,7 +30,7 @@ app:
       secret: ${APP_AUTH_JWT_SECRET}
       access-token-expiration-seconds: ${APP_AUTH_JWT_ACCESS_TOKEN_EXPIRATION_SECONDS}
       refresh-token-expiration-seconds: ${APP_AUTH_JWT_REFRESH_TOKEN_EXPIRATION_SECONDS}
-      issuer: ${APP_AUTH_JWT_ISSUER:exhibition}
+      issuer: ${APP_AUTH_JWT_ISSUER}
     kakao:
       client-id: ${APP_AUTH_KAKAO_CLIENT_ID}
       client-secret: ${APP_AUTH_KAKAO_CLIENT_SECRET}
