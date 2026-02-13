@@ -2,6 +2,13 @@ package kr.ac.skku.scg.exhibition.global.auth.controller;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessRequest;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessResponse;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
+import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -17,6 +24,7 @@ import kr.ac.skku.scg.exhibition.user.domain.UserType;
 import kr.ac.skku.scg.exhibition.user.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.restdocs.test.autoconfigure.AutoConfigureRestDocs;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
@@ -25,6 +33,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(controllers = AuthController.class)
 @Import({SecurityConfig.class, ApiExceptionHandler.class, WebConfig.class})
+@AutoConfigureRestDocs
 class AuthControllerTest {
 
     @Autowired
@@ -54,7 +63,21 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.tokenType").value("Bearer"))
                 .andExpect(jsonPath("$.accessTokenExpiresIn").value(3600))
                 .andExpect(jsonPath("$.refreshTokenExpiresIn").value(1209600))
-                .andExpect(jsonPath("$.registrationRequired").value(true));
+                .andExpect(jsonPath("$.registrationRequired").value(true))
+                .andDo(document("auth-kakao-login",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        requestFields(
+                                fieldWithPath("code").description("카카오 인가 코드")
+                        ),
+                        responseFields(
+                                fieldWithPath("accessToken").description("서비스 Access Token"),
+                                fieldWithPath("refreshToken").description("서비스 Refresh Token"),
+                                fieldWithPath("tokenType").description("토큰 타입(Bearer)"),
+                                fieldWithPath("accessTokenExpiresIn").description("Access Token 만료(초)"),
+                                fieldWithPath("refreshTokenExpiresIn").description("Refresh Token 만료(초)"),
+                                fieldWithPath("registrationRequired").description("회원가입 정보 입력 필요 여부")
+                        )));
     }
 
     @Test
@@ -73,7 +96,21 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.accessToken").value("new-access-token"))
                 .andExpect(jsonPath("$.refreshToken").value("new-refresh-token"))
                 .andExpect(jsonPath("$.tokenType").value("Bearer"))
-                .andExpect(jsonPath("$.registrationRequired").value(false));
+                .andExpect(jsonPath("$.registrationRequired").value(false))
+                .andDo(document("auth-refresh",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        requestFields(
+                                fieldWithPath("refreshToken").description("기존 Refresh Token")
+                        ),
+                        responseFields(
+                                fieldWithPath("accessToken").description("재발급된 Access Token"),
+                                fieldWithPath("refreshToken").description("재발급된 Refresh Token"),
+                                fieldWithPath("tokenType").description("토큰 타입(Bearer)"),
+                                fieldWithPath("accessTokenExpiresIn").description("Access Token 만료(초)"),
+                                fieldWithPath("refreshTokenExpiresIn").description("Refresh Token 만료(초)"),
+                                fieldWithPath("registrationRequired").description("회원가입 정보 입력 필요 여부")
+                        )));
     }
 
     @Test
@@ -103,6 +140,16 @@ class AuthControllerTest {
                                   "studentNumber": "2020123456"
                                 }
                                 """))
-                .andExpect(status().isNoContent());
+                .andExpect(status().isNoContent())
+                .andDo(document("auth-register",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        requestFields(
+                                fieldWithPath("name").description("이름"),
+                                fieldWithPath("email").description("이메일").optional(),
+                                fieldWithPath("department").description("소속").optional(),
+                                fieldWithPath("phoneNumber").description("연락처").optional(),
+                                fieldWithPath("studentNumber").description("학번").optional()
+                        )));
     }
 }

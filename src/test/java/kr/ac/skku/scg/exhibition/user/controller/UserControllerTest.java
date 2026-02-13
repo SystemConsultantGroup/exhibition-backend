@@ -1,6 +1,14 @@
 package kr.ac.skku.scg.exhibition.user.controller;
 
 import static org.mockito.Mockito.when;
+import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
+import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessRequest;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessResponse;
+import static org.springframework.restdocs.operation.preprocess.Preprocessors.prettyPrint;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -15,6 +23,7 @@ import kr.ac.skku.scg.exhibition.user.domain.UserType;
 import kr.ac.skku.scg.exhibition.user.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.restdocs.test.autoconfigure.AutoConfigureRestDocs;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -22,6 +31,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(controllers = UserController.class)
 @Import({SecurityConfig.class, ApiExceptionHandler.class, WebConfig.class})
+@AutoConfigureRestDocs
 class UserControllerTest {
 
     @Autowired
@@ -53,7 +63,9 @@ class UserControllerTest {
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
-        mockMvc.perform(get("/users/me").requestAttr("auth.userId", userId))
+        mockMvc.perform(get("/users/me")
+                        .requestAttr("auth.userId", userId)
+                        .header("Authorization", "Bearer {accessToken}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("홍길동"))
                 .andExpect(jsonPath("$.role").value("STUDENT"))
@@ -63,6 +75,21 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.studentNumber").value("2020123456"))
                 .andExpect(jsonPath("$.registrationCompleted").value(true))
                 .andExpect(jsonPath("$.id").doesNotExist())
-                .andExpect(jsonPath("$.ci").doesNotExist());
+                .andExpect(jsonPath("$.ci").doesNotExist())
+                .andDo(document("users-me",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        requestHeaders(
+                                headerWithName("Authorization").description("Bearer Access Token")
+                        ),
+                        responseFields(
+                                fieldWithPath("name").description("이름"),
+                                fieldWithPath("role").description("사용자 권한"),
+                                fieldWithPath("email").description("이메일").optional(),
+                                fieldWithPath("department").description("소속").optional(),
+                                fieldWithPath("phoneNumber").description("연락처").optional(),
+                                fieldWithPath("studentNumber").description("학번").optional(),
+                                fieldWithPath("registrationCompleted").description("회원가입 정보 입력 완료 여부")
+                        )));
     }
 }
