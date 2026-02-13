@@ -11,7 +11,8 @@ public record AuthenticatedUser(
         String email,
         String department,
         String phoneNumber,
-        String studentNumber
+        String studentNumber,
+        boolean registrationCompleted
 ) {
     public static AuthenticatedUser from(UserEntity user) {
         return new AuthenticatedUser(
@@ -21,7 +22,8 @@ public record AuthenticatedUser(
                 user.getEmail(),
                 user.getDepartment(),
                 user.getPhoneNumber(),
-                user.getStudentNumber()
+                user.getStudentNumber(),
+                user.isRegistrationCompleted()
         );
     }
 }
