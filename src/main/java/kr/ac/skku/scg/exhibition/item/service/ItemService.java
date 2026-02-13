@@ -74,7 +74,7 @@ public class ItemService {
 
         UserEntity user = userRepository.getReferenceById(currentUser.id());
         try {
-            itemLikeRepository.save(new ItemLikeEntity(UUID.randomUUID(), item, user));
+            itemLikeRepository.save(new ItemLikeEntity(null, item, user));
         } catch (DataIntegrityViolationException ignored) {
             // Race condition safety: unique constraint already guarantees one like per user/item.
         }

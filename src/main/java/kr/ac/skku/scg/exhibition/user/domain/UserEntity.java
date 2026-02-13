@@ -138,11 +138,17 @@ public class UserEntity extends BaseEntity {
     }
 
     public void completeRegistration(String name, String email, String department, String phoneNumber, String studentNumber) {
+        completeRegistration(name, email, department, phoneNumber, studentNumber, this.role);
+    }
+
+    public void completeRegistration(String name, String email, String department, String phoneNumber,
+            String studentNumber, UserType role) {
         this.name = name;
         this.email = email;
         this.department = department;
         this.phoneNumber = phoneNumber;
         this.studentNumber = studentNumber;
+        this.role = role;
         this.registrationCompleted = true;
     }
 }

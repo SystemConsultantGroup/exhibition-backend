@@ -133,6 +133,7 @@ class AuthControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
+                                  "userType": "STUDENT",
                                   "name": "홍길동",
                                   "email": "hong@example.com",
                                   "department": "소프트웨어학과",
@@ -145,6 +146,7 @@ class AuthControllerTest {
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
                         requestFields(
+                                fieldWithPath("userType").description("회원 유형(VISITOR, STUDENT, STAFF, PROFESSOR)"),
                                 fieldWithPath("name").description("이름"),
                                 fieldWithPath("email").description("이메일").optional(),
                                 fieldWithPath("department").description("소속").optional(),

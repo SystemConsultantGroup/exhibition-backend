@@ -10,7 +10,7 @@ import org.springframework.web.client.RestClient;
 public class AuthConfig {
 
     @Bean
-    public RestClient authRestClient(RestClient.Builder builder) {
-        return builder.build();
+    public RestClient authRestClient() {
+        return RestClient.builder().build();
     }
 }

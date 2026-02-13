@@ -54,7 +54,8 @@ public class AuthService {
                 request.email(),
                 request.department(),
                 request.phoneNumber(),
-                request.studentNumber()
+                request.studentNumber(),
+                request.userType().toUserType()
         );
     }
 
@@ -64,7 +65,7 @@ public class AuthService {
                 : profile.name();
 
         UserEntity user = new UserEntity(
-                UUID.randomUUID(),
+                null,
                 ci,
                 name,
                 profile.email(),
