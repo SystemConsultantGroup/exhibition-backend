@@ -25,3 +25,15 @@ app:
     access-key: ${MINIO_ACCESS_KEY}
     secret-key: ${MINIO_SECRET_KEY}
     bucket: ${MINIO_BUCKET}
+  auth:
+    jwt:
+      secret: ${APP_AUTH_JWT_SECRET}
+      access-token-expiration-seconds: ${APP_AUTH_JWT_ACCESS_TOKEN_EXPIRATION_SECONDS}
+      refresh-token-expiration-seconds: ${APP_AUTH_JWT_REFRESH_TOKEN_EXPIRATION_SECONDS}
+      issuer: ${APP_AUTH_JWT_ISSUER:exhibition}
+    kakao:
+      client-id: ${APP_AUTH_KAKAO_CLIENT_ID}
+      client-secret: ${APP_AUTH_KAKAO_CLIENT_SECRET}
+      redirect-uri: ${APP_AUTH_KAKAO_REDIRECT_URI}
+      token-uri: ${APP_AUTH_KAKAO_TOKEN_URI}
+      user-info-uri: ${APP_AUTH_KAKAO_USER_INFO_URI}
