@@ -1,7 +1,11 @@
 package kr.ac.skku.scg.exhibition.item.controller;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
+import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
+import static org.springframework.restdocs.headers.HeaderDocumentation.requestHeaders;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessRequest;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessResponse;
@@ -11,16 +15,24 @@ import static org.springframework.restdocs.payload.PayloadDocumentation.response
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
+import kr.ac.skku.scg.exhibition.global.auth.resolver.AuthenticatedUser;
+import kr.ac.skku.scg.exhibition.global.config.WebConfig;
 import kr.ac.skku.scg.exhibition.global.config.SecurityConfig;
 import kr.ac.skku.scg.exhibition.global.error.ApiExceptionHandler;
 import kr.ac.skku.scg.exhibition.item.dto.response.ItemResponse;
 import kr.ac.skku.scg.exhibition.item.service.ItemService;
+import kr.ac.skku.scg.exhibition.user.domain.UserEntity;
+import kr.ac.skku.scg.exhibition.user.domain.UserType;
+import kr.ac.skku.scg.exhibition.user.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.restdocs.test.autoconfigure.AutoConfigureRestDocs;
@@ -30,7 +42,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(controllers = ItemController.class)
-@Import({SecurityConfig.class, ApiExceptionHandler.class})
+@Import({SecurityConfig.class, ApiExceptionHandler.class, WebConfig.class})
 @AutoConfigureRestDocs
 class ItemControllerTest {
 
@@ -39,6 +51,9 @@ class ItemControllerTest {
 
     @MockitoBean
     private ItemService itemService;
+
+    @MockitoBean
+    private UserRepository userRepository;
 
     @Test
     void getById() throws Exception {
@@ -121,5 +136,64 @@ class ItemControllerTest {
                                 fieldWithPath("pageSize").description("페이지 크기"),
                                 fieldWithPath("total").description("전체 건수")
                         )));
+    }
+
+    @Test
+    void like() throws Exception {
+        UUID itemId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        when(userRepository.findById(userId)).thenReturn(Optional.of(testUser(userId)));
+        doNothing().when(itemService).like(eq(itemId), any(AuthenticatedUser.class));
+
+        mockMvc.perform(post("/items/{id}/like", itemId)
+                        .requestAttr("auth.userId", userId)
+                        .header("Authorization", "Bearer {accessToken}"))
+                .andExpect(status().isCreated())
+                .andDo(document("items-like",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        pathParameters(
+                                parameterWithName("id").description("아이템 ID")
+                        ),
+                        requestHeaders(
+                                headerWithName("Authorization").description("Bearer Access Token")
+                        )));
+    }
+
+    @Test
+    void unlike() throws Exception {
+        UUID itemId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        when(userRepository.findById(userId)).thenReturn(Optional.of(testUser(userId)));
+        doNothing().when(itemService).unlike(eq(itemId), any(AuthenticatedUser.class));
+
+        mockMvc.perform(delete("/items/{id}/like", itemId)
+                        .requestAttr("auth.userId", userId)
+                        .header("Authorization", "Bearer {accessToken}"))
+                .andExpect(status().isNoContent())
+                .andDo(document("items-unlike",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        pathParameters(
+                                parameterWithName("id").description("아이템 ID")
+                        ),
+                        requestHeaders(
+                                headerWithName("Authorization").description("Bearer Access Token")
+                        )));
+    }
+
+    private UserEntity testUser(UUID userId) {
+        UserEntity user = new UserEntity(
+                userId,
+                "kakao:test",
+                "테스트유저",
+                null,
+                null,
+                null,
+                null,
+                UserType.VISITOR
+        );
+        user.completeRegistration("테스트유저", null, null, null, null);
+        return user;
     }
 }

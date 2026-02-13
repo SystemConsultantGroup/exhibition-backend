@@ -149,6 +149,26 @@ include::{snippets}/items-get/http-response.adoc[]
 ==== 응답 본문(JSON)
 include::{snippets}/items-get/response-body.adoc[]
 
+=== 항목 좋아요 추가
+==== 경로 파라미터
+include::{snippets}/items-like/path-parameters.adoc[]
+==== 요청 헤더
+include::{snippets}/items-like/request-headers.adoc[]
+==== 요청 예시
+include::{snippets}/items-like/http-request.adoc[]
+==== 응답 예시
+include::{snippets}/items-like/http-response.adoc[]
+
+=== 항목 좋아요 취소
+==== 경로 파라미터
+include::{snippets}/items-unlike/path-parameters.adoc[]
+==== 요청 헤더
+include::{snippets}/items-unlike/request-headers.adoc[]
+==== 요청 예시
+include::{snippets}/items-unlike/http-request.adoc[]
+==== 응답 예시
+include::{snippets}/items-unlike/http-response.adoc[]
+
 == 분류(Classification)
 
 === 분류 목록 조회
