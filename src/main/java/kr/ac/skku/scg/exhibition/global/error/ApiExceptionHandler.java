@@ -17,6 +17,12 @@ public class ApiExceptionHandler {
                 .body(ApiErrorResponse.of("NOT_FOUND", ex.getMessage()));
     }
 
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<ApiErrorResponse> handleUnauthorized(UnauthorizedException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(ApiErrorResponse.of("UNAUTHORIZED", ex.getMessage()));
+    }
+
     @ExceptionHandler({MethodArgumentNotValidException.class, ConstraintViolationException.class})
     public ResponseEntity<ApiErrorResponse> handleValidation(Exception ex) {
         String message = "Validation failed";
@@ -25,5 +31,10 @@ public class ApiExceptionHandler {
             message = fieldError.getField() + ": " + fieldError.getDefaultMessage();
         }
         return ResponseEntity.badRequest().body(ApiErrorResponse.of("BAD_REQUEST", message));
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ApiErrorResponse> handleIllegalArgument(IllegalArgumentException ex) {
+        return ResponseEntity.badRequest().body(ApiErrorResponse.of("BAD_REQUEST", ex.getMessage()));
     }
 }

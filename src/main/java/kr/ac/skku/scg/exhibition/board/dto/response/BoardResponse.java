@@ -10,6 +10,7 @@ public record BoardResponse(
         String title,
         String content,
         List<UUID> attachmentMediaIds,
+        List<AttachmentMediaResponse> attachmentMedias,
         UUID authorUserId,
         Instant createdAt,
         Instant updatedAt

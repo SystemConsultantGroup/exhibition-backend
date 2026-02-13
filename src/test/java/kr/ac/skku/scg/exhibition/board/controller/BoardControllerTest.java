@@ -18,6 +18,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
+import kr.ac.skku.scg.exhibition.board.dto.response.AttachmentMediaResponse;
 import kr.ac.skku.scg.exhibition.board.dto.response.BoardResponse;
 import kr.ac.skku.scg.exhibition.board.service.BoardService;
 import kr.ac.skku.scg.exhibition.global.config.SecurityConfig;
@@ -50,6 +51,7 @@ class BoardControllerTest {
                 "공지",
                 "안내 내용",
                 List.of(UUID.randomUUID()),
+                List.of(new AttachmentMediaResponse(UUID.randomUUID(), "notice.pdf")),
                 UUID.randomUUID(),
                 Instant.now(),
                 Instant.now()
@@ -70,6 +72,9 @@ class BoardControllerTest {
                                 fieldWithPath("title").description("제목"),
                                 fieldWithPath("content").description("내용"),
                                 fieldWithPath("attachmentMediaIds").description("첨부 미디어 ID 목록"),
+                                fieldWithPath("attachmentMedias").description("첨부 미디어 목록"),
+                                fieldWithPath("attachmentMedias[].id").description("첨부 미디어 ID"),
+                                fieldWithPath("attachmentMedias[].fileName").description("첨부 미디어 파일명"),
                                 fieldWithPath("authorUserId").description("작성자 사용자 ID"),
                                 fieldWithPath("createdAt").description("생성 일시"),
                                 fieldWithPath("updatedAt").description("수정 일시")
@@ -79,12 +84,14 @@ class BoardControllerTest {
     @Test
     void list() throws Exception {
         UUID exhibitionId = UUID.randomUUID();
+        UUID attachmentMediaId = UUID.randomUUID();
         when(boardService.list(any())).thenReturn(List.of(new BoardResponse(
                 UUID.randomUUID(),
                 exhibitionId,
                 "공지",
                 "안내 내용",
-                List.of(),
+                List.of(attachmentMediaId),
+                List.of(new AttachmentMediaResponse(attachmentMediaId, "notice-list.pdf")),
                 UUID.randomUUID(),
                 Instant.now(),
                 Instant.now()
@@ -106,6 +113,9 @@ class BoardControllerTest {
                                 fieldWithPath("items[].title").description("제목"),
                                 fieldWithPath("items[].content").description("내용"),
                                 fieldWithPath("items[].attachmentMediaIds").description("첨부 미디어 ID 목록"),
+                                fieldWithPath("items[].attachmentMedias").description("첨부 미디어 목록"),
+                                fieldWithPath("items[].attachmentMedias[].id").description("첨부 미디어 ID"),
+                                fieldWithPath("items[].attachmentMedias[].fileName").description("첨부 미디어 파일명"),
                                 fieldWithPath("items[].authorUserId").description("작성자 사용자 ID"),
                                 fieldWithPath("items[].createdAt").description("생성 일시"),
                                 fieldWithPath("items[].updatedAt").description("수정 일시"),

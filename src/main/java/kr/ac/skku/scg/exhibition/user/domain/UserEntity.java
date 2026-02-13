@@ -2,6 +2,8 @@ package kr.ac.skku.scg.exhibition.user.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
@@ -34,11 +36,24 @@ public class UserEntity extends BaseEntity {
     @Column(nullable = false, length = 100)
     private String name;
 
-    @Column(length = 200)
+    @Column(nullable = true, length = 200)
     private String email;
 
+    @Column(nullable = true, length = 100)
+    private String department;
+
+    @Column(nullable = true, length = 30)
+    private String phoneNumber;
+
+    @Column(nullable = true, length = 30)
+    private String studentNumber;
+
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
-    private String role = "visitor";
+    private UserType role = UserType.VISITOR;
+
+    @Column(nullable = false)
+    private boolean registrationCompleted = false;
 
     @Column
     private Instant lastLoginAt;
@@ -46,25 +61,39 @@ public class UserEntity extends BaseEntity {
     protected UserEntity() {
     }
 
-    public UserEntity(UUID id, String ci, String name, String email, String role) {
+    public UserEntity(UUID id, String ci, String name, String email, UserType role) {
         this.id = id;
         this.ci = ci;
         this.name = name;
         this.email = email;
         this.role = role;
+        this.registrationCompleted = false;
+    }
+
+    public UserEntity(UUID id, String ci, String name, String email, String department, String phoneNumber,
+            String studentNumber, UserType role) {
+        this.id = id;
+        this.ci = ci;
+        this.name = name;
+        this.email = email;
+        this.department = department;
+        this.phoneNumber = phoneNumber;
+        this.studentNumber = studentNumber;
+        this.role = role;
+        this.registrationCompleted = false;
     }
 
     @PrePersist
     void ensureRoleOnCreate() {
-        if (role == null || role.isBlank()) {
-            role = "visitor";
+        if (role == null) {
+            role = UserType.VISITOR;
         }
     }
 
     @PreUpdate
     void ensureRoleOnUpdate() {
-        if (role == null || role.isBlank()) {
-            role = "visitor";
+        if (role == null) {
+            role = UserType.VISITOR;
         }
     }
 
@@ -84,11 +113,42 @@ public class UserEntity extends BaseEntity {
         return email;
     }
 
-    public String getRole() {
+    public String getDepartment() {
+        return department;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public String getStudentNumber() {
+        return studentNumber;
+    }
+
+    public UserType getRole() {
         return role;
+    }
+
+    public boolean isRegistrationCompleted() {
+        return registrationCompleted;
     }
 
     public Instant getLastLoginAt() {
         return lastLoginAt;
+    }
+
+    public void completeRegistration(String name, String email, String department, String phoneNumber, String studentNumber) {
+        completeRegistration(name, email, department, phoneNumber, studentNumber, this.role);
+    }
+
+    public void completeRegistration(String name, String email, String department, String phoneNumber,
+            String studentNumber, UserType role) {
+        this.name = name;
+        this.email = email;
+        this.department = department;
+        this.phoneNumber = phoneNumber;
+        this.studentNumber = studentNumber;
+        this.role = role;
+        this.registrationCompleted = true;
     }
 }
