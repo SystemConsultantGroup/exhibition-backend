@@ -54,7 +54,8 @@ class ItemControllerTest {
                 "김교수",
                 null,
                 null,
-                null));
+                null,
+                0));
 
         mockMvc.perform(get("/items/{id}", id))
                 .andExpect(status().isOk())
@@ -76,7 +77,8 @@ class ItemControllerTest {
                                 fieldWithPath("advisorNames").description("지도교수 명단: 쉼표로 구분됨").optional(),
                                 fieldWithPath("thumbnailMediaId").description("썸네일 미디어 ID").optional(),
                                 fieldWithPath("posterMediaId").description("포스터 미디어 ID").optional(),
-                                fieldWithPath("presentationVideoMediaId").description("발표 영상 미디어 ID").optional()
+                                fieldWithPath("presentationVideoMediaId").description("발표 영상 미디어 ID").optional(),
+                                fieldWithPath("likes").description("좋아요 수")
                         )));
     }
 
@@ -87,7 +89,8 @@ class ItemControllerTest {
                 UUID.randomUUID(), exhibitionId, UUID.randomUUID(), null,
                 "Smart Campus", "desc",
                 "홍길동", "김교수",
-                null, null, null)));
+                null, null, null,
+                0)));
 
         mockMvc.perform(get("/items").param("exhibitionId", exhibitionId.toString()))
                 .andExpect(status().isOk())
@@ -113,6 +116,7 @@ class ItemControllerTest {
                                 fieldWithPath("items[].thumbnailMediaId").description("썸네일 미디어 ID").optional(),
                                 fieldWithPath("items[].posterMediaId").description("포스터 미디어 ID").optional(),
                                 fieldWithPath("items[].presentationVideoMediaId").description("발표 영상 미디어 ID").optional(),
+                                fieldWithPath("items[].likes").description("좋아요 수"),
                                 fieldWithPath("page").description("페이지 번호"),
                                 fieldWithPath("pageSize").description("페이지 크기"),
                                 fieldWithPath("total").description("전체 건수")

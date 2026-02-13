@@ -1,12 +1,15 @@
 package kr.ac.skku.scg.exhibition.item.service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import kr.ac.skku.scg.exhibition.global.error.NotFoundException;
 import kr.ac.skku.scg.exhibition.item.domain.ItemEntity;
 import kr.ac.skku.scg.exhibition.item.dto.request.ItemListRequest;
 import kr.ac.skku.scg.exhibition.item.dto.response.ItemResponse;
+import kr.ac.skku.scg.exhibition.item.repository.ItemLikeRepository;
 import kr.ac.skku.scg.exhibition.item.repository.ItemRepository;
+import static java.util.stream.Collectors.toMap;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,15 +18,18 @@ import org.springframework.transaction.annotation.Transactional;
 public class ItemService {
 
     private final ItemRepository itemRepository;
+    private final ItemLikeRepository itemLikeRepository;
 
-    public ItemService(ItemRepository itemRepository) {
+    public ItemService(ItemRepository itemRepository, ItemLikeRepository itemLikeRepository) {
         this.itemRepository = itemRepository;
+        this.itemLikeRepository = itemLikeRepository;
     }
 
     public ItemResponse get(UUID id) {
         ItemEntity item = itemRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Item not found: " + id));
-        return toResponse(item);
+        long likes = itemLikeRepository.countByItem_Id(id);
+        return toResponse(item, likes);
     }
 
     public List<ItemResponse> list(ItemListRequest request) {
@@ -37,10 +43,20 @@ public class ItemService {
             items = itemRepository.findAllByExhibition_Id(request.getExhibitionId());
         }
 
-        return items.stream().map(this::toResponse).toList();
+        if (items.isEmpty()) {
+            return List.of();
+        }
+
+        Map<UUID, Long> likesByItemId = itemLikeRepository.countLikesByItemIds(
+                        items.stream().map(ItemEntity::getId).toList()).stream()
+                .collect(toMap(ItemLikeRepository.ItemLikeCount::getItemId, ItemLikeRepository.ItemLikeCount::getLikeCount));
+
+        return items.stream()
+                .map(item -> toResponse(item, likesByItemId.getOrDefault(item.getId(), 0L)))
+                .toList();
     }
 
-    private ItemResponse toResponse(ItemEntity item) {
+    private ItemResponse toResponse(ItemEntity item, long likes) {
         UUID eventPeriodId = item.getEventPeriod() == null ? null : item.getEventPeriod().getId();
         UUID thumbnailMediaId = item.getThumbnailMedia() == null ? null : item.getThumbnailMedia().getId();
         UUID posterMediaId = item.getPosterMedia() == null ? null : item.getPosterMedia().getId();
@@ -57,6 +73,7 @@ public class ItemService {
                 item.getAdvisorNames(),
                 thumbnailMediaId,
                 posterMediaId,
-                presentationVideoMediaId);
+                presentationVideoMediaId,
+                likes);
     }
 }

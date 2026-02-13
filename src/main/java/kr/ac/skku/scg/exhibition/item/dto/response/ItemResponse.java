@@ -13,6 +13,7 @@ public record ItemResponse(
         String advisorNames,
         UUID thumbnailMediaId,
         UUID posterMediaId,
-        UUID presentationVideoMediaId
+        UUID presentationVideoMediaId,
+        long likes
 ) {
 }
