@@ -52,6 +52,9 @@ public class UserEntity extends BaseEntity {
     @Column(nullable = false, length = 20)
     private UserType role = UserType.VISITOR;
 
+    @Column(nullable = false)
+    private boolean registrationCompleted = false;
+
     @Column
     private Instant lastLoginAt;
 
@@ -64,6 +67,7 @@ public class UserEntity extends BaseEntity {
         this.name = name;
         this.email = email;
         this.role = role;
+        this.registrationCompleted = false;
     }
 
     public UserEntity(UUID id, String ci, String name, String email, String department, String phoneNumber,
@@ -76,6 +80,7 @@ public class UserEntity extends BaseEntity {
         this.phoneNumber = phoneNumber;
         this.studentNumber = studentNumber;
         this.role = role;
+        this.registrationCompleted = false;
     }
 
     @PrePersist
@@ -124,7 +129,20 @@ public class UserEntity extends BaseEntity {
         return role;
     }
 
+    public boolean isRegistrationCompleted() {
+        return registrationCompleted;
+    }
+
     public Instant getLastLoginAt() {
         return lastLoginAt;
+    }
+
+    public void completeRegistration(String name, String email, String department, String phoneNumber, String studentNumber) {
+        this.name = name;
+        this.email = email;
+        this.department = department;
+        this.phoneNumber = phoneNumber;
+        this.studentNumber = studentNumber;
+        this.registrationCompleted = true;
     }
 }
