@@ -25,14 +25,23 @@ public class MediaController {
     public ResponseEntity<ByteArrayResource> get(@PathVariable UUID id) {
         MediaFileResponse file = mediaService.getFile(id);
         ByteArrayResource resource = new ByteArrayResource(file.bytes());
-        MediaType mediaType = MediaType.APPLICATION_OCTET_STREAM;
-        if (file.contentType() != null && !file.contentType().isBlank()) {
-            mediaType = MediaType.parseMediaType(file.contentType());
-        }
+        MediaType mediaType = resolveMediaType(file.contentType());
 
         return ResponseEntity.ok()
                 .contentType(mediaType)
                 .contentLength(file.contentLength())
                 .body(resource);
+    }
+
+    private MediaType resolveMediaType(String contentType) {
+        if (contentType == null || contentType.isBlank()) {
+            return MediaType.APPLICATION_OCTET_STREAM;
+        }
+
+        try {
+            return MediaType.parseMediaType(contentType);
+        } catch (IllegalArgumentException ex) {
+            return MediaType.APPLICATION_OCTET_STREAM;
+        }
     }
 }

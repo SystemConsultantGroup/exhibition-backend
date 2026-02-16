@@ -57,4 +57,14 @@ class MediaControllerTest {
                                 headerWithName("Content-Length").description("파일 바이트 크기")
                         )));
     }
+
+    @Test
+    void getFileById_invalidMimeTypeFallback() throws Exception {
+        UUID id = UUID.randomUUID();
+        when(mediaService.getFile(id)).thenReturn(new MediaFileResponse("a.bin", "invalid mime", 3L, new byte[]{1, 2, 3}));
+
+        mockMvc.perform(get("/media/{id}", id))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Content-Type", "application/octet-stream"));
+    }
 }

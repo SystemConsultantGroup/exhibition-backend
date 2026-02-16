@@ -118,4 +118,14 @@ public class ItemEntity extends BaseEntity {
         return presentationVideoMedia;
     }
 
+    public void updateParticipantAndAdvisor(String participantNames, String advisorNames) {
+        this.participantNames = participantNames;
+        this.advisorNames = advisorNames;
+    }
+
+    public void updateMedia(MediaAssetEntity thumbnailMedia, MediaAssetEntity posterMedia, MediaAssetEntity presentationVideoMedia) {
+        this.thumbnailMedia = thumbnailMedia;
+        this.posterMedia = posterMedia;
+        this.presentationVideoMedia = presentationVideoMedia;
+    }
 }
