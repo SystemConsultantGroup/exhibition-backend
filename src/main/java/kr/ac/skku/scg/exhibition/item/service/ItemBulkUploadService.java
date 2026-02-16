@@ -2,10 +2,6 @@ package kr.ac.skku.scg.exhibition.item.service;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 import kr.ac.skku.scg.exhibition.category.domain.CategoryEntity;
 import kr.ac.skku.scg.exhibition.category.repository.CategoryRepository;
@@ -95,7 +91,7 @@ public class ItemBulkUploadService {
                 UUID exhibitionId = parseUuid(cellValue(row, 0, formatter), "exhibition_id", excelRowNum);
                 UUID eventPeriodId = parseUuid(cellValue(row, 1, formatter), "event_period_id", excelRowNum);
                 String categoryName = required(cellValue(row, 3, formatter), "category_name", excelRowNum);
-                String title = required(cellValue(row, 7, formatter), "title", excelRowNum);
+                String title = required(cellValue(row, 5, formatter), "title", excelRowNum);
 
                 ExhibitionEntity exhibition = exhibitionRepository.findById(exhibitionId)
                         .orElseThrow(() -> new NotFoundException("Row " + excelRowNum + ": exhibition not found: " + exhibitionId));
@@ -108,18 +104,18 @@ public class ItemBulkUploadService {
                         .orElseThrow(() -> new NotFoundException(
                                 "Row " + excelRowNum + ": category not found for exhibition: " + categoryName));
 
-                String description = nullable(cellValue(row, 8, formatter));
-                String participantNames = nullable(cellValue(row, 9, formatter));
-                String advisorNames = nullable(cellValue(row, 10, formatter));
+                String description = nullable(cellValue(row, 6, formatter));
+                String participantNames = nullable(cellValue(row, 7, formatter));
+                String advisorNames = nullable(cellValue(row, 8, formatter));
 
                 ItemEntity item = new ItemEntity(null, exhibition, category, eventPeriod, title, description);
                 item.updateParticipantAndAdvisor(participantNames, advisorNames);
                 item = itemRepository.save(item);
                 createdItems++;
 
-                MediaAssetEntity thumbnailMedia = createMediaIfPresent(item, exhibition, cellValue(row, 11, formatter));
-                MediaAssetEntity posterMedia = createMediaIfPresent(item, exhibition, cellValue(row, 12, formatter));
-                MediaAssetEntity presentationMedia = createMediaIfPresent(item, exhibition, cellValue(row, 13, formatter));
+                MediaAssetEntity thumbnailMedia = createMediaIfPresent(item, exhibition, cellValue(row, 9, formatter));
+                MediaAssetEntity posterMedia = createMediaIfPresent(item, exhibition, cellValue(row, 10, formatter));
+                MediaAssetEntity presentationMedia = createMediaIfPresent(item, exhibition, cellValue(row, 11, formatter));
 
                 if (thumbnailMedia != null) {
                     thumbnailMedia = mediaAssetRepository.save(thumbnailMedia);
@@ -136,22 +132,14 @@ public class ItemBulkUploadService {
 
                 item.updateMedia(thumbnailMedia, posterMedia, presentationMedia);
 
-                Set<String> classificationNames = new LinkedHashSet<>();
-                addIfPresent(classificationNames, cellValue(row, 4, formatter));
-                addIfPresent(classificationNames, cellValue(row, 5, formatter));
-                addIfPresent(classificationNames, cellValue(row, 6, formatter));
-
-                if (!classificationNames.isEmpty()) {
-                    List<ItemClassificationMapEntity> mappings = new ArrayList<>();
-                    for (String classificationName : classificationNames) {
-                        ItemClassificationEntity classification = classificationRepository.findByExhibition_IdAndName(
-                                        exhibitionId, classificationName)
-                                .orElseThrow(() -> new NotFoundException(
-                                        "Row " + excelRowNum + ": classification not found for exhibition: " + classificationName));
-                        mappings.add(new ItemClassificationMapEntity(null, item, classification));
-                    }
-                    itemClassificationMapRepository.saveAll(mappings);
-                    createdClassificationMappings += mappings.size();
+                String classificationName = nullable(cellValue(row, 4, formatter));
+                if (classificationName != null) {
+                    ItemClassificationEntity classification = classificationRepository.findByExhibition_IdAndName(
+                                    exhibitionId, classificationName)
+                            .orElseThrow(() -> new NotFoundException(
+                                    "Row " + excelRowNum + ": classification not found for exhibition: " + classificationName));
+                    itemClassificationMapRepository.save(new ItemClassificationMapEntity(null, item, classification));
+                    createdClassificationMappings++;
                 }
             }
         } catch (IOException ex) {
@@ -203,19 +191,12 @@ public class ItemBulkUploadService {
         return "application/octet-stream";
     }
 
-    private void addIfPresent(Set<String> target, String value) {
-        String normalized = nullable(value);
-        if (normalized != null) {
-            target.add(normalized);
-        }
-    }
-
     private boolean isDataRowEmpty(Row row, DataFormatter formatter) {
         if (row == null) {
             return true;
         }
 
-        for (int col = 3; col <= 13; col++) {
+        for (int col = 3; col <= 11; col++) {
             if (!cellValue(row, col, formatter).isBlank()) {
                 return false;
             }

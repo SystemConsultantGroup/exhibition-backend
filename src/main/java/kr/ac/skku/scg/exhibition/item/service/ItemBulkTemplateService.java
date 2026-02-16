@@ -45,6 +45,7 @@ public class ItemBulkTemplateService {
     private static final int DATA_ROW_START = 1;
     private static final int DATA_ROW_END = 1000;
     private static final int OPTIONS_START_ROW = 4;
+    private static final int LAST_TEMPLATE_COLUMN_INDEX = 11;
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.BASIC_ISO_DATE;
 
     private final ExhibitionRepository exhibitionRepository;
@@ -115,12 +116,10 @@ public class ItemBulkTemplateService {
                     + Math.max(OPTIONS_START_ROW + classifications.size(), OPTIONS_START_ROW + 1));
             applyDropDown(templateSheet, 3, "category_options");
             applyDropDown(templateSheet, 4, "classification_options");
-            applyDropDown(templateSheet, 5, "classification_options");
-            applyDropDown(templateSheet, 6, "classification_options");
 
             workbook.setSheetHidden(workbook.getSheetIndex(optionsSheet), true);
 
-            for (int i = 0; i <= 13; i++) {
+            for (int i = 0; i <= LAST_TEMPLATE_COLUMN_INDEX; i++) {
                 templateSheet.autoSizeColumn(i);
             }
 
@@ -137,9 +136,7 @@ public class ItemBulkTemplateService {
                 "event_period_id",
                 "event_period_name",
                 "category_name",
-                "classification_1_name",
-                "classification_2_name",
-                "classification_3_name",
+                "classification_name",
                 "title",
                 "description",
                 "participant_names_csv",

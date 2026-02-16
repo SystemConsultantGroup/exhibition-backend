@@ -3,19 +3,16 @@ package kr.ac.skku.scg.exhibition.item.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.Instant;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import kr.ac.skku.scg.exhibition.category.domain.CategoryEntity;
 import kr.ac.skku.scg.exhibition.category.repository.CategoryRepository;
 import kr.ac.skku.scg.exhibition.classification.domain.ItemClassificationEntity;
-import kr.ac.skku.scg.exhibition.classification.domain.ItemClassificationMapEntity;
 import kr.ac.skku.scg.exhibition.classification.repository.ItemClassificationMapRepository;
 import kr.ac.skku.scg.exhibition.classification.repository.ItemClassificationRepository;
 import kr.ac.skku.scg.exhibition.eventperiod.domain.EventPeriodEntity;
@@ -114,16 +111,14 @@ class ItemBulkUploadServiceTest {
         );
         CategoryEntity category = new CategoryEntity(UUID.randomUUID(), exhibition, "AI");
         ItemClassificationEntity classificationA = new ItemClassificationEntity(UUID.randomUUID(), exhibition, "작품");
-        ItemClassificationEntity classificationB = new ItemClassificationEntity(UUID.randomUUID(), exhibition, "논문");
 
         when(exhibitionRepository.findById(exhibitionId)).thenReturn(Optional.of(exhibition));
         when(eventPeriodRepository.findByIdAndExhibition_Id(eventPeriodId, exhibitionId)).thenReturn(Optional.of(eventPeriod));
         when(categoryRepository.findByExhibition_IdAndName(exhibitionId, "AI")).thenReturn(Optional.of(category));
         when(classificationRepository.findByExhibition_IdAndName(exhibitionId, "작품")).thenReturn(Optional.of(classificationA));
-        when(classificationRepository.findByExhibition_IdAndName(exhibitionId, "논문")).thenReturn(Optional.of(classificationB));
         when(itemRepository.save(any(ItemEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(mediaAssetRepository.save(any(MediaAssetEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(itemClassificationMapRepository.saveAll(anyList())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(itemClassificationMapRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         MockMultipartFile file = new MockMultipartFile(
                 "file",
@@ -147,14 +142,14 @@ class ItemBulkUploadServiceTest {
 
         assertThat(response.createdItems()).isEqualTo(1);
         assertThat(response.createdMediaAssets()).isEqualTo(3);
-        assertThat(response.createdClassificationMappings()).isEqualTo(2);
+        assertThat(response.createdClassificationMappings()).isEqualTo(1);
     }
 
     private byte[] createWorkbookBytes(UUID exhibitionId, UUID eventPeriodId) throws IOException {
         try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
             Sheet sheet = workbook.createSheet("items_template");
             Row header = sheet.createRow(0);
-            for (int i = 0; i <= 13; i++) {
+            for (int i = 0; i <= 11; i++) {
                 header.createCell(i).setCellValue("h" + i);
             }
 
@@ -163,14 +158,13 @@ class ItemBulkUploadServiceTest {
             row.createCell(1).setCellValue(eventPeriodId.toString());
             row.createCell(3).setCellValue("AI");
             row.createCell(4).setCellValue("작품");
-            row.createCell(5).setCellValue("논문");
-            row.createCell(7).setCellValue("Smart Campus");
-            row.createCell(8).setCellValue("desc");
-            row.createCell(9).setCellValue("홍길동,양현준");
-            row.createCell(10).setCellValue("김교수");
-            row.createCell(11).setCellValue("items/1/thumb.jpg");
-            row.createCell(12).setCellValue("items/1/poster.png");
-            row.createCell(13).setCellValue("items/1/video.mp4");
+            row.createCell(5).setCellValue("Smart Campus");
+            row.createCell(6).setCellValue("desc");
+            row.createCell(7).setCellValue("홍길동,양현준");
+            row.createCell(8).setCellValue("김교수");
+            row.createCell(9).setCellValue("items/1/thumb.jpg");
+            row.createCell(10).setCellValue("items/1/poster.png");
+            row.createCell(11).setCellValue("items/1/video.mp4");
 
             workbook.write(outputStream);
             return outputStream.toByteArray();
