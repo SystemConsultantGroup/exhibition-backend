@@ -39,6 +39,7 @@ dependencies {
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.6'
     implementation 'com.querydsl:querydsl-jpa:5.1.0:jakarta'
     implementation 'io.minio:minio:8.5.12'
+    implementation 'org.apache.poi:poi-ooxml:5.4.1'
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'com.mysql:mysql-connector-j'
     annotationProcessor 'org.projectlombok:lombok'

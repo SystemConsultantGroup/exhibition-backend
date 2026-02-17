@@ -23,6 +23,12 @@ public class ApiExceptionHandler {
                 .body(ApiErrorResponse.of("UNAUTHORIZED", ex.getMessage()));
     }
 
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<ApiErrorResponse> handleForbidden(ForbiddenException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(ApiErrorResponse.of("FORBIDDEN", ex.getMessage()));
+    }
+
     @ExceptionHandler({MethodArgumentNotValidException.class, ConstraintViolationException.class})
     public ResponseEntity<ApiErrorResponse> handleValidation(Exception ex) {
         String message = "Validation failed";

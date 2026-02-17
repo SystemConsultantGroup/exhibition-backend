@@ -44,12 +44,25 @@ public class MediaService {
 
             byte[] bytes = object.readAllBytes();
             String fileName = extractFileName(media.getObjectKey());
-            return new MediaFileResponse(fileName, media.getMediaType(), media.getSize(), bytes);
+            String contentType = extractContentType(object, media.getMediaType());
+            long contentLength = bytes.length;
+            return new MediaFileResponse(fileName, contentType, contentLength, bytes);
         } catch (MinioException | IOException e) {
             throw new IllegalStateException("Failed to read media file from MinIO: " + media.getObjectKey(), e);
         } catch (Exception e) {
             throw new IllegalStateException("Unexpected MinIO error: " + media.getObjectKey(), e);
         }
+    }
+
+    private String extractContentType(GetObjectResponse object, String fallbackContentType) {
+        String minioContentType = object.headers().get("Content-Type");
+        if (minioContentType != null && !minioContentType.isBlank()) {
+            return minioContentType;
+        }
+        if (fallbackContentType != null && !fallbackContentType.isBlank()) {
+            return fallbackContentType;
+        }
+        return "application/octet-stream";
     }
 
     private String extractFileName(String objectKey) {
