@@ -66,6 +66,7 @@ class ItemControllerTest {
                 "Smart Campus",
                 "desc",
                 "홍길동,양현준",
+                "hong@example.com,yang@example.com",
                 "김교수",
                 null,
                 null,
@@ -89,6 +90,7 @@ class ItemControllerTest {
                                 fieldWithPath("title").description("제목"),
                                 fieldWithPath("description").description("설명").optional(),
                                 fieldWithPath("participantNames").description("참여자 명단: 쉼표로 구분됨").optional(),
+                                fieldWithPath("participantEmails").description("발표자 이메일 명단: 쉼표로 구분됨").optional(),
                                 fieldWithPath("advisorNames").description("지도교수 명단: 쉼표로 구분됨").optional(),
                                 fieldWithPath("thumbnailMediaId").description("썸네일 미디어 ID").optional(),
                                 fieldWithPath("posterMediaId").description("포스터 미디어 ID").optional(),
@@ -103,7 +105,7 @@ class ItemControllerTest {
         when(itemService.list(any())).thenReturn(List.of(new ItemResponse(
                 UUID.randomUUID(), exhibitionId, UUID.randomUUID(), null,
                 "Smart Campus", "desc",
-                "홍길동", "김교수",
+                "홍길동", "hong@example.com", "김교수",
                 null, null, null,
                 0)));
 
@@ -127,6 +129,7 @@ class ItemControllerTest {
                                 fieldWithPath("items[].title").description("제목"),
                                 fieldWithPath("items[].description").description("설명").optional(),
                                 fieldWithPath("items[].participantNames").description("참여자명단: 쉼표로 구분됨").optional(),
+                                fieldWithPath("items[].participantEmails").description("발표자 이메일 명단: 쉼표로 구분됨").optional(),
                                 fieldWithPath("items[].advisorNames").description("지도교수명단: 쉼표로 구분됨").optional(),
                                 fieldWithPath("items[].thumbnailMediaId").description("썸네일 미디어 ID").optional(),
                                 fieldWithPath("items[].posterMediaId").description("포스터 미디어 ID").optional(),

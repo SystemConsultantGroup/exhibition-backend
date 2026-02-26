@@ -10,6 +10,7 @@ public record ItemResponse(
         String title,
         String description,
         String participantNames,
+        String participantEmails,
         String advisorNames,
         UUID thumbnailMediaId,
         UUID posterMediaId,

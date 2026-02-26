@@ -46,6 +46,9 @@ public class ItemEntity extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String participantNames;
 
+    @Column(columnDefinition = "TEXT", nullable = true)
+    private String participantEmails;
+
     @Column(columnDefinition = "TEXT")
     private String advisorNames;
 
@@ -102,6 +105,10 @@ public class ItemEntity extends BaseEntity {
         return participantNames;
     }
 
+    public String getParticipantEmails() {
+        return participantEmails;
+    }
+
     public String getAdvisorNames() {
         return advisorNames;
     }
@@ -119,7 +126,12 @@ public class ItemEntity extends BaseEntity {
     }
 
     public void updateParticipantAndAdvisor(String participantNames, String advisorNames) {
+        updateParticipantAndAdvisor(participantNames, null, advisorNames);
+    }
+
+    public void updateParticipantAndAdvisor(String participantNames, String participantEmails, String advisorNames) {
         this.participantNames = participantNames;
+        this.participantEmails = participantEmails;
         this.advisorNames = advisorNames;
     }
 

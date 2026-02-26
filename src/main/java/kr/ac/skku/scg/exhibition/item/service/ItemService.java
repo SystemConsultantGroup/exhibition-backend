@@ -103,6 +103,7 @@ public class ItemService {
                 item.getTitle(),
                 item.getDescription(),
                 item.getParticipantNames(),
+                item.getParticipantEmails(),
                 item.getAdvisorNames(),
                 thumbnailMediaId,
                 posterMediaId,
