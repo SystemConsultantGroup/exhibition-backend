@@ -12,6 +12,10 @@ public class ItemListRequest {
 
     private UUID eventPeriodId;
 
+    private UUID classificationId;
+
+    private String q;
+
     public UUID getExhibitionId() {
         return exhibitionId;
     }
@@ -35,4 +39,21 @@ public class ItemListRequest {
     public void setEventPeriodId(UUID eventPeriodId) {
         this.eventPeriodId = eventPeriodId;
     }
+
+    public UUID getClassificationId() {
+        return classificationId;
+    }
+
+    public void setClassificationId(UUID classificationId) {
+        this.classificationId = classificationId;
+    }
+
+    public String getQ() {
+        return q;
+    }
+
+    public void setQ(String q) {
+        this.q = q;
+    }
+
 }

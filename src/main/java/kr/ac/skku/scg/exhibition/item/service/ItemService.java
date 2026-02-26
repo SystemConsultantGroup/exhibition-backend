@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import kr.ac.skku.scg.exhibition.global.auth.resolver.AuthenticatedUser;
+import kr.ac.skku.scg.exhibition.global.dto.ListResponse;
 import kr.ac.skku.scg.exhibition.global.error.NotFoundException;
 import kr.ac.skku.scg.exhibition.item.domain.ItemEntity;
 import kr.ac.skku.scg.exhibition.item.domain.ItemLikeEntity;
@@ -15,6 +16,8 @@ import kr.ac.skku.scg.exhibition.user.domain.UserEntity;
 import kr.ac.skku.scg.exhibition.user.repository.UserRepository;
 import static java.util.stream.Collectors.toMap;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,28 +42,22 @@ public class ItemService {
         return toResponse(item, likes);
     }
 
-    public List<ItemResponse> list(ItemListRequest request) {
-        List<ItemEntity> items;
-
-        if (request.getCategoryId() != null) {
-            items = itemRepository.findAllByExhibition_IdAndCategory_Id(request.getExhibitionId(), request.getCategoryId());
-        } else if (request.getEventPeriodId() != null) {
-            items = itemRepository.findAllByExhibition_IdAndEventPeriod_Id(request.getExhibitionId(), request.getEventPeriodId());
-        } else {
-            items = itemRepository.findAllByExhibition_Id(request.getExhibitionId());
-        }
-
+    public ListResponse<ItemResponse> list(ItemListRequest request, Pageable pageable) {
+        Page<ItemEntity> page = itemRepository.search(request, pageable);
+        List<ItemEntity> items = page.getContent();
         if (items.isEmpty()) {
-            return List.of();
+            return new ListResponse<>(List.of(), page.getNumber() + 1, page.getSize(), page.getTotalElements());
         }
 
         Map<UUID, Long> likesByItemId = itemLikeRepository.countLikesByItemIds(
                         items.stream().map(ItemEntity::getId).toList()).stream()
                 .collect(toMap(ItemLikeRepository.ItemLikeCount::getItemId, ItemLikeRepository.ItemLikeCount::getLikeCount));
 
-        return items.stream()
+        List<ItemResponse> responses = items.stream()
                 .map(item -> toResponse(item, likesByItemId.getOrDefault(item.getId(), 0L)))
                 .toList();
+
+        return new ListResponse<>(responses, page.getNumber() + 1, page.getSize(), page.getTotalElements());
     }
 
     @Transactional
@@ -103,6 +100,7 @@ public class ItemService {
                 item.getTitle(),
                 item.getDescription(),
                 item.getParticipantNames(),
+                item.getParticipantEmails(),
                 item.getAdvisorNames(),
                 thumbnailMediaId,
                 posterMediaId,

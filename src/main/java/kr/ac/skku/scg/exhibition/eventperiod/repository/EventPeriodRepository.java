@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface EventPeriodRepository extends JpaRepository<EventPeriodEntity, UUID> {
 
-    List<EventPeriodEntity> findAllByExhibition_Id(UUID exhibitionId);
+    List<EventPeriodEntity> findAllByExhibition_IdOrderByCreatedAtDesc(UUID exhibitionId);
 
     Optional<EventPeriodEntity> findByIdAndExhibition_Id(UUID id, UUID exhibitionId);
 }

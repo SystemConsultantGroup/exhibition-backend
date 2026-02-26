@@ -27,6 +27,7 @@ import java.util.UUID;
 import kr.ac.skku.scg.exhibition.global.auth.resolver.AuthenticatedUser;
 import kr.ac.skku.scg.exhibition.global.config.WebConfig;
 import kr.ac.skku.scg.exhibition.global.config.SecurityConfig;
+import kr.ac.skku.scg.exhibition.global.dto.ListResponse;
 import kr.ac.skku.scg.exhibition.global.error.ApiExceptionHandler;
 import kr.ac.skku.scg.exhibition.item.dto.response.ItemResponse;
 import kr.ac.skku.scg.exhibition.item.service.ItemService;
@@ -66,6 +67,7 @@ class ItemControllerTest {
                 "Smart Campus",
                 "desc",
                 "홍길동,양현준",
+                "hong@example.com,yang@example.com",
                 "김교수",
                 null,
                 null,
@@ -89,6 +91,7 @@ class ItemControllerTest {
                                 fieldWithPath("title").description("제목"),
                                 fieldWithPath("description").description("설명").optional(),
                                 fieldWithPath("participantNames").description("참여자 명단: 쉼표로 구분됨").optional(),
+                                fieldWithPath("participantEmails").description("발표자 이메일 명단: 쉼표로 구분됨").optional(),
                                 fieldWithPath("advisorNames").description("지도교수 명단: 쉼표로 구분됨").optional(),
                                 fieldWithPath("thumbnailMediaId").description("썸네일 미디어 ID").optional(),
                                 fieldWithPath("posterMediaId").description("포스터 미디어 ID").optional(),
@@ -100,12 +103,12 @@ class ItemControllerTest {
     @Test
     void list() throws Exception {
         UUID exhibitionId = UUID.randomUUID();
-        when(itemService.list(any())).thenReturn(List.of(new ItemResponse(
+        when(itemService.list(any(), any())).thenReturn(new ListResponse<>(List.of(new ItemResponse(
                 UUID.randomUUID(), exhibitionId, UUID.randomUUID(), null,
                 "Smart Campus", "desc",
-                "홍길동", "김교수",
+                "홍길동", "hong@example.com", "김교수",
                 null, null, null,
-                0)));
+                0)), 1, 20, 1));
 
         mockMvc.perform(get("/items").param("exhibitionId", exhibitionId.toString()))
                 .andExpect(status().isOk())
@@ -116,7 +119,12 @@ class ItemControllerTest {
                         queryParameters(
                                 parameterWithName("exhibitionId").description("전시 ID"),
                                 parameterWithName("categoryId").optional().description("카테고리 ID"),
-                                parameterWithName("eventPeriodId").optional().description("이벤트 기간 ID")
+                                parameterWithName("eventPeriodId").optional().description("이벤트 기간 ID"),
+                                parameterWithName("classificationId").optional().description("분야(분류) ID"),
+                                parameterWithName("q").optional().description("검색어 (제목, 지도교수, 학생명)"),
+                                parameterWithName("page").optional().description("페이지 번호(0부터 시작)"),
+                                parameterWithName("size").optional().description("페이지 크기"),
+                                parameterWithName("sort").optional().description("정렬 (예: title,asc 또는 createdAt,desc)")
                         ),
                         responseFields(
                                 fieldWithPath("items").description("아이템 목록"),
@@ -127,6 +135,7 @@ class ItemControllerTest {
                                 fieldWithPath("items[].title").description("제목"),
                                 fieldWithPath("items[].description").description("설명").optional(),
                                 fieldWithPath("items[].participantNames").description("참여자명단: 쉼표로 구분됨").optional(),
+                                fieldWithPath("items[].participantEmails").description("발표자 이메일 명단: 쉼표로 구분됨").optional(),
                                 fieldWithPath("items[].advisorNames").description("지도교수명단: 쉼표로 구분됨").optional(),
                                 fieldWithPath("items[].thumbnailMediaId").description("썸네일 미디어 ID").optional(),
                                 fieldWithPath("items[].posterMediaId").description("포스터 미디어 ID").optional(),
