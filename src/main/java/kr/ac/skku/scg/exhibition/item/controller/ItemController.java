@@ -1,7 +1,6 @@
 package kr.ac.skku.scg.exhibition.item.controller;
 
 import jakarta.validation.Valid;
-import java.util.List;
 import java.util.UUID;
 import kr.ac.skku.scg.exhibition.global.auth.resolver.AuthenticatedUser;
 import kr.ac.skku.scg.exhibition.global.auth.resolver.CurrentUser;
@@ -10,6 +9,8 @@ import kr.ac.skku.scg.exhibition.item.dto.request.ItemListRequest;
 import kr.ac.skku.scg.exhibition.item.dto.response.ItemResponse;
 import kr.ac.skku.scg.exhibition.item.service.ItemService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import static org.springframework.data.domain.Sort.Direction.DESC;
 
 @Validated
 @RestController
@@ -35,9 +37,11 @@ public class ItemController {
     }
 
     @GetMapping
-    public ResponseEntity<ListResponse<ItemResponse>> list(@Valid @ModelAttribute ItemListRequest request) {
-        List<ItemResponse> items = itemService.list(request);
-        return ResponseEntity.ok(ListResponse.of(items));
+    public ResponseEntity<ListResponse<ItemResponse>> list(
+            @Valid @ModelAttribute ItemListRequest request,
+            @PageableDefault(sort = "createdAt", direction = DESC)
+            Pageable pageable) {
+        return ResponseEntity.ok(itemService.list(request, pageable));
     }
 
     @PostMapping("/{id}/like")

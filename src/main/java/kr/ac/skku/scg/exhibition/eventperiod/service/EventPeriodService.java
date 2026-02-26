@@ -27,7 +27,7 @@ public class EventPeriodService {
     }
 
     public List<EventPeriodResponse> list(EventPeriodListRequest request) {
-        return eventPeriodRepository.findAllByExhibition_Id(request.getExhibitionId()).stream()
+        return eventPeriodRepository.findAllByExhibition_IdOrderByCreatedAtDesc(request.getExhibitionId()).stream()
                 .map(this::toResponse)
                 .toList();
     }
