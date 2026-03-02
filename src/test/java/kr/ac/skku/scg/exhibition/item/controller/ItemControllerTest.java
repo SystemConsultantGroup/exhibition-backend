@@ -2,6 +2,7 @@ package kr.ac.skku.scg.exhibition.item.controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.restdocs.headers.HeaderDocumentation.headerWithName;
@@ -59,7 +60,7 @@ class ItemControllerTest {
     @Test
     void getById() throws Exception {
         UUID id = UUID.randomUUID();
-        when(itemService.get(id)).thenReturn(new ItemResponse(
+        when(itemService.get(eq(id), isNull())).thenReturn(new ItemResponse(
                 id,
                 UUID.randomUUID(),
                 UUID.randomUUID(),
@@ -72,7 +73,8 @@ class ItemControllerTest {
                 null,
                 null,
                 null,
-                0));
+                0,
+                false));
 
         mockMvc.perform(get("/items/{id}", id))
                 .andExpect(status().isOk())
@@ -96,19 +98,20 @@ class ItemControllerTest {
                                 fieldWithPath("thumbnailMediaId").description("썸네일 미디어 ID").optional(),
                                 fieldWithPath("posterMediaId").description("포스터 미디어 ID").optional(),
                                 fieldWithPath("presentationVideoMediaId").description("발표 영상 미디어 ID").optional(),
-                                fieldWithPath("likes").description("좋아요 수")
+                                fieldWithPath("likes").description("좋아요 수"),
+                                fieldWithPath("isLike").description("현재 로그인 사용자의 좋아요 여부 (비로그인 시 false)")
                         )));
     }
 
     @Test
     void list() throws Exception {
         UUID exhibitionId = UUID.randomUUID();
-        when(itemService.list(any(), any())).thenReturn(new ListResponse<>(List.of(new ItemResponse(
+        when(itemService.list(any(), any(), isNull())).thenReturn(new ListResponse<>(List.of(new ItemResponse(
                 UUID.randomUUID(), exhibitionId, UUID.randomUUID(), null,
                 "Smart Campus", "desc",
                 "홍길동", "hong@example.com", "김교수",
                 null, null, null,
-                0)), 1, 20, 1));
+                0, false)), 1, 20, 1));
 
         mockMvc.perform(get("/items").param("exhibitionId", exhibitionId.toString()))
                 .andExpect(status().isOk())
@@ -141,6 +144,7 @@ class ItemControllerTest {
                                 fieldWithPath("items[].posterMediaId").description("포스터 미디어 ID").optional(),
                                 fieldWithPath("items[].presentationVideoMediaId").description("발표 영상 미디어 ID").optional(),
                                 fieldWithPath("items[].likes").description("좋아요 수"),
+                                fieldWithPath("items[].isLike").description("현재 로그인 사용자의 좋아요 여부 (비로그인 시 false)"),
                                 fieldWithPath("page").description("페이지 번호"),
                                 fieldWithPath("pageSize").description("페이지 크기"),
                                 fieldWithPath("total").description("전체 건수")

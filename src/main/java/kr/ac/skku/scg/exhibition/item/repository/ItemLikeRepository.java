@@ -27,6 +27,14 @@ public interface ItemLikeRepository extends JpaRepository<ItemLikeEntity, UUID> 
             """)
     List<ItemLikeCount> countLikesByItemIds(@Param("itemIds") Collection<UUID> itemIds);
 
+    @Query("""
+            select il.item.id
+            from ItemLikeEntity il
+            where il.user.id = :userId
+              and il.item.id in :itemIds
+            """)
+    List<UUID> findLikedItemIdsByUserIdAndItemIds(@Param("userId") UUID userId, @Param("itemIds") Collection<UUID> itemIds);
+
     interface ItemLikeCount {
         UUID getItemId();
 

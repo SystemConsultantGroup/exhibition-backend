@@ -15,6 +15,7 @@ public record ItemResponse(
         UUID thumbnailMediaId,
         UUID posterMediaId,
         UUID presentationVideoMediaId,
-        long likes
+        long likes,
+        boolean isLike
 ) {
 }

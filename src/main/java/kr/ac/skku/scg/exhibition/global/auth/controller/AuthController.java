@@ -27,7 +27,7 @@ public class AuthController {
 
     @PostMapping("/kakao/login")
     public ResponseEntity<AuthTokenResponse> kakaoLogin(@Valid @RequestBody KakaoLoginRequest request) {
-        return ResponseEntity.ok(authService.loginWithKakao(request.code()));
+        return ResponseEntity.ok(authService.loginWithKakao(request.code(), request.redirectUri()));
     }
 
     @PostMapping("/refresh")

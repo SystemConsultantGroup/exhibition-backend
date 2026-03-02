@@ -34,6 +34,6 @@ app:
     kakao:
       client-id: ${APP_AUTH_KAKAO_CLIENT_ID}
       client-secret: ${APP_AUTH_KAKAO_CLIENT_SECRET}
-      redirect-uri: ${APP_AUTH_KAKAO_REDIRECT_URI}
+      redirect-uris: ${APP_AUTH_KAKAO_REDIRECT_URI}
       token-uri: ${APP_AUTH_KAKAO_TOKEN_URI}
       user-info-uri: ${APP_AUTH_KAKAO_USER_INFO_URI}

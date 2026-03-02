@@ -1,6 +1,7 @@
 package kr.ac.skku.scg.exhibition.global.auth.controller;
 
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.when;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessRequest;
@@ -28,6 +29,7 @@ import org.springframework.boot.restdocs.test.autoconfigure.AutoConfigureRestDoc
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -47,7 +49,7 @@ class AuthControllerTest {
 
     @Test
     void kakaoLogin() throws Exception {
-        when(authService.loginWithKakao(anyString()))
+        when(authService.loginWithKakao(anyString(), nullable(String.class)))
                 .thenReturn(new AuthTokenResponse("access-token", "refresh-token", "Bearer", 3600, 1209600, true));
 
         mockMvc.perform(post("/auth/kakao/login")
@@ -68,7 +70,9 @@ class AuthControllerTest {
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
                         requestFields(
-                                fieldWithPath("code").description("카카오 인가 코드")
+                                fieldWithPath("code").description("카카오 인가 코드"),
+                                fieldWithPath("redirectUri").type(JsonFieldType.STRING)
+                                        .description("인가 요청에 사용한 redirect URI").optional()
                         ),
                         responseFields(
                                 fieldWithPath("accessToken").description("서비스 Access Token"),
