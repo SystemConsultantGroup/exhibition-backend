@@ -2,6 +2,7 @@ package kr.ac.skku.scg.exhibition.item.service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import kr.ac.skku.scg.exhibition.global.auth.resolver.AuthenticatedUser;
 import kr.ac.skku.scg.exhibition.global.dto.ListResponse;
@@ -18,6 +19,7 @@ import static java.util.stream.Collectors.toMap;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,26 +37,36 @@ public class ItemService {
         this.userRepository = userRepository;
     }
 
-    public ItemResponse get(UUID id) {
+    public ItemResponse get(UUID id, @Nullable UUID currentUserId) {
         ItemEntity item = itemRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Item not found: " + id));
         long likes = itemLikeRepository.countByItem_Id(id);
-        return toResponse(item, likes);
+        boolean isLike = currentUserId != null && itemLikeRepository.existsByItem_IdAndUser_Id(id, currentUserId);
+        return toResponse(item, likes, isLike);
     }
 
-    public ListResponse<ItemResponse> list(ItemListRequest request, Pageable pageable) {
+    public ListResponse<ItemResponse> list(ItemListRequest request, Pageable pageable, @Nullable UUID currentUserId) {
         Page<ItemEntity> page = itemRepository.search(request, pageable);
         List<ItemEntity> items = page.getContent();
         if (items.isEmpty()) {
             return new ListResponse<>(List.of(), page.getNumber() + 1, page.getSize(), page.getTotalElements());
         }
 
+        List<UUID> itemIds = items.stream().map(ItemEntity::getId).toList();
+
         Map<UUID, Long> likesByItemId = itemLikeRepository.countLikesByItemIds(
-                        items.stream().map(ItemEntity::getId).toList()).stream()
+                        itemIds).stream()
                 .collect(toMap(ItemLikeRepository.ItemLikeCount::getItemId, ItemLikeRepository.ItemLikeCount::getLikeCount));
 
+        Set<UUID> likedItemIds = currentUserId == null
+                ? Set.of()
+                : Set.copyOf(itemLikeRepository.findLikedItemIdsByUserIdAndItemIds(currentUserId, itemIds));
+
         List<ItemResponse> responses = items.stream()
-                .map(item -> toResponse(item, likesByItemId.getOrDefault(item.getId(), 0L)))
+                .map(item -> toResponse(
+                        item,
+                        likesByItemId.getOrDefault(item.getId(), 0L),
+                        likedItemIds.contains(item.getId())))
                 .toList();
 
         return new ListResponse<>(responses, page.getNumber() + 1, page.getSize(), page.getTotalElements());
@@ -86,7 +98,7 @@ public class ItemService {
         itemLikeRepository.deleteByItem_IdAndUser_Id(itemId, currentUser.id());
     }
 
-    private ItemResponse toResponse(ItemEntity item, long likes) {
+    private ItemResponse toResponse(ItemEntity item, long likes, boolean isLike) {
         UUID eventPeriodId = item.getEventPeriod() == null ? null : item.getEventPeriod().getId();
         UUID thumbnailMediaId = item.getThumbnailMedia() == null ? null : item.getThumbnailMedia().getId();
         UUID posterMediaId = item.getPosterMedia() == null ? null : item.getPosterMedia().getId();
@@ -105,6 +117,7 @@ public class ItemService {
                 thumbnailMediaId,
                 posterMediaId,
                 presentationVideoMediaId,
-                likes);
+                likes,
+                isLike);
     }
 }

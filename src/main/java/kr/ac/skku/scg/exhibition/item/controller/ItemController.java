@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import java.util.UUID;
 import kr.ac.skku.scg.exhibition.global.auth.resolver.AuthenticatedUser;
 import kr.ac.skku.scg.exhibition.global.auth.resolver.CurrentUser;
+import kr.ac.skku.scg.exhibition.global.auth.resolver.CurrentUserArgumentResolver;
 import kr.ac.skku.scg.exhibition.global.dto.ListResponse;
 import kr.ac.skku.scg.exhibition.item.dto.request.ItemListRequest;
 import kr.ac.skku.scg.exhibition.item.dto.response.ItemResponse;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import static org.springframework.data.domain.Sort.Direction.DESC;
@@ -32,16 +34,19 @@ public class ItemController {
     private final ItemService itemService;
 
     @GetMapping("/{id}")
-    public ResponseEntity<ItemResponse> get(@PathVariable UUID id) {
-        return ResponseEntity.ok(itemService.get(id));
+    public ResponseEntity<ItemResponse> get(
+            @PathVariable UUID id,
+            @RequestAttribute(name = CurrentUserArgumentResolver.REQUEST_ATTR_USER_ID, required = false) UUID currentUserId) {
+        return ResponseEntity.ok(itemService.get(id, currentUserId));
     }
 
     @GetMapping
     public ResponseEntity<ListResponse<ItemResponse>> list(
             @Valid @ModelAttribute ItemListRequest request,
             @PageableDefault(sort = "createdAt", direction = DESC)
-            Pageable pageable) {
-        return ResponseEntity.ok(itemService.list(request, pageable));
+            Pageable pageable,
+            @RequestAttribute(name = CurrentUserArgumentResolver.REQUEST_ATTR_USER_ID, required = false) UUID currentUserId) {
+        return ResponseEntity.ok(itemService.list(request, pageable, currentUserId));
     }
 
     @PostMapping("/{id}/like")
