@@ -1,6 +1,7 @@
 package kr.ac.skku.scg.exhibition.global.auth.client;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.List;
 import kr.ac.skku.scg.exhibition.global.auth.config.AuthProperties;
 import kr.ac.skku.scg.exhibition.global.error.UnauthorizedException;
 import org.springframework.http.MediaType;
@@ -20,11 +21,12 @@ public class KakaoAuthClient {
         this.authProperties = authProperties;
     }
 
-    public KakaoUserProfile getUserProfile(String code) {
+    public KakaoUserProfile getUserProfile(String code, String requestedRedirectUri) {
         AuthProperties.Kakao kakao = authProperties.getKakao();
         validateKakaoProperties(kakao);
+        String redirectUri = resolveRedirectUri(kakao, requestedRedirectUri);
 
-        KakaoTokenResponse tokenResponse = requestToken(kakao, code);
+        KakaoTokenResponse tokenResponse = requestToken(kakao, code, redirectUri);
         KakaoUserResponse userResponse = requestUserInfo(kakao, tokenResponse.accessToken());
 
         String providerId = userResponse.id() == null ? null : userResponse.id().toString();
@@ -38,12 +40,12 @@ public class KakaoAuthClient {
         return new KakaoUserProfile(providerId, name, email);
     }
 
-    private KakaoTokenResponse requestToken(AuthProperties.Kakao kakao, String code) {
+    private KakaoTokenResponse requestToken(AuthProperties.Kakao kakao, String code, String redirectUri) {
         MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
         form.add("grant_type", "authorization_code");
         form.add("client_id", kakao.getClientId());
         form.add("code", code);
-        form.add("redirect_uri", kakao.getRedirectUri());
+        form.add("redirect_uri", redirectUri);
         if (kakao.getClientSecret() != null && !kakao.getClientSecret().isBlank()) {
             form.add("client_secret", kakao.getClientSecret());
         }
@@ -89,9 +91,22 @@ public class KakaoAuthClient {
         if (kakao.getClientId() == null || kakao.getClientId().isBlank()) {
             throw new IllegalArgumentException("Kakao client id is not configured");
         }
-        if (kakao.getRedirectUri() == null || kakao.getRedirectUri().isBlank()) {
-            throw new IllegalArgumentException("Kakao redirect uri is not configured");
+        if (kakao.getRedirectUris() == null || kakao.getRedirectUris().isEmpty()) {
+            throw new IllegalArgumentException("Kakao redirect uris are not configured");
         }
+    }
+
+    private String resolveRedirectUri(AuthProperties.Kakao kakao, String requestedRedirectUri) {
+        if (requestedRedirectUri == null || requestedRedirectUri.isBlank()) {
+            return kakao.getPrimaryRedirectUri();
+        }
+
+        String normalizedRedirectUri = requestedRedirectUri.trim();
+        List<String> allowedRedirectUris = kakao.getRedirectUris();
+        if (!allowedRedirectUris.contains(normalizedRedirectUri)) {
+            throw new UnauthorizedException("Requested redirect uri is not allowed");
+        }
+        return normalizedRedirectUri;
     }
 
     private record KakaoTokenResponse(@JsonProperty("access_token") String accessToken) {

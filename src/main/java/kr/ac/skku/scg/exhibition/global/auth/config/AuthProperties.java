@@ -1,5 +1,8 @@
 package kr.ac.skku.scg.exhibition.global.auth.config;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = "app.auth")
@@ -58,7 +61,7 @@ public class AuthProperties {
     public static class Kakao {
         private String clientId;
         private String clientSecret;
-        private String redirectUri;
+        private List<String> redirectUris = new ArrayList<>();
         private String tokenUri = "https://kauth.kakao.com/oauth/token";
         private String userInfoUri = "https://kapi.kakao.com/v2/user/me";
 
@@ -79,11 +82,23 @@ public class AuthProperties {
         }
 
         public String getRedirectUri() {
-            return redirectUri;
+            return getPrimaryRedirectUri();
         }
 
         public void setRedirectUri(String redirectUri) {
-            this.redirectUri = redirectUri;
+            this.redirectUris = parseRedirectUris(redirectUri);
+        }
+
+        public List<String> getRedirectUris() {
+            return redirectUris;
+        }
+
+        public void setRedirectUris(List<String> redirectUris) {
+            this.redirectUris = normalizeRedirectUris(redirectUris);
+        }
+
+        public String getPrimaryRedirectUri() {
+            return redirectUris.isEmpty() ? null : redirectUris.get(0);
         }
 
         public String getTokenUri() {
@@ -100,6 +115,24 @@ public class AuthProperties {
 
         public void setUserInfoUri(String userInfoUri) {
             this.userInfoUri = userInfoUri;
+        }
+
+        private List<String> parseRedirectUris(String redirectUri) {
+            if (redirectUri == null) {
+                return new ArrayList<>();
+            }
+            return normalizeRedirectUris(Arrays.asList(redirectUri.split(",")));
+        }
+
+        private List<String> normalizeRedirectUris(List<String> redirectUris) {
+            if (redirectUris == null) {
+                return new ArrayList<>();
+            }
+            return redirectUris.stream()
+                    .map(uri -> uri == null ? "" : uri.trim())
+                    .filter(uri -> !uri.isBlank())
+                    .distinct()
+                    .toList();
         }
     }
 }

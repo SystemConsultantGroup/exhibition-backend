@@ -2,7 +2,7 @@ spring:
   application:
     name: exhibition
   profiles:
-    active: prod
+    active: dev
     group:
       prod: common
       dev: dev

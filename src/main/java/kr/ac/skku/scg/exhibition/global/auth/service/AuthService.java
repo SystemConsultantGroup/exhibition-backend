@@ -26,8 +26,8 @@ public class AuthService {
     }
 
     @Transactional
-    public AuthTokenResponse loginWithKakao(String code) {
-        KakaoUserProfile profile = kakaoAuthClient.getUserProfile(code);
+    public AuthTokenResponse loginWithKakao(String code, String redirectUri) {
+        KakaoUserProfile profile = kakaoAuthClient.getUserProfile(code, redirectUri);
         String ci = "kakao:" + profile.providerId();
 
         UserEntity user = userRepository.findByCi(ci)
