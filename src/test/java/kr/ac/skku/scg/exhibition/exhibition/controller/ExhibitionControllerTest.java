@@ -46,6 +46,7 @@ class ExhibitionControllerTest {
         when(exhibitionService.get(id)).thenReturn(new ExhibitionResponse(
                 id,
                 "sw-gp",
+                "exhibition.scg.skku.ac.kr",
                 "소프트웨어융합대학 졸업작품 전시회",
                 "설명",
                 null,
@@ -69,6 +70,7 @@ class ExhibitionControllerTest {
                         responseFields(
                                 fieldWithPath("id").description("전시회 ID"),
                                 fieldWithPath("slug").description("전시회 slug"),
+                                fieldWithPath("domain").description("전시회 도메인").optional(),
                                 fieldWithPath("name").description("전시회명"),
                                 fieldWithPath("description").description("전시회 설명").optional(),
                                 fieldWithPath("logoMediaId").description("로고 미디어 ID").optional(),
@@ -87,6 +89,7 @@ class ExhibitionControllerTest {
                 new ExhibitionResponse(
                         UUID.randomUUID(),
                         "sw-gp",
+                        "exhibition.scg.skku.ac.kr",
                         "소프트웨어융합대학 졸업작품 전시회",
                         "설명",
                         null,
@@ -99,19 +102,21 @@ class ExhibitionControllerTest {
                 )
         ));
 
-        mockMvc.perform(get("/exhibitions").param("q", "cse"))
+        mockMvc.perform(get("/exhibitions").param("q", "cse").param("slug", "sw-gp"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.items[0].name").value("소프트웨어융합대학 졸업작품 전시회"))
                 .andDo(document("exhibitions-list",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
                         queryParameters(
-                                parameterWithName("q").optional().description("전시회명 검색어")
+                                parameterWithName("q").optional().description("전시회명 검색어"),
+                                parameterWithName("slug").optional().description("전시회 slug (정확히 일치)")
                         ),
                         responseFields(
                                 fieldWithPath("items").description("전시회 목록"),
                                 fieldWithPath("items[].id").description("전시회 ID"),
                                 fieldWithPath("items[].slug").description("전시회 slug"),
+                                fieldWithPath("items[].domain").description("전시회 도메인").optional(),
                                 fieldWithPath("items[].name").description("전시회명"),
                                 fieldWithPath("items[].description").description("전시회 설명").optional(),
                                 fieldWithPath("items[].logoMediaId").description("로고 미디어 ID").optional(),

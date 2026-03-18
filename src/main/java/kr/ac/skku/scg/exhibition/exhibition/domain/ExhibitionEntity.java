@@ -25,6 +25,9 @@ public class ExhibitionEntity extends BaseEntity {
     @Column(nullable = false, unique = true, length = 64)
     private String slug;
 
+    @Column(unique = true, length = 255)
+    private String domain;
+
     @Column(nullable = false, unique = true, length = 128)
     private String name;
 
@@ -70,6 +73,10 @@ public class ExhibitionEntity extends BaseEntity {
 
     public String getSlug() {
         return slug;
+    }
+
+    public String getDomain() {
+        return domain;
     }
 
     public String getName() {
