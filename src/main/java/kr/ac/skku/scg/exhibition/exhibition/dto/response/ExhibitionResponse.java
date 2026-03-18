@@ -5,6 +5,7 @@ import java.util.UUID;
 public record ExhibitionResponse(
         UUID id,
         String slug,
+        String domain,
         String name,
         String description,
         UUID logoMediaId,

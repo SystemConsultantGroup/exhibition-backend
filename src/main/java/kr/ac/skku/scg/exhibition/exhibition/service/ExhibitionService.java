@@ -28,6 +28,14 @@ public class ExhibitionService {
 
     public List<ExhibitionResponse> list(ExhibitionListRequest request) {
         String keyword = request.getQ();
+        String slug = request.getSlug();
+        // slug 필터가 있으면 해당 전시회만 반환
+        if (slug != null && !slug.isBlank()) {
+            return exhibitionRepository.findBySlug(slug)
+                    .map(this::toResponse)
+                    .map(List::of)
+                    .orElse(List.of());
+        }
         return exhibitionRepository.findAll().stream()
                 .filter(exhibition -> keyword == null || keyword.isBlank() || exhibition.getName().toLowerCase().contains(keyword.toLowerCase()))
                 .map(this::toResponse)
@@ -42,6 +50,7 @@ public class ExhibitionService {
         return new ExhibitionResponse(
                 exhibition.getId(),
                 exhibition.getSlug(),
+                exhibition.getDomain(),
                 exhibition.getName(),
                 exhibition.getDescription(),
                 logoMediaId,
