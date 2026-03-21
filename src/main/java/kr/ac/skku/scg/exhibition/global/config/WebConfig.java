@@ -32,7 +32,10 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowedOrigins(
                         "http://localhost:3000",
                         "http://exhibition.scg.skku.ac.kr",
-                        "https://exhibition.scg.skku.ac.kr"
+                        "https://exhibition.scg.skku.ac.kr",
+                        "https://exhibition.scg.sh",
+                        "https://api.exhibition.scg.sh",
+                        "http://exhibition.scg.sh"
                 )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
                 .allowedHeaders("*")
