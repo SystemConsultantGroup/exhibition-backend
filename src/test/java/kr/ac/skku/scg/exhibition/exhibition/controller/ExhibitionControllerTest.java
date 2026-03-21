@@ -18,6 +18,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.List;
 import java.util.UUID;
 import kr.ac.skku.scg.exhibition.exhibition.dto.response.ExhibitionResponse;
+import kr.ac.skku.scg.exhibition.exhibition.dto.response.ExhibitionSlugResponse;
 import kr.ac.skku.scg.exhibition.exhibition.service.ExhibitionService;
 import kr.ac.skku.scg.exhibition.global.config.SecurityConfig;
 import kr.ac.skku.scg.exhibition.global.error.ApiExceptionHandler;
@@ -129,6 +130,25 @@ class ExhibitionControllerTest {
                                 fieldWithPath("page").description("페이지 번호"),
                                 fieldWithPath("pageSize").description("페이지 크기"),
                                 fieldWithPath("total").description("전체 건수")
+                        )));
+    }
+
+    @Test
+    void getSlugByDomain() throws Exception {
+        when(exhibitionService.getSlugByDomain("exhibition.scg.skku.ac.kr"))
+                .thenReturn(new ExhibitionSlugResponse("sw-gp"));
+
+        mockMvc.perform(get("/exhibitions/slug").param("domain", "exhibition.scg.skku.ac.kr"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.slug").value("sw-gp"))
+                .andDo(document("exhibitions-get-slug",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        queryParameters(
+                                parameterWithName("domain").description("전시회 도메인")
+                        ),
+                        responseFields(
+                                fieldWithPath("slug").description("전시회 slug")
                         )));
     }
 }

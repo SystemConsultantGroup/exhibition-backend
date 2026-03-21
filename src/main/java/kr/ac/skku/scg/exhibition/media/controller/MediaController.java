@@ -19,6 +19,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class MediaController {
 
+    private static final String CACHE_CONTROL_VALUE = "public, max-age=31536000, immutable";
+
     private final MediaService mediaService;
 
     @GetMapping("/{id}")
@@ -28,6 +30,7 @@ public class MediaController {
         MediaType mediaType = resolveMediaType(file.contentType());
 
         return ResponseEntity.ok()
+                .header("Cache-Control", CACHE_CONTROL_VALUE)
                 .contentType(mediaType)
                 .contentLength(file.contentLength())
                 .body(resource);
