@@ -2,6 +2,7 @@ package kr.ac.skku.scg.exhibition.exhibition.controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.hamcrest.Matchers.nullValue;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessRequest;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.preprocessResponse;
@@ -145,10 +146,20 @@ class ExhibitionControllerTest {
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
                         queryParameters(
-                                parameterWithName("domain").description("전시회 도메인")
+                                parameterWithName("domain").optional().description("전시회 도메인")
                         ),
                         responseFields(
                                 fieldWithPath("slug").description("전시회 slug")
                         )));
+    }
+
+    @Test
+    void getSlugByDomainWhenDomainMissingReturnsNull() throws Exception {
+        when(exhibitionService.getSlugByDomain(null))
+                .thenReturn(new ExhibitionSlugResponse(null));
+
+        mockMvc.perform(get("/exhibitions/slug"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.slug", nullValue()));
     }
 }
