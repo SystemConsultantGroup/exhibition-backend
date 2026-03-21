@@ -5,6 +5,7 @@ import java.util.UUID;
 import kr.ac.skku.scg.exhibition.exhibition.domain.ExhibitionEntity;
 import kr.ac.skku.scg.exhibition.exhibition.dto.request.ExhibitionListRequest;
 import kr.ac.skku.scg.exhibition.exhibition.dto.response.ExhibitionResponse;
+import kr.ac.skku.scg.exhibition.exhibition.dto.response.ExhibitionSlugResponse;
 import kr.ac.skku.scg.exhibition.exhibition.repository.ExhibitionRepository;
 import kr.ac.skku.scg.exhibition.global.error.NotFoundException;
 import org.springframework.stereotype.Service;
@@ -40,6 +41,12 @@ public class ExhibitionService {
                 .filter(exhibition -> keyword == null || keyword.isBlank() || exhibition.getName().toLowerCase().contains(keyword.toLowerCase()))
                 .map(this::toResponse)
                 .toList();
+    }
+
+    public ExhibitionSlugResponse getSlugByDomain(String domain) {
+        ExhibitionEntity exhibition = exhibitionRepository.findByDomain(domain)
+                .orElseThrow(() -> new NotFoundException("Exhibition not found by domain: " + domain));
+        return new ExhibitionSlugResponse(exhibition.getSlug());
     }
 
     private ExhibitionResponse toResponse(ExhibitionEntity exhibition) {

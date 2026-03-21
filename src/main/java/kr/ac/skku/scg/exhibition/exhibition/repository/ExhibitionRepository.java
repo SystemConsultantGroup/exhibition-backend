@@ -8,4 +8,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface ExhibitionRepository extends JpaRepository<ExhibitionEntity, UUID> {
 
     Optional<ExhibitionEntity> findBySlug(String slug);
+
+    Optional<ExhibitionEntity> findByDomain(String domain);
 }
