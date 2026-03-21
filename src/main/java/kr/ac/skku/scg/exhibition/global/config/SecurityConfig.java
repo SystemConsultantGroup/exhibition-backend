@@ -24,7 +24,10 @@ public class SecurityConfig {
                 "http://localhost:*",
                 "http://127.0.0.1:*",
                 "http://exhibition.scg.skku.ac.kr",
-                "https://exhibition.scg.skku.ac.kr"
+                "https://exhibition.scg.skku.ac.kr",
+                "https://exhibition.scg.sh",
+                "https://api.exhibition.scg.sh",
+                "http://exhibition.scg.sh"
         ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
