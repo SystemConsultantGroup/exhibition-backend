@@ -1,6 +1,5 @@
 package kr.ac.skku.scg.exhibition.exhibition.controller;
 
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
@@ -39,7 +38,8 @@ public class ExhibitionController {
     }
 
     @GetMapping("/slug")
-    public ResponseEntity<ExhibitionSlugResponse> getSlugByDomain(@RequestParam @NotBlank String domain) {
+    public ResponseEntity<ExhibitionSlugResponse> getSlugByDomain(
+            @RequestParam(required = false) String domain) {
         return ResponseEntity.ok(exhibitionService.getSlugByDomain(domain));
     }
 }

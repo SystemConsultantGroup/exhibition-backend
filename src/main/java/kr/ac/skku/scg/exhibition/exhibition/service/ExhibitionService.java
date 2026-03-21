@@ -8,6 +8,7 @@ import kr.ac.skku.scg.exhibition.exhibition.dto.response.ExhibitionResponse;
 import kr.ac.skku.scg.exhibition.exhibition.dto.response.ExhibitionSlugResponse;
 import kr.ac.skku.scg.exhibition.exhibition.repository.ExhibitionRepository;
 import kr.ac.skku.scg.exhibition.global.error.NotFoundException;
+import org.springframework.util.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,9 +45,13 @@ public class ExhibitionService {
     }
 
     public ExhibitionSlugResponse getSlugByDomain(String domain) {
-        ExhibitionEntity exhibition = exhibitionRepository.findByDomain(domain)
-                .orElseThrow(() -> new NotFoundException("Exhibition not found by domain: " + domain));
-        return new ExhibitionSlugResponse(exhibition.getSlug());
+        if (!StringUtils.hasText(domain)) {
+            return new ExhibitionSlugResponse(null);
+        }
+
+        return exhibitionRepository.findByDomain(domain.trim())
+                .map(exhibition -> new ExhibitionSlugResponse(exhibition.getSlug()))
+                .orElseGet(() -> new ExhibitionSlugResponse(null));
     }
 
     private ExhibitionResponse toResponse(ExhibitionEntity exhibition) {
