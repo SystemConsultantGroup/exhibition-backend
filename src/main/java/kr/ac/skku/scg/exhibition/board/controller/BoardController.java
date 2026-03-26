@@ -6,7 +6,9 @@ import java.util.UUID;
 import kr.ac.skku.scg.exhibition.board.dto.request.BoardListRequest;
 import kr.ac.skku.scg.exhibition.board.dto.response.BoardResponse;
 import kr.ac.skku.scg.exhibition.board.service.BoardService;
+import kr.ac.skku.scg.exhibition.exhibition.domain.ExhibitionEntity;
 import kr.ac.skku.scg.exhibition.global.dto.ListResponse;
+import kr.ac.skku.scg.exhibition.global.tenant.CurrentExhibition;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -25,12 +27,17 @@ public class BoardController {
     private final BoardService boardService;
 
     @GetMapping("/{id}")
-    public ResponseEntity<BoardResponse> get(@PathVariable UUID id) {
-        return ResponseEntity.ok(boardService.get(id));
+    public ResponseEntity<BoardResponse> get(
+            @PathVariable UUID id,
+            @CurrentExhibition ExhibitionEntity currentExhibition) {
+        return ResponseEntity.ok(boardService.get(id, currentExhibition.getId()));
     }
 
     @GetMapping
-    public ResponseEntity<ListResponse<BoardResponse>> list(@Valid @ModelAttribute BoardListRequest request) {
+    public ResponseEntity<ListResponse<BoardResponse>> list(
+            @Valid @ModelAttribute BoardListRequest request,
+            @CurrentExhibition ExhibitionEntity currentExhibition) {
+        request.setExhibitionId(currentExhibition.getId());
         List<BoardResponse> boards = boardService.list(request);
         return ResponseEntity.ok(ListResponse.of(boards));
     }

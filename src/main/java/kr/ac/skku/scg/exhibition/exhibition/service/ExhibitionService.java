@@ -5,12 +5,11 @@ import java.util.UUID;
 import kr.ac.skku.scg.exhibition.exhibition.domain.ExhibitionEntity;
 import kr.ac.skku.scg.exhibition.exhibition.dto.request.ExhibitionListRequest;
 import kr.ac.skku.scg.exhibition.exhibition.dto.response.ExhibitionResponse;
-import kr.ac.skku.scg.exhibition.exhibition.dto.response.ExhibitionSlugResponse;
 import kr.ac.skku.scg.exhibition.exhibition.repository.ExhibitionRepository;
 import kr.ac.skku.scg.exhibition.global.error.NotFoundException;
-import org.springframework.util.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 @Service
 @Transactional(readOnly = true)
@@ -22,36 +21,25 @@ public class ExhibitionService {
         this.exhibitionRepository = exhibitionRepository;
     }
 
-    public ExhibitionResponse get(UUID id) {
+    public ExhibitionResponse get(UUID id, UUID currentExhibitionId) {
         ExhibitionEntity exhibition = exhibitionRepository.findById(id)
+                .filter(candidate -> candidate.getId().equals(currentExhibitionId))
                 .orElseThrow(() -> new NotFoundException("Exhibition not found: " + id));
         return toResponse(exhibition);
     }
 
-    public List<ExhibitionResponse> list(ExhibitionListRequest request) {
+    public List<ExhibitionResponse> list(ExhibitionListRequest request, ExhibitionEntity currentExhibition) {
         String keyword = request.getQ();
         String slug = request.getSlug();
-        // slug 필터가 있으면 해당 전시회만 반환
-        if (slug != null && !slug.isBlank()) {
-            return exhibitionRepository.findBySlug(slug)
-                    .map(this::toResponse)
-                    .map(List::of)
-                    .orElse(List.of());
-        }
-        return exhibitionRepository.findAll().stream()
-                .filter(exhibition -> keyword == null || keyword.isBlank() || exhibition.getName().toLowerCase().contains(keyword.toLowerCase()))
-                .map(this::toResponse)
-                .toList();
-    }
 
-    public ExhibitionSlugResponse getSlugByDomain(String domain) {
-        if (!StringUtils.hasText(domain)) {
-            return new ExhibitionSlugResponse(null);
+        if (StringUtils.hasText(slug) && !slug.trim().equals(currentExhibition.getSlug())) {
+            return List.of();
         }
-
-        return exhibitionRepository.findByDomain(domain.trim())
-                .map(exhibition -> new ExhibitionSlugResponse(exhibition.getSlug()))
-                .orElseGet(() -> new ExhibitionSlugResponse(null));
+        if (StringUtils.hasText(keyword)
+                && !currentExhibition.getName().toLowerCase().contains(keyword.trim().toLowerCase())) {
+            return List.of();
+        }
+        return List.of(toResponse(currentExhibition));
     }
 
     private ExhibitionResponse toResponse(ExhibitionEntity exhibition) {
@@ -62,7 +50,8 @@ public class ExhibitionService {
         return new ExhibitionResponse(
                 exhibition.getId(),
                 exhibition.getSlug(),
-                exhibition.getDomain(),
+                exhibition.getDefaultDomain(),
+                exhibition.getCustomDomain(),
                 exhibition.getName(),
                 exhibition.getDescription(),
                 logoMediaId,

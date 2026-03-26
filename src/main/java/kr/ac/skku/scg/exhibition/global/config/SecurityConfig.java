@@ -1,11 +1,14 @@
 package kr.ac.skku.scg.exhibition.global.config;
 
+import java.util.List;
+import java.util.Locale;
+import kr.ac.skku.scg.exhibition.exhibition.repository.ExhibitionRepository;
 import kr.ac.skku.scg.exhibition.global.auth.security.JwtAuthenticationFilter;
 import kr.ac.skku.scg.exhibition.global.auth.service.JwtTokenService;
-import java.util.List;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -18,23 +21,37 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class SecurityConfig {
 
     @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(List.of(
-                "http://localhost:*",
-                "http://127.0.0.1:*",
-                "http://exhibition.scg.skku.ac.kr",
-                "https://exhibition.scg.skku.ac.kr"
-        ));
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("*"));
-        configuration.setExposedHeaders(List.of("Authorization"));
-        configuration.setAllowCredentials(true);
-        configuration.setMaxAge(3600L);
+    public CorsConfigurationSource corsConfigurationSource(ObjectProvider<ExhibitionRepository> exhibitionRepositoryProvider) {
+        return request -> {
+            String origin = request.getHeader(HttpHeaders.ORIGIN);
+            if (origin == null || origin.isBlank()) {
+                return null;
+            }
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
+            String host = request.getHeader(HttpHeaders.ORIGIN);
+            try {
+                host = java.net.URI.create(origin.trim()).getHost();
+            } catch (IllegalArgumentException ignored) {
+                return null;
+            }
+
+            if (host == null || host.isBlank()) {
+                return null;
+            }
+
+            if (!isAllowedOrigin(host.toLowerCase(Locale.ROOT), exhibitionRepositoryProvider.getIfAvailable())) {
+                return null;
+            }
+
+            CorsConfiguration configuration = new CorsConfiguration();
+            configuration.setAllowedOrigins(List.of(origin));
+            configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+            configuration.setAllowedHeaders(List.of("*"));
+            configuration.setExposedHeaders(List.of("Authorization"));
+            configuration.setAllowCredentials(true);
+            configuration.setMaxAge(3600L);
+            return configuration;
+        };
     }
 
     @Bean
@@ -52,5 +69,13 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
                 .build();
+    }
+
+    private boolean isAllowedOrigin(String host, ExhibitionRepository exhibitionRepository) {
+        if ("localhost".equals(host) || "127.0.0.1".equals(host)) {
+            return true;
+        }
+        return exhibitionRepository != null
+                && exhibitionRepository.existsByDefaultDomainIgnoreCaseOrCustomDomainIgnoreCase(host, host);
     }
 }

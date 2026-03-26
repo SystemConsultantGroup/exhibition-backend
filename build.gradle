@@ -10,9 +10,8 @@ version = '0.0.1-SNAPSHOT'
 description = 'exhibition'
 
 java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
-    }
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
 
 configurations {
@@ -60,6 +59,10 @@ dependencies {
 tasks.named('test') {
     outputs.dir snippetsDir
     useJUnitPlatform()
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.release = 17
 }
 
 tasks.named('asciidoctor') {

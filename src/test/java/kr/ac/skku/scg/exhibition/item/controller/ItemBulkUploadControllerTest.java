@@ -8,9 +8,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.Optional;
 import java.util.UUID;
+import kr.ac.skku.scg.exhibition.exhibition.domain.ExhibitionEntity;
 import kr.ac.skku.scg.exhibition.global.config.SecurityConfig;
 import kr.ac.skku.scg.exhibition.global.config.WebConfig;
 import kr.ac.skku.scg.exhibition.global.error.ApiExceptionHandler;
+import kr.ac.skku.scg.exhibition.global.tenant.CurrentExhibitionArgumentResolver;
 import kr.ac.skku.scg.exhibition.item.dto.response.ItemBulkUploadResponse;
 import kr.ac.skku.scg.exhibition.item.service.ItemBulkUploadService;
 import kr.ac.skku.scg.exhibition.user.domain.UserEntity;
@@ -40,8 +42,9 @@ class ItemBulkUploadControllerTest {
     @Test
     void upload() throws Exception {
         UUID userId = UUID.randomUUID();
+        UUID exhibitionId = UUID.randomUUID();
         when(userRepository.findById(userId)).thenReturn(Optional.of(testAdminUser(userId)));
-        when(itemBulkUploadService.upload(any(), any())).thenReturn(new ItemBulkUploadResponse(2, 3, 4));
+        when(itemBulkUploadService.upload(any(), any(UUID.class), any())).thenReturn(new ItemBulkUploadResponse(2, 3, 4));
 
         MockMultipartFile file = new MockMultipartFile(
                 "file",
@@ -52,11 +55,16 @@ class ItemBulkUploadControllerTest {
 
         mockMvc.perform(multipart("/admin/items/bulk/upload")
                         .file(file)
-                        .requestAttr("auth.userId", userId))
+                        .requestAttr("auth.userId", userId)
+                        .requestAttr(CurrentExhibitionArgumentResolver.REQUEST_ATTR_EXHIBITION, currentExhibition(exhibitionId)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.createdItems").value(2))
                 .andExpect(jsonPath("$.createdMediaAssets").value(3))
                 .andExpect(jsonPath("$.createdClassificationMappings").value(4));
+    }
+
+    private ExhibitionEntity currentExhibition(UUID exhibitionId) {
+        return new ExhibitionEntity(exhibitionId, "sw-gp", "전시");
     }
 
     private UserEntity testAdminUser(UUID userId) {

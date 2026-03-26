@@ -8,9 +8,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.Optional;
 import java.util.UUID;
+import kr.ac.skku.scg.exhibition.exhibition.domain.ExhibitionEntity;
 import kr.ac.skku.scg.exhibition.global.config.SecurityConfig;
 import kr.ac.skku.scg.exhibition.global.config.WebConfig;
 import kr.ac.skku.scg.exhibition.global.error.ApiExceptionHandler;
+import kr.ac.skku.scg.exhibition.global.tenant.CurrentExhibitionArgumentResolver;
 import kr.ac.skku.scg.exhibition.item.dto.response.ItemBulkTemplateFile;
 import kr.ac.skku.scg.exhibition.item.service.ItemBulkTemplateService;
 import kr.ac.skku.scg.exhibition.user.domain.UserEntity;
@@ -48,13 +50,17 @@ class ItemBulkTemplateControllerTest {
 
         mockMvc.perform(get("/admin/items/bulk/template")
                         .requestAttr("auth.userId", userId)
-                        .param("exhibitionId", exhibitionId.toString())
+                        .requestAttr(CurrentExhibitionArgumentResolver.REQUEST_ATTR_EXHIBITION, currentExhibition(exhibitionId))
                         .param("eventPeriodId", eventPeriodId.toString()))
                 .andExpect(status().isOk())
                 .andExpect(header().string("Content-Type",
                         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
                 .andExpect(header().string("Content-Disposition",
                         "attachment; filename=\"item-bulk-template.xlsx\""));
+    }
+
+    private ExhibitionEntity currentExhibition(UUID exhibitionId) {
+        return new ExhibitionEntity(exhibitionId, "sw-gp", "전시");
     }
 
     private UserEntity testAdminUser(UUID userId) {

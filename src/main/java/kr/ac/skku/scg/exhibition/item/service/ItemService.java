@@ -37,8 +37,8 @@ public class ItemService {
         this.userRepository = userRepository;
     }
 
-    public ItemResponse get(UUID id, @Nullable UUID currentUserId) {
-        ItemEntity item = itemRepository.findById(id)
+    public ItemResponse get(UUID id, UUID exhibitionId, @Nullable UUID currentUserId) {
+        ItemEntity item = itemRepository.findByIdAndExhibition_Id(id, exhibitionId)
                 .orElseThrow(() -> new NotFoundException("Item not found: " + id));
         long likes = itemLikeRepository.countByItem_Id(id);
         boolean isLike = currentUserId != null && itemLikeRepository.existsByItem_IdAndUser_Id(id, currentUserId);
@@ -73,8 +73,8 @@ public class ItemService {
     }
 
     @Transactional
-    public void like(UUID itemId, AuthenticatedUser currentUser) {
-        ItemEntity item = itemRepository.findById(itemId)
+    public void like(UUID itemId, UUID exhibitionId, AuthenticatedUser currentUser) {
+        ItemEntity item = itemRepository.findByIdAndExhibition_Id(itemId, exhibitionId)
                 .orElseThrow(() -> new NotFoundException("Item not found: " + itemId));
 
         if (itemLikeRepository.existsByItem_IdAndUser_Id(itemId, currentUser.id())) {
@@ -90,8 +90,8 @@ public class ItemService {
     }
 
     @Transactional
-    public void unlike(UUID itemId, AuthenticatedUser currentUser) {
-        if (!itemRepository.existsById(itemId)) {
+    public void unlike(UUID itemId, UUID exhibitionId, AuthenticatedUser currentUser) {
+        if (!itemRepository.existsByIdAndExhibition_Id(itemId, exhibitionId)) {
             throw new NotFoundException("Item not found: " + itemId);
         }
 

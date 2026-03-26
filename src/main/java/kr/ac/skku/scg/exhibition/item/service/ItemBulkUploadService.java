@@ -63,7 +63,7 @@ public class ItemBulkUploadService {
     }
 
     @Transactional
-    public ItemBulkUploadResponse upload(MultipartFile file, AuthenticatedUser currentUser) {
+    public ItemBulkUploadResponse upload(MultipartFile file, UUID currentExhibitionId, AuthenticatedUser currentUser) {
         validateAdmin(currentUser);
         validateFile(file);
 
@@ -89,6 +89,7 @@ public class ItemBulkUploadService {
 
                 int excelRowNum = rowIndex + 1;
                 UUID exhibitionId = parseUuid(cellValue(row, 0, formatter), "exhibition_id", excelRowNum);
+                validateTenantExhibition(exhibitionId, currentExhibitionId, excelRowNum);
                 UUID eventPeriodId = parseUuid(cellValue(row, 1, formatter), "event_period_id", excelRowNum);
                 String categoryName = required(cellValue(row, 3, formatter), "category_name", excelRowNum);
                 String title = required(cellValue(row, 5, formatter), "title", excelRowNum);
@@ -245,6 +246,13 @@ public class ItemBulkUploadService {
     private void validateFile(MultipartFile file) {
         if (file == null || file.isEmpty()) {
             throw new IllegalArgumentException("Excel file is required");
+        }
+    }
+
+    private void validateTenantExhibition(UUID exhibitionId, UUID currentExhibitionId, int excelRowNum) {
+        if (!currentExhibitionId.equals(exhibitionId)) {
+            throw new IllegalArgumentException(
+                    "Row " + excelRowNum + ": exhibition_id does not match current origin exhibition");
         }
     }
 }

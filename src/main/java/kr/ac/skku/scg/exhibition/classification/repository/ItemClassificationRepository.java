@@ -10,5 +10,7 @@ public interface ItemClassificationRepository extends JpaRepository<ItemClassifi
 
     List<ItemClassificationEntity> findAllByExhibition_Id(UUID exhibitionId);
 
+    Optional<ItemClassificationEntity> findByIdAndExhibition_Id(UUID id, UUID exhibitionId);
+
     Optional<ItemClassificationEntity> findByExhibition_IdAndName(UUID exhibitionId, String name);
 }

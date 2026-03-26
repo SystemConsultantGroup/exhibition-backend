@@ -663,9 +663,6 @@ Host: localhost:8080
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 200 OK
-Vary: Origin
-Vary: Access-Control-Request-Method
-Vary: Access-Control-Request-Headers
 Content-Type: application/json
 X-Content-Type-Options: nosniff
 X-XSS-Protection: 0
@@ -797,9 +794,6 @@ Host: localhost:8080
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 200 OK
-Vary: Origin
-Vary: Access-Control-Request-Method
-Vary: Access-Control-Request-Headers
 Content-Type: application/json
 X-Content-Type-Options: nosniff
 X-XSS-Protection: 0
@@ -912,9 +906,6 @@ Host: localhost:8080
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 204 No Content
-Vary: Origin
-Vary: Access-Control-Request-Method
-Vary: Access-Control-Request-Headers
 X-Content-Type-Options: nosniff
 X-XSS-Protection: 0
 Cache-Control: no-cache, no-store, max-age=0, must-revalidate
@@ -998,9 +989,14 @@ Host: localhost:8080</code></pre>
 <td class="tableblock halign-left valign-top"><p class="tableblock">전시회 slug</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>items[].domain</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>items[].defaultDomain</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">전시회 도메인</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">기본 전시 도메인</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>items[].customDomain</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">커스텀 전시 도메인</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>items[].name</code></p></td>
@@ -1070,9 +1066,6 @@ Host: localhost:8080</code></pre>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 200 OK
-Vary: Origin
-Vary: Access-Control-Request-Method
-Vary: Access-Control-Request-Headers
 Content-Type: application/json
 X-Content-Type-Options: nosniff
 X-XSS-Protection: 0
@@ -1080,13 +1073,14 @@ Cache-Control: no-cache, no-store, max-age=0, must-revalidate
 Pragma: no-cache
 Expires: 0
 X-Frame-Options: DENY
-Content-Length: 482
+Content-Length: 538
 
 {
   "items" : [ {
-    "id" : "53737312-0907-4090-be5f-f99579f72360",
+    "id" : "5737a78f-b0f1-4377-9fd7-40fef1d636f4",
     "slug" : "sw-gp",
-    "domain" : "exhibition.scg.skku.ac.kr",
+    "defaultDomain" : "exhibition.scg.skku.ac.kr",
+    "customDomain" : "custom.exhibition.scg.sh",
     "name" : "소프트웨어융합대학 졸업작품 전시회",
     "description" : "설명",
     "logoMediaId" : null,
@@ -1110,9 +1104,10 @@ Content-Length: 482
 <div class="content">
 <pre class="highlight nowrap"><code class="language-json" data-lang="json">{
   "items" : [ {
-    "id" : "53737312-0907-4090-be5f-f99579f72360",
+    "id" : "5737a78f-b0f1-4377-9fd7-40fef1d636f4",
     "slug" : "sw-gp",
-    "domain" : "exhibition.scg.skku.ac.kr",
+    "defaultDomain" : "exhibition.scg.skku.ac.kr",
+    "customDomain" : "custom.exhibition.scg.sh",
     "name" : "소프트웨어융합대학 졸업작품 전시회",
     "description" : "설명",
     "logoMediaId" : null,
@@ -1158,7 +1153,7 @@ Content-Length: 482
 <h4 id="_요청_예시_5">3.2.2. 요청 예시</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /exhibitions/d0528761-14ed-4ee6-ba03-dc5664a74344 HTTP/1.1
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /exhibitions/77f48fd9-4db2-46d5-9a32-0c8be9422d1d HTTP/1.1
 Host: localhost:8080</code></pre>
 </div>
 </div>
@@ -1190,9 +1185,14 @@ Host: localhost:8080</code></pre>
 <td class="tableblock halign-left valign-top"><p class="tableblock">전시회 slug</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>domain</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>defaultDomain</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">전시회 도메인</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">기본 전시 도메인</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>customDomain</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">커스텀 전시 도메인</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>name</code></p></td>
@@ -1247,9 +1247,6 @@ Host: localhost:8080</code></pre>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 200 OK
-Vary: Origin
-Vary: Access-Control-Request-Method
-Vary: Access-Control-Request-Headers
 Content-Type: application/json
 X-Content-Type-Options: nosniff
 X-XSS-Protection: 0
@@ -1257,12 +1254,13 @@ Cache-Control: no-cache, no-store, max-age=0, must-revalidate
 Pragma: no-cache
 Expires: 0
 X-Frame-Options: DENY
-Content-Length: 389
+Content-Length: 443
 
 {
-  "id" : "d0528761-14ed-4ee6-ba03-dc5664a74344",
+  "id" : "77f48fd9-4db2-46d5-9a32-0c8be9422d1d",
   "slug" : "sw-gp",
-  "domain" : "exhibition.scg.skku.ac.kr",
+  "defaultDomain" : "exhibition.scg.skku.ac.kr",
+  "customDomain" : "custom.exhibition.scg.sh",
   "name" : "소프트웨어융합대학 졸업작품 전시회",
   "description" : "설명",
   "logoMediaId" : null,
@@ -1281,9 +1279,10 @@ Content-Length: 389
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-json" data-lang="json">{
-  "id" : "d0528761-14ed-4ee6-ba03-dc5664a74344",
+  "id" : "77f48fd9-4db2-46d5-9a32-0c8be9422d1d",
   "slug" : "sw-gp",
-  "domain" : "exhibition.scg.skku.ac.kr",
+  "defaultDomain" : "exhibition.scg.skku.ac.kr",
+  "customDomain" : "custom.exhibition.scg.sh",
   "name" : "소프트웨어융합대학 졸업작품 전시회",
   "description" : "설명",
   "logoMediaId" : null,
@@ -1302,89 +1301,16 @@ Content-Length: 389
 <h3 id="_도메인으로_slug_조회">3.3. 도메인으로 slug 조회</h3>
 <div class="sect3">
 <h4 id="_요청_예시_6">3.3.1. 요청 예시</h4>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /exhibitions/slug?domain=exhibition.scg.skku.ac.kr HTTP/1.1
-Host: localhost:8080</code></pre>
-</div>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_쿼리_파라미터_2">3.3.2. 쿼리 파라미터</h4>
-<table class="tableblock frame-all grid-all stretch">
-<colgroup>
-<col style="width: 50%;">
-<col style="width: 50%;">
-</colgroup>
-<thead>
-<tr>
-<th class="tableblock halign-left valign-top">이름</th>
-<th class="tableblock halign-left valign-top">설명</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>domain</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">전시회 도메인</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="sect3">
-<h4 id="_응답_필드_5">3.3.3. 응답 필드</h4>
-<table class="tableblock frame-all grid-all stretch">
-<colgroup>
-<col style="width: 33.3333%;">
-<col style="width: 33.3333%;">
-<col style="width: 33.3334%;">
-</colgroup>
-<thead>
-<tr>
-<th class="tableblock halign-left valign-top">경로</th>
-<th class="tableblock halign-left valign-top">타입</th>
-<th class="tableblock halign-left valign-top">설명</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>slug</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">전시회 slug</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="sect3">
-<h4 id="_응답_예시_6">3.3.4. 응답 예시</h4>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 200 OK
-Vary: Origin
-Vary: Access-Control-Request-Method
-Vary: Access-Control-Request-Headers
-Content-Type: application/json
-X-Content-Type-Options: nosniff
-X-XSS-Protection: 0
-Cache-Control: no-cache, no-store, max-age=0, must-revalidate
-Pragma: no-cache
-Expires: 0
-X-Frame-Options: DENY
-Content-Length: 22
-
-{
-  "slug" : "sw-gp"
-}</code></pre>
-</div>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_응답_본문json_5">3.3.5. 응답 본문(JSON)</h4>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight nowrap"><code class="language-json" data-lang="json">{
-  "slug" : "sw-gp"
-}</code></pre>
-</div>
+<div class="paragraph">
+<p>Unresolved directive in index.adoc - include::/Volumes/Sub/exhibition-backend/build/generated-snippets/exhibitions-get-slug/http-request.adoc[]
+==== 쿼리 파라미터
+Unresolved directive in index.adoc - include::/Volumes/Sub/exhibition-backend/build/generated-snippets/exhibitions-get-slug/query-parameters.adoc[]
+==== 응답 필드
+Unresolved directive in index.adoc - include::/Volumes/Sub/exhibition-backend/build/generated-snippets/exhibitions-get-slug/response-fields.adoc[]
+==== 응답 예시
+Unresolved directive in index.adoc - include::/Volumes/Sub/exhibition-backend/build/generated-snippets/exhibitions-get-slug/http-response.adoc[]
+==== 응답 본문(JSON)
+Unresolved directive in index.adoc - include::/Volumes/Sub/exhibition-backend/build/generated-snippets/exhibitions-get-slug/response-body.adoc[]</p>
 </div>
 </div>
 </div>
@@ -1399,13 +1325,13 @@ Content-Length: 22
 <h4 id="_요청_예시_7">4.1.1. 요청 예시</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /categories?exhibitionId=a796b2a6-7d63-4f2a-ad00-c73a7dfb456d HTTP/1.1
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /categories HTTP/1.1
 Host: localhost:8080</code></pre>
 </div>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_응답_필드_6">4.1.2. 응답 필드</h4>
+<h4 id="_응답_필드_5">4.1.2. 응답 필드</h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 33.3333%;">
@@ -1459,13 +1385,10 @@ Host: localhost:8080</code></pre>
 </table>
 </div>
 <div class="sect3">
-<h4 id="_응답_예시_7">4.1.3. 응답 예시</h4>
+<h4 id="_응답_예시_6">4.1.3. 응답 예시</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 200 OK
-Vary: Origin
-Vary: Access-Control-Request-Method
-Vary: Access-Control-Request-Headers
 Content-Type: application/json
 X-Content-Type-Options: nosniff
 X-XSS-Protection: 0
@@ -1477,8 +1400,8 @@ Content-Length: 202
 
 {
   "items" : [ {
-    "id" : "9d136b35-116e-4bbc-a504-a797794eaa1e",
-    "exhibitionId" : "a796b2a6-7d63-4f2a-ad00-c73a7dfb456d",
+    "id" : "943a96d3-437b-4887-98e9-538de810c6bb",
+    "exhibitionId" : "ad1cd5b0-5192-4586-be31-2d77b57c9e9f",
     "name" : "AI"
   } ],
   "page" : 1,
@@ -1489,13 +1412,13 @@ Content-Length: 202
 </div>
 </div>
 <div class="sect3">
-<h4 id="_응답_본문json_6">4.1.4. 응답 본문(JSON)</h4>
+<h4 id="_응답_본문json_5">4.1.4. 응답 본문(JSON)</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-json" data-lang="json">{
   "items" : [ {
-    "id" : "9d136b35-116e-4bbc-a504-a797794eaa1e",
-    "exhibitionId" : "a796b2a6-7d63-4f2a-ad00-c73a7dfb456d",
+    "id" : "943a96d3-437b-4887-98e9-538de810c6bb",
+    "exhibitionId" : "ad1cd5b0-5192-4586-be31-2d77b57c9e9f",
     "name" : "AI"
   } ],
   "page" : 1,
@@ -1512,13 +1435,13 @@ Content-Length: 202
 <h4 id="_요청_예시_8">4.2.1. 요청 예시</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /categories/2de59cdd-68f1-4357-b758-21598c18ae56 HTTP/1.1
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /categories/adb3d069-ca55-4a5c-ba41-b6d29c3cab93 HTTP/1.1
 Host: localhost:8080</code></pre>
 </div>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_응답_필드_7">4.2.2. 응답 필드</h4>
+<h4 id="_응답_필드_6">4.2.2. 응답 필드</h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 33.3333%;">
@@ -1552,13 +1475,10 @@ Host: localhost:8080</code></pre>
 </table>
 </div>
 <div class="sect3">
-<h4 id="_응답_예시_8">4.2.3. 응답 예시</h4>
+<h4 id="_응답_예시_7">4.2.3. 응답 예시</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 200 OK
-Vary: Origin
-Vary: Access-Control-Request-Method
-Vary: Access-Control-Request-Headers
 Content-Type: application/json
 X-Content-Type-Options: nosniff
 X-XSS-Protection: 0
@@ -1569,20 +1489,20 @@ X-Frame-Options: DENY
 Content-Length: 128
 
 {
-  "id" : "2de59cdd-68f1-4357-b758-21598c18ae56",
-  "exhibitionId" : "bb5f9cb0-4978-410c-9893-d5461a708dce",
+  "id" : "adb3d069-ca55-4a5c-ba41-b6d29c3cab93",
+  "exhibitionId" : "ba9ae54e-57bd-4609-9c8f-0965a8e9d507",
   "name" : "Web"
 }</code></pre>
 </div>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_응답_본문json_7">4.2.4. 응답 본문(JSON)</h4>
+<h4 id="_응답_본문json_6">4.2.4. 응답 본문(JSON)</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-json" data-lang="json">{
-  "id" : "2de59cdd-68f1-4357-b758-21598c18ae56",
-  "exhibitionId" : "bb5f9cb0-4978-410c-9893-d5461a708dce",
+  "id" : "adb3d069-ca55-4a5c-ba41-b6d29c3cab93",
+  "exhibitionId" : "ba9ae54e-57bd-4609-9c8f-0965a8e9d507",
   "name" : "Web"
 }</code></pre>
 </div>
@@ -1597,7 +1517,7 @@ Content-Length: 128
 <div class="sect2">
 <h3 id="_항목_목록_조회">5.1. 항목 목록 조회</h3>
 <div class="sect3">
-<h4 id="_쿼리_파라미터_3">5.1.1. 쿼리 파라미터</h4>
+<h4 id="_쿼리_파라미터_2">5.1.1. 쿼리 파라미터</h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 50%;">
@@ -1610,10 +1530,6 @@ Content-Length: 128
 </tr>
 </thead>
 <tbody>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>exhibitionId</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">전시 ID</p></td>
-</tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>categoryId</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">카테고리 ID</p></td>
@@ -1649,13 +1565,13 @@ Content-Length: 128
 <h4 id="_요청_예시_9">5.1.2. 요청 예시</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /items?exhibitionId=892688ac-217a-49b9-a9f9-48a8af36bd2b HTTP/1.1
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /items HTTP/1.1
 Host: localhost:8080</code></pre>
 </div>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_응답_필드_8">5.1.3. 응답 필드</h4>
+<h4 id="_응답_필드_7">5.1.3. 응답 필드</h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 33.3333%;">
@@ -1764,13 +1680,10 @@ Host: localhost:8080</code></pre>
 </table>
 </div>
 <div class="sect3">
-<h4 id="_응답_예시_9">5.1.4. 응답 예시</h4>
+<h4 id="_응답_예시_8">5.1.4. 응답 예시</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 200 OK
-Vary: Origin
-Vary: Access-Control-Request-Method
-Vary: Access-Control-Request-Headers
 Content-Type: application/json
 X-Content-Type-Options: nosniff
 X-XSS-Protection: 0
@@ -1782,9 +1695,9 @@ Content-Length: 584
 
 {
   "items" : [ {
-    "id" : "07356b21-18dc-46ce-8065-d48824e94d63",
-    "exhibitionId" : "892688ac-217a-49b9-a9f9-48a8af36bd2b",
-    "categoryId" : "2555d99a-a128-4f72-8a16-6fc4d3227119",
+    "id" : "7a7ee20e-4afc-4103-b20c-43803e5ab878",
+    "exhibitionId" : "06cf5d26-2502-4eb0-a171-02137e513d23",
+    "categoryId" : "03081255-43e8-4095-9468-feb11ee53f97",
     "eventPeriodId" : null,
     "title" : "Smart Campus",
     "description" : "desc",
@@ -1805,14 +1718,14 @@ Content-Length: 584
 </div>
 </div>
 <div class="sect3">
-<h4 id="_응답_본문json_8">5.1.5. 응답 본문(JSON)</h4>
+<h4 id="_응답_본문json_7">5.1.5. 응답 본문(JSON)</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-json" data-lang="json">{
   "items" : [ {
-    "id" : "07356b21-18dc-46ce-8065-d48824e94d63",
-    "exhibitionId" : "892688ac-217a-49b9-a9f9-48a8af36bd2b",
-    "categoryId" : "2555d99a-a128-4f72-8a16-6fc4d3227119",
+    "id" : "7a7ee20e-4afc-4103-b20c-43803e5ab878",
+    "exhibitionId" : "06cf5d26-2502-4eb0-a171-02137e513d23",
+    "categoryId" : "03081255-43e8-4095-9468-feb11ee53f97",
     "eventPeriodId" : null,
     "title" : "Smart Campus",
     "description" : "desc",
@@ -1860,13 +1773,13 @@ Content-Length: 584
 <h4 id="_요청_예시_10">5.2.2. 요청 예시</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /items/94e5cf46-4982-4429-aa04-2ed01629df4e HTTP/1.1
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /items/0bff8188-e181-4190-9abc-4af0968cf706 HTTP/1.1
 Host: localhost:8080</code></pre>
 </div>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_응답_필드_9">5.2.3. 응답 필드</h4>
+<h4 id="_응답_필드_8">5.2.3. 응답 필드</h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 33.3333%;">
@@ -1955,13 +1868,10 @@ Host: localhost:8080</code></pre>
 </table>
 </div>
 <div class="sect3">
-<h4 id="_응답_예시_10">5.2.4. 응답 예시</h4>
+<h4 id="_응답_예시_9">5.2.4. 응답 예시</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 200 OK
-Vary: Origin
-Vary: Access-Control-Request-Method
-Vary: Access-Control-Request-Headers
 Content-Type: application/json
 X-Content-Type-Options: nosniff
 X-XSS-Protection: 0
@@ -1972,10 +1882,10 @@ X-Frame-Options: DENY
 Content-Length: 547
 
 {
-  "id" : "94e5cf46-4982-4429-aa04-2ed01629df4e",
-  "exhibitionId" : "1385a9ef-4293-41d7-b817-c1527987b6de",
-  "categoryId" : "35ffede0-9fdd-4d79-be61-d4e285437013",
-  "eventPeriodId" : "f7c3db45-13d7-4d6e-9c08-7232fa8f86be",
+  "id" : "0bff8188-e181-4190-9abc-4af0968cf706",
+  "exhibitionId" : "cd323946-0d73-4edc-8350-c05b9f19fe46",
+  "categoryId" : "3f28d349-4f78-4623-903f-ec00ac3aef4e",
+  "eventPeriodId" : "149c8e0b-708f-4506-b4f4-211b8903e6b3",
   "title" : "Smart Campus",
   "description" : "desc",
   "participantNames" : "홍길동,양현준",
@@ -1991,14 +1901,14 @@ Content-Length: 547
 </div>
 </div>
 <div class="sect3">
-<h4 id="_응답_본문json_9">5.2.5. 응답 본문(JSON)</h4>
+<h4 id="_응답_본문json_8">5.2.5. 응답 본문(JSON)</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-json" data-lang="json">{
-  "id" : "94e5cf46-4982-4429-aa04-2ed01629df4e",
-  "exhibitionId" : "1385a9ef-4293-41d7-b817-c1527987b6de",
-  "categoryId" : "35ffede0-9fdd-4d79-be61-d4e285437013",
-  "eventPeriodId" : "f7c3db45-13d7-4d6e-9c08-7232fa8f86be",
+  "id" : "0bff8188-e181-4190-9abc-4af0968cf706",
+  "exhibitionId" : "cd323946-0d73-4edc-8350-c05b9f19fe46",
+  "categoryId" : "3f28d349-4f78-4623-903f-ec00ac3aef4e",
+  "eventPeriodId" : "149c8e0b-708f-4506-b4f4-211b8903e6b3",
   "title" : "Smart Campus",
   "description" : "desc",
   "participantNames" : "홍길동,양현준",
@@ -2062,7 +1972,7 @@ Content-Length: 547
 <h4 id="_요청_예시_11">5.3.3. 요청 예시</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">POST /items/05b9f916-4913-4715-b3a3-ab19d72df7fa/like HTTP/1.1
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">POST /items/e639d5b6-3cd9-477d-afa0-5b6420dc6e1f/like HTTP/1.1
 Authorization: Bearer {accessToken}
 Host: localhost:8080
 Content-Type: application/x-www-form-urlencoded</code></pre>
@@ -2070,13 +1980,10 @@ Content-Type: application/x-www-form-urlencoded</code></pre>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_응답_예시_11">5.3.4. 응답 예시</h4>
+<h4 id="_응답_예시_10">5.3.4. 응답 예시</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 201 Created
-Vary: Origin
-Vary: Access-Control-Request-Method
-Vary: Access-Control-Request-Headers
 X-Content-Type-Options: nosniff
 X-XSS-Protection: 0
 Cache-Control: no-cache, no-store, max-age=0, must-revalidate
@@ -2135,20 +2042,17 @@ X-Frame-Options: DENY</code></pre>
 <h4 id="_요청_예시_12">5.4.3. 요청 예시</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">DELETE /items/9ce1b83b-2d48-4f9d-a330-21f8f232855c/like HTTP/1.1
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">DELETE /items/a52c8378-3f8a-4f94-9636-8d6616509c62/like HTTP/1.1
 Authorization: Bearer {accessToken}
 Host: localhost:8080</code></pre>
 </div>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_응답_예시_12">5.4.4. 응답 예시</h4>
+<h4 id="_응답_예시_11">5.4.4. 응답 예시</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 204 No Content
-Vary: Origin
-Vary: Access-Control-Request-Method
-Vary: Access-Control-Request-Headers
 X-Content-Type-Options: nosniff
 X-XSS-Protection: 0
 Cache-Control: no-cache, no-store, max-age=0, must-revalidate
@@ -2170,13 +2074,13 @@ X-Frame-Options: DENY</code></pre>
 <h4 id="_요청_예시_13">6.1.1. 요청 예시</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /classifications?exhibitionId=4313cfb7-16db-47f9-830f-8483945a0bad HTTP/1.1
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /classifications HTTP/1.1
 Host: localhost:8080</code></pre>
 </div>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_응답_필드_10">6.1.2. 응답 필드</h4>
+<h4 id="_응답_필드_9">6.1.2. 응답 필드</h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 33.3333%;">
@@ -2230,13 +2134,10 @@ Host: localhost:8080</code></pre>
 </table>
 </div>
 <div class="sect3">
-<h4 id="_응답_예시_13">6.1.3. 응답 예시</h4>
+<h4 id="_응답_예시_12">6.1.3. 응답 예시</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 200 OK
-Vary: Origin
-Vary: Access-Control-Request-Method
-Vary: Access-Control-Request-Headers
 Content-Type: application/json
 X-Content-Type-Options: nosniff
 X-XSS-Protection: 0
@@ -2248,8 +2149,8 @@ Content-Length: 206
 
 {
   "items" : [ {
-    "id" : "58bb591b-f536-40b7-ac47-afb026a88b67",
-    "exhibitionId" : "4313cfb7-16db-47f9-830f-8483945a0bad",
+    "id" : "11669277-eae3-4034-bb27-6f7ffdef349b",
+    "exhibitionId" : "e7b1362f-15bf-4c65-88ad-c468965a4d16",
     "name" : "작품"
   } ],
   "page" : 1,
@@ -2260,13 +2161,13 @@ Content-Length: 206
 </div>
 </div>
 <div class="sect3">
-<h4 id="_응답_본문json_10">6.1.4. 응답 본문(JSON)</h4>
+<h4 id="_응답_본문json_9">6.1.4. 응답 본문(JSON)</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-json" data-lang="json">{
   "items" : [ {
-    "id" : "58bb591b-f536-40b7-ac47-afb026a88b67",
-    "exhibitionId" : "4313cfb7-16db-47f9-830f-8483945a0bad",
+    "id" : "11669277-eae3-4034-bb27-6f7ffdef349b",
+    "exhibitionId" : "e7b1362f-15bf-4c65-88ad-c468965a4d16",
     "name" : "작품"
   } ],
   "page" : 1,
@@ -2283,13 +2184,13 @@ Content-Length: 206
 <h4 id="_요청_예시_14">6.2.1. 요청 예시</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /classifications/fddc69ca-ab4f-4ee3-8ccb-1d60e6bd0a88 HTTP/1.1
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /classifications/72a11f3b-6357-476f-b677-59b2bea27860 HTTP/1.1
 Host: localhost:8080</code></pre>
 </div>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_응답_필드_11">6.2.2. 응답 필드</h4>
+<h4 id="_응답_필드_10">6.2.2. 응답 필드</h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 33.3333%;">
@@ -2323,13 +2224,10 @@ Host: localhost:8080</code></pre>
 </table>
 </div>
 <div class="sect3">
-<h4 id="_응답_예시_14">6.2.3. 응답 예시</h4>
+<h4 id="_응답_예시_13">6.2.3. 응답 예시</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 200 OK
-Vary: Origin
-Vary: Access-Control-Request-Method
-Vary: Access-Control-Request-Headers
 Content-Type: application/json
 X-Content-Type-Options: nosniff
 X-XSS-Protection: 0
@@ -2340,20 +2238,20 @@ X-Frame-Options: DENY
 Content-Length: 131
 
 {
-  "id" : "fddc69ca-ab4f-4ee3-8ccb-1d60e6bd0a88",
-  "exhibitionId" : "df5f3152-3a44-40a0-ad51-563b0f944281",
+  "id" : "72a11f3b-6357-476f-b677-59b2bea27860",
+  "exhibitionId" : "7021244a-99d2-49c8-bf89-a3dc77de65ed",
   "name" : "논문"
 }</code></pre>
 </div>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_응답_본문json_11">6.2.4. 응답 본문(JSON)</h4>
+<h4 id="_응답_본문json_10">6.2.4. 응답 본문(JSON)</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-json" data-lang="json">{
-  "id" : "fddc69ca-ab4f-4ee3-8ccb-1d60e6bd0a88",
-  "exhibitionId" : "df5f3152-3a44-40a0-ad51-563b0f944281",
+  "id" : "72a11f3b-6357-476f-b677-59b2bea27860",
+  "exhibitionId" : "7021244a-99d2-49c8-bf89-a3dc77de65ed",
   "name" : "논문"
 }</code></pre>
 </div>
@@ -2371,13 +2269,13 @@ Content-Length: 131
 <h4 id="_요청_예시_15">7.1.1. 요청 예시</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /event-periods?exhibitionId=544f9e45-34e6-4813-963d-1a2bd00fba76 HTTP/1.1
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /event-periods HTTP/1.1
 Host: localhost:8080</code></pre>
 </div>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_응답_필드_12">7.1.2. 응답 필드</h4>
+<h4 id="_응답_필드_11">7.1.2. 응답 필드</h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 33.3333%;">
@@ -2441,13 +2339,10 @@ Host: localhost:8080</code></pre>
 </table>
 </div>
 <div class="sect3">
-<h4 id="_응답_예시_15">7.1.3. 응답 예시</h4>
+<h4 id="_응답_예시_14">7.1.3. 응답 예시</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 200 OK
-Vary: Origin
-Vary: Access-Control-Request-Method
-Vary: Access-Control-Request-Headers
 Content-Type: application/json
 X-Content-Type-Options: nosniff
 X-XSS-Protection: 0
@@ -2459,8 +2354,8 @@ Content-Length: 294
 
 {
   "items" : [ {
-    "id" : "0c9636a2-bcf7-4cf7-803c-5eca65084dae",
-    "exhibitionId" : "544f9e45-34e6-4813-963d-1a2bd00fba76",
+    "id" : "773aae06-d74c-468f-a930-cf8802d7a030",
+    "exhibitionId" : "fb9e5beb-94b9-4cb2-a714-429fc3837950",
     "name" : "2025-1학기",
     "startTime" : "2025-03-01T00:00:00Z",
     "endTime" : "2025-06-30T00:00:00Z"
@@ -2473,13 +2368,13 @@ Content-Length: 294
 </div>
 </div>
 <div class="sect3">
-<h4 id="_응답_본문json_12">7.1.4. 응답 본문(JSON)</h4>
+<h4 id="_응답_본문json_11">7.1.4. 응답 본문(JSON)</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-json" data-lang="json">{
   "items" : [ {
-    "id" : "0c9636a2-bcf7-4cf7-803c-5eca65084dae",
-    "exhibitionId" : "544f9e45-34e6-4813-963d-1a2bd00fba76",
+    "id" : "773aae06-d74c-468f-a930-cf8802d7a030",
+    "exhibitionId" : "fb9e5beb-94b9-4cb2-a714-429fc3837950",
     "name" : "2025-1학기",
     "startTime" : "2025-03-01T00:00:00Z",
     "endTime" : "2025-06-30T00:00:00Z"
@@ -2498,13 +2393,13 @@ Content-Length: 294
 <h4 id="_요청_예시_16">7.2.1. 요청 예시</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /event-periods/985d69fe-9e7e-4eb0-8024-3c274fdcd33f HTTP/1.1
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /event-periods/e90dbe82-964d-4b43-a09a-e79ee88819b6 HTTP/1.1
 Host: localhost:8080</code></pre>
 </div>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_응답_필드_13">7.2.2. 응답 필드</h4>
+<h4 id="_응답_필드_12">7.2.2. 응답 필드</h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 33.3333%;">
@@ -2548,13 +2443,10 @@ Host: localhost:8080</code></pre>
 </table>
 </div>
 <div class="sect3">
-<h4 id="_응답_예시_16">7.2.3. 응답 예시</h4>
+<h4 id="_응답_예시_15">7.2.3. 응답 예시</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 200 OK
-Vary: Origin
-Vary: Access-Control-Request-Method
-Vary: Access-Control-Request-Headers
 Content-Type: application/json
 X-Content-Type-Options: nosniff
 X-XSS-Protection: 0
@@ -2565,8 +2457,8 @@ X-Frame-Options: DENY
 Content-Length: 215
 
 {
-  "id" : "985d69fe-9e7e-4eb0-8024-3c274fdcd33f",
-  "exhibitionId" : "3d6736b5-3ce2-4101-8ebc-fe1c29ec3ebb",
+  "id" : "e90dbe82-964d-4b43-a09a-e79ee88819b6",
+  "exhibitionId" : "4d4de15b-92c1-4742-a38e-ff4f04fbba27",
   "name" : "2025-2학기",
   "startTime" : "2025-09-01T00:00:00Z",
   "endTime" : "2025-12-31T00:00:00Z"
@@ -2575,12 +2467,12 @@ Content-Length: 215
 </div>
 </div>
 <div class="sect3">
-<h4 id="_응답_본문json_13">7.2.4. 응답 본문(JSON)</h4>
+<h4 id="_응답_본문json_12">7.2.4. 응답 본문(JSON)</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-json" data-lang="json">{
-  "id" : "985d69fe-9e7e-4eb0-8024-3c274fdcd33f",
-  "exhibitionId" : "3d6736b5-3ce2-4101-8ebc-fe1c29ec3ebb",
+  "id" : "e90dbe82-964d-4b43-a09a-e79ee88819b6",
+  "exhibitionId" : "4d4de15b-92c1-4742-a38e-ff4f04fbba27",
   "name" : "2025-2학기",
   "startTime" : "2025-09-01T00:00:00Z",
   "endTime" : "2025-12-31T00:00:00Z"
@@ -2600,13 +2492,13 @@ Content-Length: 215
 <h4 id="_요청_예시_17">8.1.1. 요청 예시</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /boards?exhibitionId=0e6598c2-0bd2-4c2a-92e4-cd49daed12ac HTTP/1.1
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /boards HTTP/1.1
 Host: localhost:8080</code></pre>
 </div>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_응답_필드_14">8.1.2. 응답 필드</h4>
+<h4 id="_응답_필드_13">8.1.2. 응답 필드</h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 33.3333%;">
@@ -2700,13 +2592,10 @@ Host: localhost:8080</code></pre>
 </table>
 </div>
 <div class="sect3">
-<h4 id="_응답_예시_17">8.1.3. 응답 예시</h4>
+<h4 id="_응답_예시_16">8.1.3. 응답 예시</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 200 OK
-Vary: Origin
-Vary: Access-Control-Request-Method
-Vary: Access-Control-Request-Headers
 Content-Type: application/json
 X-Content-Type-Options: nosniff
 X-XSS-Protection: 0
@@ -2714,22 +2603,22 @@ Cache-Control: no-cache, no-store, max-age=0, must-revalidate
 Pragma: no-cache
 Expires: 0
 X-Frame-Options: DENY
-Content-Length: 604
+Content-Length: 598
 
 {
   "items" : [ {
-    "id" : "02ba8584-ade0-4a30-978e-a309d74c7767",
-    "exhibitionId" : "0e6598c2-0bd2-4c2a-92e4-cd49daed12ac",
+    "id" : "45803a07-232b-48dc-82db-545c7a7a26c4",
+    "exhibitionId" : "b454c7d9-8b5c-433a-89df-b84671865904",
     "title" : "공지",
     "content" : "안내 내용",
-    "attachmentMediaIds" : [ "efd2fc50-2200-4b58-9230-6cf10d8eed4a" ],
+    "attachmentMediaIds" : [ "8fc9d8ac-c3ee-4b53-acfd-58f22effd9c5" ],
     "attachmentMedias" : [ {
-      "id" : "efd2fc50-2200-4b58-9230-6cf10d8eed4a",
+      "id" : "8fc9d8ac-c3ee-4b53-acfd-58f22effd9c5",
       "fileName" : "notice-list.pdf"
     } ],
-    "authorUserId" : "ac5675af-693c-4272-badf-6a23d8ea10f1",
-    "createdAt" : "2026-03-21T04:53:43.263565738Z",
-    "updatedAt" : "2026-03-21T04:53:43.263568886Z"
+    "authorUserId" : "4cda1ee8-bddc-4ec1-8448-b0bf2ea3de38",
+    "createdAt" : "2026-03-26T17:00:30.291114Z",
+    "updatedAt" : "2026-03-26T17:00:30.291115Z"
   } ],
   "page" : 1,
   "pageSize" : 1,
@@ -2739,23 +2628,23 @@ Content-Length: 604
 </div>
 </div>
 <div class="sect3">
-<h4 id="_응답_본문json_14">8.1.4. 응답 본문(JSON)</h4>
+<h4 id="_응답_본문json_13">8.1.4. 응답 본문(JSON)</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-json" data-lang="json">{
   "items" : [ {
-    "id" : "02ba8584-ade0-4a30-978e-a309d74c7767",
-    "exhibitionId" : "0e6598c2-0bd2-4c2a-92e4-cd49daed12ac",
+    "id" : "45803a07-232b-48dc-82db-545c7a7a26c4",
+    "exhibitionId" : "b454c7d9-8b5c-433a-89df-b84671865904",
     "title" : "공지",
     "content" : "안내 내용",
-    "attachmentMediaIds" : [ "efd2fc50-2200-4b58-9230-6cf10d8eed4a" ],
+    "attachmentMediaIds" : [ "8fc9d8ac-c3ee-4b53-acfd-58f22effd9c5" ],
     "attachmentMedias" : [ {
-      "id" : "efd2fc50-2200-4b58-9230-6cf10d8eed4a",
+      "id" : "8fc9d8ac-c3ee-4b53-acfd-58f22effd9c5",
       "fileName" : "notice-list.pdf"
     } ],
-    "authorUserId" : "ac5675af-693c-4272-badf-6a23d8ea10f1",
-    "createdAt" : "2026-03-21T04:53:43.263565738Z",
-    "updatedAt" : "2026-03-21T04:53:43.263568886Z"
+    "authorUserId" : "4cda1ee8-bddc-4ec1-8448-b0bf2ea3de38",
+    "createdAt" : "2026-03-26T17:00:30.291114Z",
+    "updatedAt" : "2026-03-26T17:00:30.291115Z"
   } ],
   "page" : 1,
   "pageSize" : 1,
@@ -2771,13 +2660,13 @@ Content-Length: 604
 <h4 id="_요청_예시_18">8.2.1. 요청 예시</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /boards/758fb467-7699-4327-8678-1117353ab58a HTTP/1.1
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /boards/f86bfee9-6b84-4ce0-ba75-a58f1e5f98a4 HTTP/1.1
 Host: localhost:8080</code></pre>
 </div>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_응답_필드_15">8.2.2. 응답 필드</h4>
+<h4 id="_응답_필드_14">8.2.2. 응답 필드</h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 33.3333%;">
@@ -2851,13 +2740,10 @@ Host: localhost:8080</code></pre>
 </table>
 </div>
 <div class="sect3">
-<h4 id="_응답_예시_18">8.2.3. 응답 예시</h4>
+<h4 id="_응답_예시_17">8.2.3. 응답 예시</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 200 OK
-Vary: Origin
-Vary: Access-Control-Request-Method
-Vary: Access-Control-Request-Headers
 Content-Type: application/json
 X-Content-Type-Options: nosniff
 X-XSS-Protection: 0
@@ -2865,42 +2751,42 @@ Cache-Control: no-cache, no-store, max-age=0, must-revalidate
 Pragma: no-cache
 Expires: 0
 X-Frame-Options: DENY
-Content-Length: 506
+Content-Length: 500
 
 {
-  "id" : "758fb467-7699-4327-8678-1117353ab58a",
-  "exhibitionId" : "cee0c263-8109-4708-bc06-e878f5678bf5",
+  "id" : "f86bfee9-6b84-4ce0-ba75-a58f1e5f98a4",
+  "exhibitionId" : "3e7f10d7-7406-4711-af82-26b647fd9b75",
   "title" : "공지",
   "content" : "안내 내용",
-  "attachmentMediaIds" : [ "232cea75-cf70-446f-84b3-446168133c77" ],
+  "attachmentMediaIds" : [ "bda450fe-a8c7-4c02-9692-fb386d13a52c" ],
   "attachmentMedias" : [ {
-    "id" : "5cc7e533-a865-4fe0-bdff-0cef96929785",
+    "id" : "118468a8-855c-4fb2-922b-9d2ec47404ac",
     "fileName" : "notice.pdf"
   } ],
-  "authorUserId" : "d2070b6b-8e85-432d-9b40-f9d920255c0f",
-  "createdAt" : "2026-03-21T04:53:42.638105687Z",
-  "updatedAt" : "2026-03-21T04:53:42.638107924Z"
+  "authorUserId" : "8b6e9a18-edeb-45e4-9cbc-48f7917a5a2c",
+  "createdAt" : "2026-03-26T17:00:30.187331Z",
+  "updatedAt" : "2026-03-26T17:00:30.187332Z"
 }</code></pre>
 </div>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_응답_본문json_15">8.2.4. 응답 본문(JSON)</h4>
+<h4 id="_응답_본문json_14">8.2.4. 응답 본문(JSON)</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-json" data-lang="json">{
-  "id" : "758fb467-7699-4327-8678-1117353ab58a",
-  "exhibitionId" : "cee0c263-8109-4708-bc06-e878f5678bf5",
+  "id" : "f86bfee9-6b84-4ce0-ba75-a58f1e5f98a4",
+  "exhibitionId" : "3e7f10d7-7406-4711-af82-26b647fd9b75",
   "title" : "공지",
   "content" : "안내 내용",
-  "attachmentMediaIds" : [ "232cea75-cf70-446f-84b3-446168133c77" ],
+  "attachmentMediaIds" : [ "bda450fe-a8c7-4c02-9692-fb386d13a52c" ],
   "attachmentMedias" : [ {
-    "id" : "5cc7e533-a865-4fe0-bdff-0cef96929785",
+    "id" : "118468a8-855c-4fb2-922b-9d2ec47404ac",
     "fileName" : "notice.pdf"
   } ],
-  "authorUserId" : "d2070b6b-8e85-432d-9b40-f9d920255c0f",
-  "createdAt" : "2026-03-21T04:53:42.638105687Z",
-  "updatedAt" : "2026-03-21T04:53:42.638107924Z"
+  "authorUserId" : "8b6e9a18-edeb-45e4-9cbc-48f7917a5a2c",
+  "createdAt" : "2026-03-26T17:00:30.187331Z",
+  "updatedAt" : "2026-03-26T17:00:30.187332Z"
 }</code></pre>
 </div>
 </div>
@@ -2917,7 +2803,7 @@ Content-Length: 506
 <h4 id="_요청_예시_19">9.1.1. 요청 예시</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /media/1b7175a0-814d-435c-9d66-0c445e6b8119 HTTP/1.1
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /media/d61eae55-cbf0-4b88-a6bb-ab8016d7f4b1 HTTP/1.1
 Host: localhost:8080</code></pre>
 </div>
 </div>
@@ -2948,13 +2834,10 @@ Host: localhost:8080</code></pre>
 </table>
 </div>
 <div class="sect3">
-<h4 id="_응답_예시_19">9.1.3. 응답 예시</h4>
+<h4 id="_응답_예시_18">9.1.3. 응답 예시</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 200 OK
-Vary: Origin
-Vary: Access-Control-Request-Method
-Vary: Access-Control-Request-Headers
 Cache-Control: public, max-age=31536000, immutable
 Content-Type: image/jpeg
 Content-Length: 3
@@ -3015,7 +2898,7 @@ Host: localhost:8080</code></pre>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_응답_필드_16">10.1.3. 응답 필드</h4>
+<h4 id="_응답_필드_15">10.1.3. 응답 필드</h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 33.3333%;">
@@ -3069,13 +2952,10 @@ Host: localhost:8080</code></pre>
 </table>
 </div>
 <div class="sect3">
-<h4 id="_응답_예시_20">10.1.4. 응답 예시</h4>
+<h4 id="_응답_예시_19">10.1.4. 응답 예시</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 200 OK
-Vary: Origin
-Vary: Access-Control-Request-Method
-Vary: Access-Control-Request-Headers
 Content-Type: application/json
 X-Content-Type-Options: nosniff
 X-XSS-Protection: 0
@@ -3098,7 +2978,7 @@ Content-Length: 225
 </div>
 </div>
 <div class="sect3">
-<h4 id="_응답_본문json_16">10.1.5. 응답 본문(JSON)</h4>
+<h4 id="_응답_본문json_15">10.1.5. 응답 본문(JSON)</h4>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-json" data-lang="json">{
@@ -3120,7 +3000,7 @@ Content-Length: 225
 <div id="footer">
 <div id="footer-text">
 Version 0.0.1-SNAPSHOT<br>
-Last updated 2026-03-21 13:48:04 +0900
+Last updated 2026-03-27 01:33:16 +0900
 </div>
 </div>
 </body>
