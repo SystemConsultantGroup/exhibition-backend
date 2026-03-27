@@ -104,8 +104,6 @@ include::{snippets}/exhibitions-get/response-body.adoc[]
 === 도메인으로 slug 조회
 ==== 요청 예시
 include::{snippets}/exhibitions-get-slug/http-request.adoc[]
-==== 쿼리 파라미터
-include::{snippets}/exhibitions-get-slug/query-parameters.adoc[]
 ==== 응답 필드
 include::{snippets}/exhibitions-get-slug/response-fields.adoc[]
 ==== 응답 예시

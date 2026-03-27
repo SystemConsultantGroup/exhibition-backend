@@ -9,5 +9,10 @@ public interface ExhibitionRepository extends JpaRepository<ExhibitionEntity, UU
 
     Optional<ExhibitionEntity> findBySlug(String slug);
 
-    Optional<ExhibitionEntity> findByDomain(String domain);
+    Optional<ExhibitionEntity> findFirstByDefaultDomainIgnoreCaseOrCustomDomainIgnoreCase(
+            String defaultDomain,
+            String customDomain
+    );
+
+    boolean existsByDefaultDomainIgnoreCaseOrCustomDomainIgnoreCase(String defaultDomain, String customDomain);
 }

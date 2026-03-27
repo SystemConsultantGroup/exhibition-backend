@@ -1,8 +1,10 @@
 package kr.ac.skku.scg.exhibition.item.controller;
 
 import jakarta.validation.Valid;
+import kr.ac.skku.scg.exhibition.exhibition.domain.ExhibitionEntity;
 import kr.ac.skku.scg.exhibition.global.auth.resolver.AuthenticatedUser;
 import kr.ac.skku.scg.exhibition.global.auth.resolver.CurrentUser;
+import kr.ac.skku.scg.exhibition.global.tenant.CurrentExhibition;
 import kr.ac.skku.scg.exhibition.item.dto.request.ItemBulkTemplateRequest;
 import kr.ac.skku.scg.exhibition.item.dto.response.ItemBulkTemplateFile;
 import kr.ac.skku.scg.exhibition.item.service.ItemBulkTemplateService;
@@ -31,8 +33,10 @@ public class ItemBulkTemplateController {
     @GetMapping("/template")
     public ResponseEntity<ByteArrayResource> downloadTemplate(
             @Valid @ModelAttribute ItemBulkTemplateRequest request,
+            @CurrentExhibition ExhibitionEntity currentExhibition,
             @CurrentUser AuthenticatedUser currentUser
     ) {
+        request.setExhibitionId(currentExhibition.getId());
         ItemBulkTemplateFile file = itemBulkTemplateService.generateTemplate(request, currentUser);
 
         return ResponseEntity.ok()

@@ -20,8 +20,8 @@ public class EventPeriodService {
         this.eventPeriodRepository = eventPeriodRepository;
     }
 
-    public EventPeriodResponse get(UUID id) {
-        EventPeriodEntity eventPeriod = eventPeriodRepository.findById(id)
+    public EventPeriodResponse get(UUID id, UUID exhibitionId) {
+        EventPeriodEntity eventPeriod = eventPeriodRepository.findByIdAndExhibition_Id(id, exhibitionId)
                 .orElseThrow(() -> new NotFoundException("Event period not found: " + id));
         return toResponse(eventPeriod);
     }

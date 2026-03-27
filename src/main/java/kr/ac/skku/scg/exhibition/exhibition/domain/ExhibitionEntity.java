@@ -25,8 +25,11 @@ public class ExhibitionEntity extends BaseEntity {
     @Column(nullable = false, unique = true, length = 64)
     private String slug;
 
-    @Column(unique = true, length = 255)
-    private String domain;
+    @Column(name = "default_domain", unique = true, length = 255)
+    private String defaultDomain;
+
+    @Column(name = "custom_domain", unique = true, length = 255)
+    private String customDomain;
 
     @Column(nullable = false, unique = true, length = 128)
     private String name;
@@ -37,6 +40,13 @@ public class ExhibitionEntity extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "logo_media_id")
     private MediaAssetEntity logoMedia;
+
+    @Column(nullable = false)
+    private boolean bannerEnabled = false;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "banner_media_id")
+    private MediaAssetEntity bannerMedia;
 
     @Column(nullable = false)
     private boolean popupEnabled = false;
@@ -75,8 +85,12 @@ public class ExhibitionEntity extends BaseEntity {
         return slug;
     }
 
-    public String getDomain() {
-        return domain;
+    public String getDefaultDomain() {
+        return defaultDomain;
+    }
+
+    public String getCustomDomain() {
+        return customDomain;
     }
 
     public String getName() {
@@ -89,6 +103,14 @@ public class ExhibitionEntity extends BaseEntity {
 
     public MediaAssetEntity getLogoMedia() {
         return logoMedia;
+    }
+
+    public boolean isBannerEnabled() {
+        return bannerEnabled;
+    }
+
+    public MediaAssetEntity getBannerMedia() {
+        return bannerMedia;
     }
 
     public boolean isPopupEnabled() {

@@ -17,10 +17,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.List;
 import java.util.UUID;
+import kr.ac.skku.scg.exhibition.exhibition.domain.ExhibitionEntity;
 import kr.ac.skku.scg.exhibition.classification.dto.response.ClassificationResponse;
 import kr.ac.skku.scg.exhibition.classification.service.ClassificationService;
 import kr.ac.skku.scg.exhibition.global.config.SecurityConfig;
+import kr.ac.skku.scg.exhibition.global.config.WebConfig;
 import kr.ac.skku.scg.exhibition.global.error.ApiExceptionHandler;
+import kr.ac.skku.scg.exhibition.global.tenant.CurrentExhibitionArgumentResolver;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.restdocs.test.autoconfigure.AutoConfigureRestDocs;
@@ -30,7 +33,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(controllers = ClassificationController.class)
-@Import({SecurityConfig.class, ApiExceptionHandler.class})
+@Import({SecurityConfig.class, ApiExceptionHandler.class, WebConfig.class})
 @AutoConfigureRestDocs
 class ClassificationControllerTest {
 
@@ -44,9 +47,10 @@ class ClassificationControllerTest {
     void getById() throws Exception {
         UUID id = UUID.randomUUID();
         UUID exhibitionId = UUID.randomUUID();
-        when(classificationService.get(id)).thenReturn(new ClassificationResponse(id, exhibitionId, "논문"));
+        when(classificationService.get(id, exhibitionId)).thenReturn(new ClassificationResponse(id, exhibitionId, "논문"));
 
-        mockMvc.perform(get("/classifications/{id}", id))
+        mockMvc.perform(get("/classifications/{id}", id)
+                        .requestAttr(CurrentExhibitionArgumentResolver.REQUEST_ATTR_EXHIBITION, currentExhibition(exhibitionId)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(id.toString()))
                 .andDo(document("classifications-get",
@@ -69,15 +73,13 @@ class ClassificationControllerTest {
                 new ClassificationResponse(UUID.randomUUID(), exhibitionId, "작품")
         ));
 
-        mockMvc.perform(get("/classifications").param("exhibitionId", exhibitionId.toString()))
+        mockMvc.perform(get("/classifications")
+                        .requestAttr(CurrentExhibitionArgumentResolver.REQUEST_ATTR_EXHIBITION, currentExhibition(exhibitionId)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.items[0].name").value("작품"))
                 .andDo(document("classifications-list",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
-                        queryParameters(
-                                parameterWithName("exhibitionId").description("전시 ID")
-                        ),
                         responseFields(
                                 fieldWithPath("items").description("분류 목록"),
                                 fieldWithPath("items[].id").description("분류 ID"),
@@ -87,5 +89,9 @@ class ClassificationControllerTest {
                                 fieldWithPath("pageSize").description("페이지 크기"),
                                 fieldWithPath("total").description("전체 건수")
                         )));
+    }
+
+    private ExhibitionEntity currentExhibition(UUID exhibitionId) {
+        return new ExhibitionEntity(exhibitionId, "sw-gp", "전시");
     }
 }

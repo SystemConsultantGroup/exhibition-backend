@@ -18,11 +18,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.List;
 import java.util.UUID;
+import kr.ac.skku.scg.exhibition.exhibition.domain.ExhibitionEntity;
 import kr.ac.skku.scg.exhibition.exhibition.dto.response.ExhibitionResponse;
 import kr.ac.skku.scg.exhibition.exhibition.dto.response.ExhibitionSlugResponse;
 import kr.ac.skku.scg.exhibition.exhibition.service.ExhibitionService;
 import kr.ac.skku.scg.exhibition.global.config.SecurityConfig;
+import kr.ac.skku.scg.exhibition.global.config.WebConfig;
 import kr.ac.skku.scg.exhibition.global.error.ApiExceptionHandler;
+import kr.ac.skku.scg.exhibition.global.tenant.CurrentExhibitionArgumentResolver;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.restdocs.test.autoconfigure.AutoConfigureRestDocs;
@@ -32,7 +35,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(controllers = ExhibitionController.class)
-@Import({SecurityConfig.class, ApiExceptionHandler.class})
+@Import({SecurityConfig.class, ApiExceptionHandler.class, WebConfig.class})
 @AutoConfigureRestDocs
 class ExhibitionControllerTest {
 
@@ -45,12 +48,15 @@ class ExhibitionControllerTest {
     @Test
     void getById() throws Exception {
         UUID id = UUID.randomUUID();
-        when(exhibitionService.get(id)).thenReturn(new ExhibitionResponse(
+        when(exhibitionService.get(any())).thenReturn(new ExhibitionResponse(
                 id,
                 "sw-gp",
                 "exhibition.scg.skku.ac.kr",
+                "custom.exhibition.scg.sh",
                 "소프트웨어융합대학 졸업작품 전시회",
                 "설명",
+                null,
+                false,
                 null,
                 false,
                 null,
@@ -60,22 +66,26 @@ class ExhibitionControllerTest {
                 null
         ));
 
-        mockMvc.perform(get("/exhibitions/{id}", id))
+        mockMvc.perform(get("/exhibitions/{id}", id)
+                        .requestAttr(CurrentExhibitionArgumentResolver.REQUEST_ATTR_EXHIBITION, currentExhibition(id)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(id.toString()))
                 .andDo(document("exhibitions-get",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
                         pathParameters(
-                                parameterWithName("id").description("전시회 ID")
+                                parameterWithName("id").description("전시회 ID 형식의 더미 값 (실제 조회는 현재 요청 도메인 기준)")
                         ),
                         responseFields(
                                 fieldWithPath("id").description("전시회 ID"),
                                 fieldWithPath("slug").description("전시회 slug"),
-                                fieldWithPath("domain").description("전시회 도메인").optional(),
+                                fieldWithPath("defaultDomain").description("기본 전시 도메인").optional(),
+                                fieldWithPath("customDomain").description("커스텀 전시 도메인").optional(),
                                 fieldWithPath("name").description("전시회명"),
                                 fieldWithPath("description").description("전시회 설명").optional(),
                                 fieldWithPath("logoMediaId").description("로고 미디어 ID").optional(),
+                                fieldWithPath("bannerEnabled").description("배너 사용 여부"),
+                                fieldWithPath("bannerMediaId").description("배너 미디어 ID").optional(),
                                 fieldWithPath("popupEnabled").description("팝업 사용 여부"),
                                 fieldWithPath("popupImageMediaId").description("팝업 이미지 미디어 ID").optional(),
                                 fieldWithPath("popupUrl").description("팝업 링크 URL").optional(),
@@ -87,13 +97,17 @@ class ExhibitionControllerTest {
 
     @Test
     void list() throws Exception {
-        when(exhibitionService.list(any())).thenReturn(List.of(
+        UUID exhibitionId = UUID.randomUUID();
+        when(exhibitionService.list(any(), any())).thenReturn(List.of(
                 new ExhibitionResponse(
-                        UUID.randomUUID(),
+                        exhibitionId,
                         "sw-gp",
                         "exhibition.scg.skku.ac.kr",
+                        "custom.exhibition.scg.sh",
                         "소프트웨어융합대학 졸업작품 전시회",
                         "설명",
+                        null,
+                        false,
                         null,
                         false,
                         null,
@@ -104,7 +118,8 @@ class ExhibitionControllerTest {
                 )
         ));
 
-        mockMvc.perform(get("/exhibitions").param("q", "cse").param("slug", "sw-gp"))
+        mockMvc.perform(get("/exhibitions").param("q", "cse").param("slug", "sw-gp")
+                        .requestAttr(CurrentExhibitionArgumentResolver.REQUEST_ATTR_EXHIBITION, currentExhibition(exhibitionId)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.items[0].name").value("소프트웨어융합대학 졸업작품 전시회"))
                 .andDo(document("exhibitions-list",
@@ -118,10 +133,13 @@ class ExhibitionControllerTest {
                                 fieldWithPath("items").description("전시회 목록"),
                                 fieldWithPath("items[].id").description("전시회 ID"),
                                 fieldWithPath("items[].slug").description("전시회 slug"),
-                                fieldWithPath("items[].domain").description("전시회 도메인").optional(),
+                                fieldWithPath("items[].defaultDomain").description("기본 전시 도메인").optional(),
+                                fieldWithPath("items[].customDomain").description("커스텀 전시 도메인").optional(),
                                 fieldWithPath("items[].name").description("전시회명"),
                                 fieldWithPath("items[].description").description("전시회 설명").optional(),
                                 fieldWithPath("items[].logoMediaId").description("로고 미디어 ID").optional(),
+                                fieldWithPath("items[].bannerEnabled").description("배너 사용 여부"),
+                                fieldWithPath("items[].bannerMediaId").description("배너 미디어 ID").optional(),
                                 fieldWithPath("items[].popupEnabled").description("팝업 사용 여부"),
                                 fieldWithPath("items[].popupImageMediaId").description("팝업 이미지 미디어 ID").optional(),
                                 fieldWithPath("items[].popupUrl").description("팝업 링크 URL").optional(),
@@ -135,31 +153,23 @@ class ExhibitionControllerTest {
     }
 
     @Test
-    void getSlugByDomain() throws Exception {
-        when(exhibitionService.getSlugByDomain("exhibition.scg.skku.ac.kr"))
-                .thenReturn(new ExhibitionSlugResponse("sw-gp"));
+    void getSlug() throws Exception {
+        UUID exhibitionId = UUID.randomUUID();
+        when(exhibitionService.getSlug(any())).thenReturn(new ExhibitionSlugResponse("sw-gp"));
 
-        mockMvc.perform(get("/exhibitions/slug").param("domain", "exhibition.scg.skku.ac.kr"))
+        mockMvc.perform(get("/exhibitions/slug")
+                        .requestAttr(CurrentExhibitionArgumentResolver.REQUEST_ATTR_EXHIBITION, currentExhibition(exhibitionId)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.slug").value("sw-gp"))
                 .andDo(document("exhibitions-get-slug",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
-                        queryParameters(
-                                parameterWithName("domain").optional().description("전시회 도메인")
-                        ),
                         responseFields(
-                                fieldWithPath("slug").description("전시회 slug")
+                                fieldWithPath("slug").description("현재 도메인에 매핑된 전시회 slug")
                         )));
     }
 
-    @Test
-    void getSlugByDomainWhenDomainMissingReturnsNull() throws Exception {
-        when(exhibitionService.getSlugByDomain(null))
-                .thenReturn(new ExhibitionSlugResponse(null));
-
-        mockMvc.perform(get("/exhibitions/slug"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.slug", nullValue()));
+    private ExhibitionEntity currentExhibition(UUID exhibitionId) {
+        return new ExhibitionEntity(exhibitionId, "sw-gp", "소프트웨어융합대학 졸업작품 전시회");
     }
 }
