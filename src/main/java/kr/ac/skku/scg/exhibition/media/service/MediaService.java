@@ -32,8 +32,8 @@ public class MediaService {
         this.minioProperties = minioProperties;
     }
 
-    public MediaFileResponse getFile(UUID id, UUID exhibitionId) {
-        MediaAssetEntity media = mediaAssetRepository.findByIdAndExhibition_Id(id, exhibitionId)
+    public MediaFileResponse getFile(UUID id) {
+        MediaAssetEntity media = mediaAssetRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Media not found: " + id));
 
         try (GetObjectResponse object = minioClient.getObject(
