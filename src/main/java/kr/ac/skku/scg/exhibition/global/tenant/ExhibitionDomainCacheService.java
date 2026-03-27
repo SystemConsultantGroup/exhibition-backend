@@ -21,7 +21,7 @@ public class ExhibitionDomainCacheService {
      * 조회 결과를 캐시하여 동일 도메인에 대한 반복 DB 접근을 줄입니다.
      * 전시가 존재하지 않는 경우는 캐시하지 않습니다.
      */
-    @Cacheable(value = "exhibition-by-domain", unless = "#result.isEmpty()")
+    @Cacheable(value = "exhibition-by-domain", unless = "#result == null")
     public Optional<ExhibitionEntity> findByDomain(String host) {
         return exhibitionRepository.findFirstByDefaultDomainIgnoreCaseOrCustomDomainIgnoreCase(host, host);
     }
