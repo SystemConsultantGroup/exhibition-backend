@@ -48,7 +48,7 @@ class ExhibitionControllerTest {
     @Test
     void getById() throws Exception {
         UUID id = UUID.randomUUID();
-        when(exhibitionService.get(id, id)).thenReturn(new ExhibitionResponse(
+        when(exhibitionService.get(any())).thenReturn(new ExhibitionResponse(
                 id,
                 "sw-gp",
                 "exhibition.scg.skku.ac.kr",
@@ -74,7 +74,7 @@ class ExhibitionControllerTest {
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
                         pathParameters(
-                                parameterWithName("id").description("전시회 ID")
+                                parameterWithName("id").description("전시회 ID 형식의 더미 값 (실제 조회는 현재 요청 도메인 기준)")
                         ),
                         responseFields(
                                 fieldWithPath("id").description("전시회 ID"),

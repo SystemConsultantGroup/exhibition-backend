@@ -31,7 +31,8 @@ public class ExhibitionController {
     public ResponseEntity<ExhibitionResponse> get(
             @PathVariable UUID id,
             @CurrentExhibition ExhibitionEntity currentExhibition) {
-        return ResponseEntity.ok(exhibitionService.get(id, currentExhibition.getId()));
+        // Path UUID is kept only to preserve the existing API shape; actual lookup uses the current exhibition from headers.
+        return ResponseEntity.ok(exhibitionService.get(currentExhibition));
     }
 
     @GetMapping

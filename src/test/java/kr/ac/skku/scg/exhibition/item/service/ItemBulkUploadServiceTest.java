@@ -91,9 +91,7 @@ class ItemBulkUploadServiceTest {
                 true
         );
 
-        UUID exhibitionId = UUID.randomUUID();
-
-        assertThatThrownBy(() -> itemBulkUploadService.upload(file, exhibitionId, nonAdmin))
+        assertThatThrownBy(() -> itemBulkUploadService.upload(file, nonAdmin))
                 .isInstanceOf(ForbiddenException.class)
                 .hasMessage("Admin role is required");
     }
@@ -140,7 +138,7 @@ class ItemBulkUploadServiceTest {
                 true
         );
 
-        ItemBulkUploadResponse response = itemBulkUploadService.upload(file, exhibitionId, admin);
+        ItemBulkUploadResponse response = itemBulkUploadService.upload(file, admin);
 
         assertThat(response.createdItems()).isEqualTo(1);
         assertThat(response.createdMediaAssets()).isEqualTo(3);

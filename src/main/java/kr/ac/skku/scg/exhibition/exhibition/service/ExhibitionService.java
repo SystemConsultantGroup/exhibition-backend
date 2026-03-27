@@ -7,7 +7,6 @@ import kr.ac.skku.scg.exhibition.exhibition.dto.request.ExhibitionListRequest;
 import kr.ac.skku.scg.exhibition.exhibition.dto.response.ExhibitionResponse;
 import kr.ac.skku.scg.exhibition.exhibition.dto.response.ExhibitionSlugResponse;
 import kr.ac.skku.scg.exhibition.exhibition.repository.ExhibitionRepository;
-import kr.ac.skku.scg.exhibition.global.error.NotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -22,11 +21,8 @@ public class ExhibitionService {
         this.exhibitionRepository = exhibitionRepository;
     }
 
-    public ExhibitionResponse get(UUID id, UUID currentExhibitionId) {
-        ExhibitionEntity exhibition = exhibitionRepository.findById(id)
-                .filter(candidate -> candidate.getId().equals(currentExhibitionId))
-                .orElseThrow(() -> new NotFoundException("Exhibition not found: " + id));
-        return toResponse(exhibition);
+    public ExhibitionResponse get(ExhibitionEntity currentExhibition) {
+        return toResponse(currentExhibition);
     }
 
     public List<ExhibitionResponse> list(ExhibitionListRequest request, ExhibitionEntity currentExhibition) {
