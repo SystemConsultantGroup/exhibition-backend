@@ -14,11 +14,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.UUID;
-import kr.ac.skku.scg.exhibition.exhibition.domain.ExhibitionEntity;
 import kr.ac.skku.scg.exhibition.global.config.SecurityConfig;
 import kr.ac.skku.scg.exhibition.global.config.WebConfig;
 import kr.ac.skku.scg.exhibition.global.error.ApiExceptionHandler;
-import kr.ac.skku.scg.exhibition.global.tenant.CurrentExhibitionArgumentResolver;
 import kr.ac.skku.scg.exhibition.media.dto.response.MediaFileResponse;
 import kr.ac.skku.scg.exhibition.media.service.MediaService;
 import org.junit.jupiter.api.Test;
@@ -43,11 +41,9 @@ class MediaControllerTest {
     @Test
     void getFileById() throws Exception {
         UUID id = UUID.randomUUID();
-        UUID exhibitionId = UUID.randomUUID();
-        when(mediaService.getFile(id, exhibitionId)).thenReturn(new MediaFileResponse("a.jpg", "image/jpeg", 3L, new byte[]{1, 2, 3}));
+        when(mediaService.getFile(id)).thenReturn(new MediaFileResponse("a.jpg", "image/jpeg", 3L, new byte[]{1, 2, 3}));
 
-        mockMvc.perform(get("/media/{id}", id)
-                        .requestAttr(CurrentExhibitionArgumentResolver.REQUEST_ATTR_EXHIBITION, currentExhibition(exhibitionId)))
+        mockMvc.perform(get("/media/{id}", id))
                 .andExpect(status().isOk())
                 .andExpect(header().doesNotExist("Content-Disposition"))
                 .andExpect(header().string("Content-Type", "image/jpeg"))
@@ -66,16 +62,10 @@ class MediaControllerTest {
     @Test
     void getFileById_invalidMimeTypeFallback() throws Exception {
         UUID id = UUID.randomUUID();
-        UUID exhibitionId = UUID.randomUUID();
-        when(mediaService.getFile(id, exhibitionId)).thenReturn(new MediaFileResponse("a.bin", "invalid mime", 3L, new byte[]{1, 2, 3}));
+        when(mediaService.getFile(id)).thenReturn(new MediaFileResponse("a.bin", "invalid mime", 3L, new byte[]{1, 2, 3}));
 
-        mockMvc.perform(get("/media/{id}", id)
-                        .requestAttr(CurrentExhibitionArgumentResolver.REQUEST_ATTR_EXHIBITION, currentExhibition(exhibitionId)))
+        mockMvc.perform(get("/media/{id}", id))
                 .andExpect(status().isOk())
                 .andExpect(header().string("Content-Type", "application/octet-stream"));
-    }
-
-    private ExhibitionEntity currentExhibition(UUID exhibitionId) {
-        return new ExhibitionEntity(exhibitionId, "sw-gp", "전시");
     }
 }

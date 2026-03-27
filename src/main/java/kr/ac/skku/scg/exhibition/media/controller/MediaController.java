@@ -1,8 +1,6 @@
 package kr.ac.skku.scg.exhibition.media.controller;
 
 import java.util.UUID;
-import kr.ac.skku.scg.exhibition.exhibition.domain.ExhibitionEntity;
-import kr.ac.skku.scg.exhibition.global.tenant.CurrentExhibition;
 import kr.ac.skku.scg.exhibition.media.dto.response.MediaFileResponse;
 import kr.ac.skku.scg.exhibition.media.service.MediaService;
 import lombok.RequiredArgsConstructor;
@@ -26,10 +24,8 @@ public class MediaController {
     private final MediaService mediaService;
 
     @GetMapping("/{id}")
-    public ResponseEntity<ByteArrayResource> get(
-            @PathVariable UUID id,
-            @CurrentExhibition ExhibitionEntity currentExhibition) {
-        MediaFileResponse file = mediaService.getFile(id, currentExhibition.getId());
+    public ResponseEntity<ByteArrayResource> get(@PathVariable UUID id) {
+        MediaFileResponse file = mediaService.getFile(id);
         ByteArrayResource resource = new ByteArrayResource(file.bytes());
         MediaType mediaType = resolveMediaType(file.contentType());
 
