@@ -10,6 +10,8 @@ public record ExhibitionResponse(
         String name,
         String description,
         UUID logoMediaId,
+        boolean bannerEnabled,
+        UUID bannerMediaId,
         boolean popupEnabled,
         UUID popupImageMediaId,
         String popupUrl,

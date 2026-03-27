@@ -5,6 +5,7 @@ import java.util.UUID;
 import kr.ac.skku.scg.exhibition.exhibition.domain.ExhibitionEntity;
 import kr.ac.skku.scg.exhibition.exhibition.dto.request.ExhibitionListRequest;
 import kr.ac.skku.scg.exhibition.exhibition.dto.response.ExhibitionResponse;
+import kr.ac.skku.scg.exhibition.exhibition.dto.response.ExhibitionSlugResponse;
 import kr.ac.skku.scg.exhibition.exhibition.repository.ExhibitionRepository;
 import kr.ac.skku.scg.exhibition.global.error.NotFoundException;
 import org.springframework.stereotype.Service;
@@ -42,8 +43,13 @@ public class ExhibitionService {
         return List.of(toResponse(currentExhibition));
     }
 
+    public ExhibitionSlugResponse getSlug(ExhibitionEntity currentExhibition) {
+        return new ExhibitionSlugResponse(currentExhibition.getSlug());
+    }
+
     private ExhibitionResponse toResponse(ExhibitionEntity exhibition) {
         UUID logoMediaId = exhibition.getLogoMedia() == null ? null : exhibition.getLogoMedia().getId();
+        UUID bannerMediaId = exhibition.getBannerMedia() == null ? null : exhibition.getBannerMedia().getId();
         UUID popupImageMediaId = exhibition.getPopupImageMedia() == null ? null : exhibition.getPopupImageMedia().getId();
         UUID introVideoMediaId = exhibition.getIntroVideoMedia() == null ? null : exhibition.getIntroVideoMedia().getId();
 
@@ -55,6 +61,8 @@ public class ExhibitionService {
                 exhibition.getName(),
                 exhibition.getDescription(),
                 logoMediaId,
+                exhibition.isBannerEnabled(),
+                bannerMediaId,
                 exhibition.isPopupEnabled(),
                 popupImageMediaId,
                 exhibition.getPopupUrl(),

@@ -6,6 +6,7 @@ import java.util.UUID;
 import kr.ac.skku.scg.exhibition.exhibition.domain.ExhibitionEntity;
 import kr.ac.skku.scg.exhibition.exhibition.dto.request.ExhibitionListRequest;
 import kr.ac.skku.scg.exhibition.exhibition.dto.response.ExhibitionResponse;
+import kr.ac.skku.scg.exhibition.exhibition.dto.response.ExhibitionSlugResponse;
 import kr.ac.skku.scg.exhibition.exhibition.service.ExhibitionService;
 import kr.ac.skku.scg.exhibition.global.dto.ListResponse;
 import kr.ac.skku.scg.exhibition.global.tenant.CurrentExhibition;
@@ -39,5 +40,11 @@ public class ExhibitionController {
             @CurrentExhibition ExhibitionEntity currentExhibition) {
         List<ExhibitionResponse> items = exhibitionService.list(request, currentExhibition);
         return ResponseEntity.ok(ListResponse.of(items));
+    }
+
+    @GetMapping("/slug")
+    public ResponseEntity<ExhibitionSlugResponse> getSlug(
+            @CurrentExhibition ExhibitionEntity currentExhibition) {
+        return ResponseEntity.ok(exhibitionService.getSlug(currentExhibition));
     }
 }

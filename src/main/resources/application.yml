@@ -1,8 +1,0 @@
-spring:
-  application:
-    name: exhibition
-  profiles:
-    active: prod
-    group:
-      prod: common
-      dev: dev

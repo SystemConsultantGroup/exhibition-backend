@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.UUID;
 import kr.ac.skku.scg.exhibition.exhibition.domain.ExhibitionEntity;
 import kr.ac.skku.scg.exhibition.exhibition.dto.response.ExhibitionResponse;
+import kr.ac.skku.scg.exhibition.exhibition.dto.response.ExhibitionSlugResponse;
 import kr.ac.skku.scg.exhibition.exhibition.service.ExhibitionService;
 import kr.ac.skku.scg.exhibition.global.config.SecurityConfig;
 import kr.ac.skku.scg.exhibition.global.config.WebConfig;
@@ -57,6 +58,8 @@ class ExhibitionControllerTest {
                 null,
                 false,
                 null,
+                false,
+                null,
                 null,
                 null,
                 null,
@@ -81,6 +84,8 @@ class ExhibitionControllerTest {
                                 fieldWithPath("name").description("전시회명"),
                                 fieldWithPath("description").description("전시회 설명").optional(),
                                 fieldWithPath("logoMediaId").description("로고 미디어 ID").optional(),
+                                fieldWithPath("bannerEnabled").description("배너 사용 여부"),
+                                fieldWithPath("bannerMediaId").description("배너 미디어 ID").optional(),
                                 fieldWithPath("popupEnabled").description("팝업 사용 여부"),
                                 fieldWithPath("popupImageMediaId").description("팝업 이미지 미디어 ID").optional(),
                                 fieldWithPath("popupUrl").description("팝업 링크 URL").optional(),
@@ -101,6 +106,8 @@ class ExhibitionControllerTest {
                         "custom.exhibition.scg.sh",
                         "소프트웨어융합대학 졸업작품 전시회",
                         "설명",
+                        null,
+                        false,
                         null,
                         false,
                         null,
@@ -131,6 +138,8 @@ class ExhibitionControllerTest {
                                 fieldWithPath("items[].name").description("전시회명"),
                                 fieldWithPath("items[].description").description("전시회 설명").optional(),
                                 fieldWithPath("items[].logoMediaId").description("로고 미디어 ID").optional(),
+                                fieldWithPath("items[].bannerEnabled").description("배너 사용 여부"),
+                                fieldWithPath("items[].bannerMediaId").description("배너 미디어 ID").optional(),
                                 fieldWithPath("items[].popupEnabled").description("팝업 사용 여부"),
                                 fieldWithPath("items[].popupImageMediaId").description("팝업 이미지 미디어 ID").optional(),
                                 fieldWithPath("items[].popupUrl").description("팝업 링크 URL").optional(),
@@ -140,6 +149,23 @@ class ExhibitionControllerTest {
                                 fieldWithPath("page").description("페이지 번호"),
                                 fieldWithPath("pageSize").description("페이지 크기"),
                                 fieldWithPath("total").description("전체 건수")
+                        )));
+    }
+
+    @Test
+    void getSlug() throws Exception {
+        UUID exhibitionId = UUID.randomUUID();
+        when(exhibitionService.getSlug(any())).thenReturn(new ExhibitionSlugResponse("sw-gp"));
+
+        mockMvc.perform(get("/exhibitions/slug")
+                        .requestAttr(CurrentExhibitionArgumentResolver.REQUEST_ATTR_EXHIBITION, currentExhibition(exhibitionId)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.slug").value("sw-gp"))
+                .andDo(document("exhibitions-get-slug",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        responseFields(
+                                fieldWithPath("slug").description("현재 도메인에 매핑된 전시회 slug")
                         )));
     }
 
