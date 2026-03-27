@@ -20,8 +20,8 @@ public class ClassificationService {
         this.itemClassificationRepository = itemClassificationRepository;
     }
 
-    public ClassificationResponse get(UUID id) {
-        ItemClassificationEntity classification = itemClassificationRepository.findById(id)
+    public ClassificationResponse get(UUID id, UUID exhibitionId) {
+        ItemClassificationEntity classification = itemClassificationRepository.findByIdAndExhibition_Id(id, exhibitionId)
                 .orElseThrow(() -> new NotFoundException("Classification not found: " + id));
         return toResponse(classification);
     }

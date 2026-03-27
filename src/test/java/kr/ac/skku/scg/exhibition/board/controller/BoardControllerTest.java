@@ -21,8 +21,11 @@ import java.util.UUID;
 import kr.ac.skku.scg.exhibition.board.dto.response.AttachmentMediaResponse;
 import kr.ac.skku.scg.exhibition.board.dto.response.BoardResponse;
 import kr.ac.skku.scg.exhibition.board.service.BoardService;
+import kr.ac.skku.scg.exhibition.exhibition.domain.ExhibitionEntity;
 import kr.ac.skku.scg.exhibition.global.config.SecurityConfig;
+import kr.ac.skku.scg.exhibition.global.config.WebConfig;
 import kr.ac.skku.scg.exhibition.global.error.ApiExceptionHandler;
+import kr.ac.skku.scg.exhibition.global.tenant.CurrentExhibitionArgumentResolver;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.restdocs.test.autoconfigure.AutoConfigureRestDocs;
@@ -32,7 +35,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(controllers = BoardController.class)
-@Import({SecurityConfig.class, ApiExceptionHandler.class})
+@Import({SecurityConfig.class, ApiExceptionHandler.class, WebConfig.class})
 @AutoConfigureRestDocs
 class BoardControllerTest {
 
@@ -45,9 +48,10 @@ class BoardControllerTest {
     @Test
     void getById() throws Exception {
         UUID id = UUID.randomUUID();
-        when(boardService.get(id)).thenReturn(new BoardResponse(
+        UUID exhibitionId = UUID.randomUUID();
+        when(boardService.get(id, exhibitionId)).thenReturn(new BoardResponse(
                 id,
-                UUID.randomUUID(),
+                exhibitionId,
                 "공지",
                 "안내 내용",
                 List.of(UUID.randomUUID()),
@@ -57,7 +61,8 @@ class BoardControllerTest {
                 Instant.now()
         ));
 
-        mockMvc.perform(get("/boards/{id}", id))
+        mockMvc.perform(get("/boards/{id}", id)
+                        .requestAttr(CurrentExhibitionArgumentResolver.REQUEST_ATTR_EXHIBITION, currentExhibition(exhibitionId)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(id.toString()))
                 .andDo(document("boards-get",
@@ -97,15 +102,13 @@ class BoardControllerTest {
                 Instant.now()
         )));
 
-        mockMvc.perform(get("/boards").param("exhibitionId", exhibitionId.toString()))
+        mockMvc.perform(get("/boards")
+                        .requestAttr(CurrentExhibitionArgumentResolver.REQUEST_ATTR_EXHIBITION, currentExhibition(exhibitionId)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.items[0].title").value("공지"))
                 .andDo(document("boards-list",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
-                        queryParameters(
-                                parameterWithName("exhibitionId").description("전시 ID")
-                        ),
                         responseFields(
                                 fieldWithPath("items").description("게시판 목록"),
                                 fieldWithPath("items[].id").description("게시판 글 ID"),
@@ -123,5 +126,9 @@ class BoardControllerTest {
                                 fieldWithPath("pageSize").description("페이지 크기"),
                                 fieldWithPath("total").description("전체 건수")
                         )));
+    }
+
+    private ExhibitionEntity currentExhibition(UUID exhibitionId) {
+        return new ExhibitionEntity(exhibitionId, "sw-gp", "전시");
     }
 }

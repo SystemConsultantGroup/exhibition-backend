@@ -18,10 +18,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
+import kr.ac.skku.scg.exhibition.exhibition.domain.ExhibitionEntity;
 import kr.ac.skku.scg.exhibition.eventperiod.dto.response.EventPeriodResponse;
 import kr.ac.skku.scg.exhibition.eventperiod.service.EventPeriodService;
 import kr.ac.skku.scg.exhibition.global.config.SecurityConfig;
+import kr.ac.skku.scg.exhibition.global.config.WebConfig;
 import kr.ac.skku.scg.exhibition.global.error.ApiExceptionHandler;
+import kr.ac.skku.scg.exhibition.global.tenant.CurrentExhibitionArgumentResolver;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.restdocs.test.autoconfigure.AutoConfigureRestDocs;
@@ -31,7 +34,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(controllers = EventPeriodController.class)
-@Import({SecurityConfig.class, ApiExceptionHandler.class})
+@Import({SecurityConfig.class, ApiExceptionHandler.class, WebConfig.class})
 @AutoConfigureRestDocs
 class EventPeriodControllerTest {
 
@@ -45,11 +48,12 @@ class EventPeriodControllerTest {
     void getById() throws Exception {
         UUID id = UUID.randomUUID();
         UUID exhibitionId = UUID.randomUUID();
-        when(eventPeriodService.get(id)).thenReturn(new EventPeriodResponse(
+        when(eventPeriodService.get(id, exhibitionId)).thenReturn(new EventPeriodResponse(
                 id, exhibitionId, "2025-2학기",
                 Instant.parse("2025-09-01T00:00:00Z"), Instant.parse("2025-12-31T00:00:00Z")));
 
-        mockMvc.perform(get("/event-periods/{id}", id))
+        mockMvc.perform(get("/event-periods/{id}", id)
+                        .requestAttr(CurrentExhibitionArgumentResolver.REQUEST_ATTR_EXHIBITION, currentExhibition(exhibitionId)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(id.toString()))
                 .andDo(document("event-periods-get",
@@ -74,15 +78,13 @@ class EventPeriodControllerTest {
                 UUID.randomUUID(), exhibitionId, "2025-1학기",
                 Instant.parse("2025-03-01T00:00:00Z"), Instant.parse("2025-06-30T00:00:00Z"))));
 
-        mockMvc.perform(get("/event-periods").param("exhibitionId", exhibitionId.toString()))
+        mockMvc.perform(get("/event-periods")
+                        .requestAttr(CurrentExhibitionArgumentResolver.REQUEST_ATTR_EXHIBITION, currentExhibition(exhibitionId)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.items[0].name").value("2025-1학기"))
                 .andDo(document("event-periods-list",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
-                        queryParameters(
-                                parameterWithName("exhibitionId").description("전시 ID")
-                        ),
                         responseFields(
                                 fieldWithPath("items").description("이벤트 기간 목록"),
                                 fieldWithPath("items[].id").description("이벤트 기간 ID"),
@@ -94,5 +96,9 @@ class EventPeriodControllerTest {
                                 fieldWithPath("pageSize").description("페이지 크기"),
                                 fieldWithPath("total").description("전체 건수")
                         )));
+    }
+
+    private ExhibitionEntity currentExhibition(UUID exhibitionId) {
+        return new ExhibitionEntity(exhibitionId, "sw-gp", "전시");
     }
 }

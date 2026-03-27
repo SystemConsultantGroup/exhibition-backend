@@ -22,8 +22,8 @@ public class BoardService {
         this.boardRepository = boardRepository;
     }
 
-    public BoardResponse get(UUID id) {
-        BoardEntity board = boardRepository.findDetailById(id)
+    public BoardResponse get(UUID id, UUID exhibitionId) {
+        BoardEntity board = boardRepository.findDetailByIdAndExhibitionId(id, exhibitionId)
                 .orElseThrow(() -> new NotFoundException("Board not found: " + id));
         return toResponse(board);
     }

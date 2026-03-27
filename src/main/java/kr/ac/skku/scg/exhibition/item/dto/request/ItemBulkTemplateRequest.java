@@ -5,7 +5,6 @@ import java.util.UUID;
 
 public class ItemBulkTemplateRequest {
 
-    @NotNull
     private UUID exhibitionId;
 
     @NotNull

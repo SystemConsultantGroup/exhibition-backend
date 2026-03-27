@@ -20,8 +20,8 @@ public class CategoryService {
         this.categoryRepository = categoryRepository;
     }
 
-    public CategoryResponse get(UUID id) {
-        CategoryEntity category = categoryRepository.findById(id)
+    public CategoryResponse get(UUID id, UUID exhibitionId) {
+        CategoryEntity category = categoryRepository.findByIdAndExhibition_Id(id, exhibitionId)
                 .orElseThrow(() -> new NotFoundException("Category not found: " + id));
         return toResponse(category);
     }

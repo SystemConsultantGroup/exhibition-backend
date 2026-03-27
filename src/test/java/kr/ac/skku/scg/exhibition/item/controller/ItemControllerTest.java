@@ -25,11 +25,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import kr.ac.skku.scg.exhibition.exhibition.domain.ExhibitionEntity;
 import kr.ac.skku.scg.exhibition.global.auth.resolver.AuthenticatedUser;
 import kr.ac.skku.scg.exhibition.global.config.WebConfig;
 import kr.ac.skku.scg.exhibition.global.config.SecurityConfig;
 import kr.ac.skku.scg.exhibition.global.dto.ListResponse;
 import kr.ac.skku.scg.exhibition.global.error.ApiExceptionHandler;
+import kr.ac.skku.scg.exhibition.global.tenant.CurrentExhibitionArgumentResolver;
 import kr.ac.skku.scg.exhibition.item.dto.response.ItemResponse;
 import kr.ac.skku.scg.exhibition.item.service.ItemService;
 import kr.ac.skku.scg.exhibition.user.domain.UserEntity;
@@ -60,9 +62,10 @@ class ItemControllerTest {
     @Test
     void getById() throws Exception {
         UUID id = UUID.randomUUID();
-        when(itemService.get(eq(id), isNull())).thenReturn(new ItemResponse(
+        UUID exhibitionId = UUID.randomUUID();
+        when(itemService.get(eq(id), eq(exhibitionId), isNull())).thenReturn(new ItemResponse(
                 id,
-                UUID.randomUUID(),
+                exhibitionId,
                 UUID.randomUUID(),
                 UUID.randomUUID(),
                 "Smart Campus",
@@ -76,7 +79,8 @@ class ItemControllerTest {
                 0,
                 false));
 
-        mockMvc.perform(get("/items/{id}", id))
+        mockMvc.perform(get("/items/{id}", id)
+                        .requestAttr(CurrentExhibitionArgumentResolver.REQUEST_ATTR_EXHIBITION, currentExhibition(exhibitionId)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(id.toString()))
                 .andDo(document("items-get",
@@ -113,14 +117,14 @@ class ItemControllerTest {
                 null, null, null,
                 0, false)), 1, 20, 1));
 
-        mockMvc.perform(get("/items").param("exhibitionId", exhibitionId.toString()))
+        mockMvc.perform(get("/items")
+                        .requestAttr(CurrentExhibitionArgumentResolver.REQUEST_ATTR_EXHIBITION, currentExhibition(exhibitionId)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.items[0].title").value("Smart Campus"))
                 .andDo(document("items-list",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
                         queryParameters(
-                                parameterWithName("exhibitionId").description("전시 ID"),
                                 parameterWithName("categoryId").optional().description("카테고리 ID"),
                                 parameterWithName("eventPeriodId").optional().description("이벤트 기간 ID"),
                                 parameterWithName("classificationId").optional().description("분야(분류) ID"),
@@ -155,11 +159,13 @@ class ItemControllerTest {
     void like() throws Exception {
         UUID itemId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
+        UUID exhibitionId = UUID.randomUUID();
         when(userRepository.findById(userId)).thenReturn(Optional.of(testUser(userId)));
-        doNothing().when(itemService).like(eq(itemId), any(AuthenticatedUser.class));
+        doNothing().when(itemService).like(eq(itemId), eq(exhibitionId), any(AuthenticatedUser.class));
 
         mockMvc.perform(post("/items/{id}/like", itemId)
                         .requestAttr("auth.userId", userId)
+                        .requestAttr(CurrentExhibitionArgumentResolver.REQUEST_ATTR_EXHIBITION, currentExhibition(exhibitionId))
                         .header("Authorization", "Bearer {accessToken}"))
                 .andExpect(status().isCreated())
                 .andDo(document("items-like",
@@ -177,11 +183,13 @@ class ItemControllerTest {
     void unlike() throws Exception {
         UUID itemId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
+        UUID exhibitionId = UUID.randomUUID();
         when(userRepository.findById(userId)).thenReturn(Optional.of(testUser(userId)));
-        doNothing().when(itemService).unlike(eq(itemId), any(AuthenticatedUser.class));
+        doNothing().when(itemService).unlike(eq(itemId), eq(exhibitionId), any(AuthenticatedUser.class));
 
         mockMvc.perform(delete("/items/{id}/like", itemId)
                         .requestAttr("auth.userId", userId)
+                        .requestAttr(CurrentExhibitionArgumentResolver.REQUEST_ATTR_EXHIBITION, currentExhibition(exhibitionId))
                         .header("Authorization", "Bearer {accessToken}"))
                 .andExpect(status().isNoContent())
                 .andDo(document("items-unlike",
@@ -193,6 +201,10 @@ class ItemControllerTest {
                         requestHeaders(
                                 headerWithName("Authorization").description("Bearer Access Token")
                         )));
+    }
+
+    private ExhibitionEntity currentExhibition(UUID exhibitionId) {
+        return new ExhibitionEntity(exhibitionId, "sw-gp", "전시");
     }
 
     private UserEntity testUser(UUID userId) {

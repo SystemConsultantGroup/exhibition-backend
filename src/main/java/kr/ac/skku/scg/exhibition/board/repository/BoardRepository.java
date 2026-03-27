@@ -16,6 +16,10 @@ public interface BoardRepository extends JpaRepository<BoardEntity, UUID> {
     Optional<BoardEntity> findDetailById(@Param("id") UUID id);
 
     @EntityGraph(attributePaths = {"exhibition", "authorUser", "attachmentMediaList"})
+    @Query("select b from BoardEntity b where b.id = :id and b.exhibition.id = :exhibitionId")
+    Optional<BoardEntity> findDetailByIdAndExhibitionId(@Param("id") UUID id, @Param("exhibitionId") UUID exhibitionId);
+
+    @EntityGraph(attributePaths = {"exhibition", "authorUser", "attachmentMediaList"})
     @Query("select b from BoardEntity b where b.exhibition.id = :exhibitionId")
     List<BoardEntity> findAllDetailByExhibitionId(@Param("exhibitionId") UUID exhibitionId);
 }
