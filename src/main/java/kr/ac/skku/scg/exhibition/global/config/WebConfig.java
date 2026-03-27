@@ -1,9 +1,9 @@
 package kr.ac.skku.scg.exhibition.global.config;
 
 import java.util.List;
-import kr.ac.skku.scg.exhibition.exhibition.repository.ExhibitionRepository;
 import kr.ac.skku.scg.exhibition.global.auth.resolver.CurrentUserArgumentResolver;
 import kr.ac.skku.scg.exhibition.global.tenant.CurrentExhibitionArgumentResolver;
+import kr.ac.skku.scg.exhibition.global.tenant.ExhibitionDomainCacheService;
 import kr.ac.skku.scg.exhibition.global.tenant.ExhibitionTenantInterceptor;
 import kr.ac.skku.scg.exhibition.user.repository.UserRepository;
 import org.springframework.beans.factory.ObjectProvider;
@@ -16,14 +16,14 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class WebConfig implements WebMvcConfigurer {
 
     private final ObjectProvider<UserRepository> userRepositoryProvider;
-    private final ObjectProvider<ExhibitionRepository> exhibitionRepositoryProvider;
+    private final ObjectProvider<ExhibitionDomainCacheService> cacheServiceProvider;
 
     public WebConfig(
             ObjectProvider<UserRepository> userRepositoryProvider,
-            ObjectProvider<ExhibitionRepository> exhibitionRepositoryProvider
+            ObjectProvider<ExhibitionDomainCacheService> cacheServiceProvider
     ) {
         this.userRepositoryProvider = userRepositoryProvider;
-        this.exhibitionRepositoryProvider = exhibitionRepositoryProvider;
+        this.cacheServiceProvider = cacheServiceProvider;
     }
 
     @Override
@@ -38,12 +38,12 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        ExhibitionRepository exhibitionRepository = exhibitionRepositoryProvider.getIfAvailable();
-        if (exhibitionRepository == null) {
+        ExhibitionDomainCacheService cacheService = cacheServiceProvider.getIfAvailable();
+        if (cacheService == null) {
             return;
         }
 
-        registry.addInterceptor(new ExhibitionTenantInterceptor(exhibitionRepository))
+        registry.addInterceptor(new ExhibitionTenantInterceptor(cacheService))
                 .addPathPatterns("/**")
                 .excludePathPatterns(
                         "/auth/**",

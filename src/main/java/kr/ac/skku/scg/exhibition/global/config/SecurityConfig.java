@@ -2,9 +2,9 @@ package kr.ac.skku.scg.exhibition.global.config;
 
 import java.util.List;
 import java.util.Locale;
-import kr.ac.skku.scg.exhibition.exhibition.repository.ExhibitionRepository;
 import kr.ac.skku.scg.exhibition.global.auth.security.JwtAuthenticationFilter;
 import kr.ac.skku.scg.exhibition.global.auth.service.JwtTokenService;
+import kr.ac.skku.scg.exhibition.global.tenant.ExhibitionDomainCacheService;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,14 +21,14 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class SecurityConfig {
 
     @Bean
-    public CorsConfigurationSource corsConfigurationSource(ObjectProvider<ExhibitionRepository> exhibitionRepositoryProvider) {
+    public CorsConfigurationSource corsConfigurationSource(ObjectProvider<ExhibitionDomainCacheService> cacheServiceProvider) {
         return request -> {
             String origin = request.getHeader(HttpHeaders.ORIGIN);
             if (origin == null || origin.isBlank()) {
                 return null;
             }
 
-            String host = request.getHeader(HttpHeaders.ORIGIN);
+            String host = null;
             try {
                 host = java.net.URI.create(origin.trim()).getHost();
             } catch (IllegalArgumentException ignored) {
@@ -39,7 +39,7 @@ public class SecurityConfig {
                 return null;
             }
 
-            if (!isAllowedOrigin(host.toLowerCase(Locale.ROOT), exhibitionRepositoryProvider.getIfAvailable())) {
+            if (!isAllowedOrigin(host.toLowerCase(Locale.ROOT), cacheServiceProvider.getIfAvailable())) {
                 return null;
             }
 
@@ -71,11 +71,10 @@ public class SecurityConfig {
                 .build();
     }
 
-    private boolean isAllowedOrigin(String host, ExhibitionRepository exhibitionRepository) {
+    private boolean isAllowedOrigin(String host, ExhibitionDomainCacheService cacheService) {
         if ("localhost".equals(host) || "127.0.0.1".equals(host)) {
             return true;
         }
-        return exhibitionRepository != null
-                && exhibitionRepository.existsByDefaultDomainIgnoreCaseOrCustomDomainIgnoreCase(host, host);
+        return cacheService != null && cacheService.findByDomain(host).isPresent();
     }
 }

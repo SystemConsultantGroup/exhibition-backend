@@ -1,12 +1,13 @@
 package kr.ac.skku.scg.exhibition.item.dto.request;
 
+import jakarta.validation.constraints.NotNull;
 import java.util.UUID;
 
 public class ItemBulkTemplateRequest {
 
     private UUID exhibitionId;
 
-    @jakarta.validation.constraints.NotNull
+    @NotNull
     private UUID eventPeriodId;
 
     public UUID getExhibitionId() {

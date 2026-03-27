@@ -5,24 +5,22 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.net.URI;
 import java.util.Locale;
 import kr.ac.skku.scg.exhibition.exhibition.domain.ExhibitionEntity;
-import kr.ac.skku.scg.exhibition.exhibition.repository.ExhibitionRepository;
 import kr.ac.skku.scg.exhibition.global.error.NotFoundException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 public class ExhibitionTenantInterceptor implements HandlerInterceptor {
 
-    private final ExhibitionRepository exhibitionRepository;
+    private final ExhibitionDomainCacheService cacheService;
 
-    public ExhibitionTenantInterceptor(ExhibitionRepository exhibitionRepository) {
-        this.exhibitionRepository = exhibitionRepository;
+    public ExhibitionTenantInterceptor(ExhibitionDomainCacheService cacheService) {
+        this.cacheService = cacheService;
     }
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         String domain = resolveDomain(request);
-        ExhibitionEntity exhibition = exhibitionRepository
-                .findFirstByDefaultDomainIgnoreCaseOrCustomDomainIgnoreCase(domain, domain)
+        ExhibitionEntity exhibition = cacheService.findByDomain(domain)
                 .orElseThrow(() -> new NotFoundException("Exhibition not found for origin: " + domain));
 
         request.setAttribute(CurrentExhibitionArgumentResolver.REQUEST_ATTR_EXHIBITION, exhibition);
