@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: exhibition
+  cache:
+    type: caffeine
+    caffeine:
+      spec: maximumSize=500,expireAfterWrite=5m
+  profiles:
+    active: prod
+    group:
+      prod: common
+      dev: dev
