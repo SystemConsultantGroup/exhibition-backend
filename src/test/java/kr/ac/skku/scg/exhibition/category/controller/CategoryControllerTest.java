@@ -47,7 +47,7 @@ class CategoryControllerTest {
     void getById() throws Exception {
         UUID id = UUID.randomUUID();
         UUID exhibitionId = UUID.randomUUID();
-        when(categoryService.get(id, exhibitionId)).thenReturn(new CategoryResponse(id, exhibitionId, "Web"));
+        when(categoryService.get(id, exhibitionId)).thenReturn(new CategoryResponse(id, exhibitionId, "web", "Web"));
 
         mockMvc.perform(get("/categories/{id}", id)
                         .requestAttr(CurrentExhibitionArgumentResolver.REQUEST_ATTR_EXHIBITION, currentExhibition(exhibitionId)))
@@ -62,6 +62,7 @@ class CategoryControllerTest {
                         responseFields(
                                 fieldWithPath("id").description("카테고리 ID"),
                                 fieldWithPath("exhibitionId").description("전시 ID"),
+                                fieldWithPath("slug").description("카테고리 슬러그"),
                                 fieldWithPath("name").description("카테고리명")
                         )));
     }
@@ -70,7 +71,7 @@ class CategoryControllerTest {
     void list() throws Exception {
         UUID exhibitionId = UUID.randomUUID();
         when(categoryService.list(any())).thenReturn(List.of(
-                new CategoryResponse(UUID.randomUUID(), exhibitionId, "AI")
+                new CategoryResponse(UUID.randomUUID(), exhibitionId, "ai", "AI")
         ));
 
         mockMvc.perform(get("/categories")
@@ -84,6 +85,7 @@ class CategoryControllerTest {
                                 fieldWithPath("items").description("카테고리 목록"),
                                 fieldWithPath("items[].id").description("카테고리 ID"),
                                 fieldWithPath("items[].exhibitionId").description("전시 ID"),
+                                fieldWithPath("items[].slug").description("카테고리 슬러그"),
                                 fieldWithPath("items[].name").description("카테고리명"),
                                 fieldWithPath("page").description("페이지 번호"),
                                 fieldWithPath("pageSize").description("페이지 크기"),

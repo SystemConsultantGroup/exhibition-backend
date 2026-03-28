@@ -126,6 +126,7 @@ class ItemControllerTest {
                         preprocessResponse(prettyPrint()),
                         queryParameters(
                                 parameterWithName("categoryId").optional().description("카테고리 ID"),
+                                parameterWithName("categorySlug").optional().description("카테고리 슬러그"),
                                 parameterWithName("eventPeriodId").optional().description("이벤트 기간 ID"),
                                 parameterWithName("classificationId").optional().description("분야(분류) ID"),
                                 parameterWithName("q").optional().description("검색어 (제목, 지도교수, 학생명)"),
