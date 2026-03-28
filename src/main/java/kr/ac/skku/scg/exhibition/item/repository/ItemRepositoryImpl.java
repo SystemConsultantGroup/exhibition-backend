@@ -9,6 +9,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import kr.ac.skku.scg.exhibition.classification.domain.QItemClassificationMapEntity;
 import kr.ac.skku.scg.exhibition.item.domain.ItemEntity;
 import kr.ac.skku.scg.exhibition.item.domain.QItemEntity;
@@ -39,6 +40,10 @@ public class ItemRepositoryImpl implements ItemRepositoryCustom {
 
         if (request.getCategoryId() != null) {
             where.and(item.category.id.eq(request.getCategoryId()));
+        }
+        String categorySlug = normalize(request.getCategorySlug());
+        if (categorySlug != null) {
+            where.and(item.category.slug.eq(categorySlug));
         }
         if (request.getEventPeriodId() != null) {
             where.and(item.eventPeriod.id.eq(request.getEventPeriodId()));
@@ -98,6 +103,6 @@ public class ItemRepositoryImpl implements ItemRepositoryCustom {
         if (!StringUtils.hasText(value)) {
             return null;
         }
-        return value.trim();
+        return value.trim().toLowerCase(Locale.ROOT);
     }
 }

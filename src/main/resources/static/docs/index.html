@@ -1087,7 +1087,7 @@ Content-Length: 595
 
 {
   "items" : [ {
-    "id" : "3a272dc4-513f-4e8b-a53d-f4f44fffd26e",
+    "id" : "27c45d34-f1a3-4073-b96e-3c3bbebeb4a1",
     "slug" : "sw-gp",
     "defaultDomain" : "exhibition.scg.skku.ac.kr",
     "customDomain" : "custom.exhibition.scg.sh",
@@ -1116,7 +1116,7 @@ Content-Length: 595
 <div class="content">
 <pre class="highlight nowrap"><code class="language-json" data-lang="json">{
   "items" : [ {
-    "id" : "3a272dc4-513f-4e8b-a53d-f4f44fffd26e",
+    "id" : "27c45d34-f1a3-4073-b96e-3c3bbebeb4a1",
     "slug" : "sw-gp",
     "defaultDomain" : "exhibition.scg.skku.ac.kr",
     "customDomain" : "custom.exhibition.scg.sh",
@@ -1167,7 +1167,7 @@ Content-Length: 595
 <h4 id="_요청_예시_5">3.2.2. 요청 예시</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /exhibitions/54d6f30e-b72f-4380-843e-9b97b758bda2 HTTP/1.1
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /exhibitions/c7e8d544-a221-42c1-9223-6a84c80c9fca HTTP/1.1
 Host: localhost:8080</code></pre>
 </div>
 </div>
@@ -1281,7 +1281,7 @@ X-Frame-Options: DENY
 Content-Length: 496
 
 {
-  "id" : "54d6f30e-b72f-4380-843e-9b97b758bda2",
+  "id" : "c7e8d544-a221-42c1-9223-6a84c80c9fca",
   "slug" : "sw-gp",
   "defaultDomain" : "exhibition.scg.skku.ac.kr",
   "customDomain" : "custom.exhibition.scg.sh",
@@ -1305,7 +1305,7 @@ Content-Length: 496
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-json" data-lang="json">{
-  "id" : "54d6f30e-b72f-4380-843e-9b97b758bda2",
+  "id" : "c7e8d544-a221-42c1-9223-6a84c80c9fca",
   "slug" : "sw-gp",
   "defaultDomain" : "exhibition.scg.skku.ac.kr",
   "customDomain" : "custom.exhibition.scg.sh",
@@ -1439,6 +1439,11 @@ Host: localhost:8080</code></pre>
 <td class="tableblock halign-left valign-top"><p class="tableblock">전시 ID</p></td>
 </tr>
 <tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>items[].slug</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">카테고리 슬러그</p></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>items[].name</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">카테고리명</p></td>
@@ -1473,12 +1478,13 @@ Cache-Control: no-cache, no-store, max-age=0, must-revalidate
 Pragma: no-cache
 Expires: 0
 X-Frame-Options: DENY
-Content-Length: 202
+Content-Length: 221
 
 {
   "items" : [ {
-    "id" : "bdc61a7a-1653-4ca1-833d-ca1982f9c1d2",
-    "exhibitionId" : "dc6b40ea-b1a0-4553-8c5d-b6aa9e65eb7f",
+    "id" : "7e4d2663-3df5-4a3f-914c-e1be91c69146",
+    "exhibitionId" : "4ba3a21d-fc7a-4c99-b36e-3aa1198862a4",
+    "slug" : "ai",
     "name" : "AI"
   } ],
   "page" : 1,
@@ -1494,8 +1500,9 @@ Content-Length: 202
 <div class="content">
 <pre class="highlight nowrap"><code class="language-json" data-lang="json">{
   "items" : [ {
-    "id" : "bdc61a7a-1653-4ca1-833d-ca1982f9c1d2",
-    "exhibitionId" : "dc6b40ea-b1a0-4553-8c5d-b6aa9e65eb7f",
+    "id" : "7e4d2663-3df5-4a3f-914c-e1be91c69146",
+    "exhibitionId" : "4ba3a21d-fc7a-4c99-b36e-3aa1198862a4",
+    "slug" : "ai",
     "name" : "AI"
   } ],
   "page" : 1,
@@ -1512,7 +1519,7 @@ Content-Length: 202
 <h4 id="_요청_예시_8">4.2.1. 요청 예시</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /categories/d2b07408-d14a-456c-b19d-2c446c7c464d HTTP/1.1
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /categories/d0521866-54d7-492f-97b1-e4f9799e0dd6 HTTP/1.1
 Host: localhost:8080</code></pre>
 </div>
 </div>
@@ -1544,6 +1551,11 @@ Host: localhost:8080</code></pre>
 <td class="tableblock halign-left valign-top"><p class="tableblock">전시 ID</p></td>
 </tr>
 <tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>slug</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">카테고리 슬러그</p></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>name</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">카테고리명</p></td>
@@ -1563,11 +1575,12 @@ Cache-Control: no-cache, no-store, max-age=0, must-revalidate
 Pragma: no-cache
 Expires: 0
 X-Frame-Options: DENY
-Content-Length: 128
+Content-Length: 146
 
 {
-  "id" : "d2b07408-d14a-456c-b19d-2c446c7c464d",
-  "exhibitionId" : "348f47ab-1d2f-47e7-b7cf-6e0f664c8541",
+  "id" : "d0521866-54d7-492f-97b1-e4f9799e0dd6",
+  "exhibitionId" : "16a490bf-84c1-4d34-9a3c-15e4ea48954a",
+  "slug" : "web",
   "name" : "Web"
 }</code></pre>
 </div>
@@ -1578,8 +1591,9 @@ Content-Length: 128
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-json" data-lang="json">{
-  "id" : "d2b07408-d14a-456c-b19d-2c446c7c464d",
-  "exhibitionId" : "348f47ab-1d2f-47e7-b7cf-6e0f664c8541",
+  "id" : "d0521866-54d7-492f-97b1-e4f9799e0dd6",
+  "exhibitionId" : "16a490bf-84c1-4d34-9a3c-15e4ea48954a",
+  "slug" : "web",
   "name" : "Web"
 }</code></pre>
 </div>
@@ -1610,6 +1624,10 @@ Content-Length: 128
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>categoryId</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">카테고리 ID</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>categorySlug</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">카테고리 슬러그</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>eventPeriodId</code></p></td>
@@ -1772,9 +1790,9 @@ Content-Length: 584
 
 {
   "items" : [ {
-    "id" : "2cc8f28e-e644-4e34-bec7-43a0e9fd9e86",
-    "exhibitionId" : "f1bc99f9-c8b0-492c-bbca-a6bb04a7bd76",
-    "categoryId" : "a8d59fc9-51c4-43b5-bfb4-4a0010b98b29",
+    "id" : "a5eafa7c-372c-4ccf-aa86-a523d250a9b8",
+    "exhibitionId" : "7154466a-fcb0-4e0c-997f-7d14fcc9ed92",
+    "categoryId" : "b58b4a40-3db7-4875-bbbe-0f7d689ab961",
     "eventPeriodId" : null,
     "title" : "Smart Campus",
     "description" : "desc",
@@ -1800,9 +1818,9 @@ Content-Length: 584
 <div class="content">
 <pre class="highlight nowrap"><code class="language-json" data-lang="json">{
   "items" : [ {
-    "id" : "2cc8f28e-e644-4e34-bec7-43a0e9fd9e86",
-    "exhibitionId" : "f1bc99f9-c8b0-492c-bbca-a6bb04a7bd76",
-    "categoryId" : "a8d59fc9-51c4-43b5-bfb4-4a0010b98b29",
+    "id" : "a5eafa7c-372c-4ccf-aa86-a523d250a9b8",
+    "exhibitionId" : "7154466a-fcb0-4e0c-997f-7d14fcc9ed92",
+    "categoryId" : "b58b4a40-3db7-4875-bbbe-0f7d689ab961",
     "eventPeriodId" : null,
     "title" : "Smart Campus",
     "description" : "desc",
@@ -1850,7 +1868,7 @@ Content-Length: 584
 <h4 id="_요청_예시_10">5.2.2. 요청 예시</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /items/2cc27e44-f532-4521-9a7b-c9eac0b1fc98 HTTP/1.1
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /items/748e0be5-ed2d-43b6-995e-a8c291e1eb3d HTTP/1.1
 Host: localhost:8080</code></pre>
 </div>
 </div>
@@ -1959,10 +1977,10 @@ X-Frame-Options: DENY
 Content-Length: 547
 
 {
-  "id" : "2cc27e44-f532-4521-9a7b-c9eac0b1fc98",
-  "exhibitionId" : "079ef2fd-f208-412d-8d59-552ac8f19193",
-  "categoryId" : "7cb828a0-045c-4fe4-9b6f-930f1a1f1ded",
-  "eventPeriodId" : "4fb3cd29-df02-4196-b5e2-424f4bf8af61",
+  "id" : "748e0be5-ed2d-43b6-995e-a8c291e1eb3d",
+  "exhibitionId" : "8e417f2c-492e-4d54-8767-6230d20b24cb",
+  "categoryId" : "4dc3aacb-e3c5-41cf-9f19-37f1973409b0",
+  "eventPeriodId" : "3345c4fc-b28f-4d35-a1a5-a8949f66ebf6",
   "title" : "Smart Campus",
   "description" : "desc",
   "participantNames" : "홍길동,양현준",
@@ -1982,10 +2000,10 @@ Content-Length: 547
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-json" data-lang="json">{
-  "id" : "2cc27e44-f532-4521-9a7b-c9eac0b1fc98",
-  "exhibitionId" : "079ef2fd-f208-412d-8d59-552ac8f19193",
-  "categoryId" : "7cb828a0-045c-4fe4-9b6f-930f1a1f1ded",
-  "eventPeriodId" : "4fb3cd29-df02-4196-b5e2-424f4bf8af61",
+  "id" : "748e0be5-ed2d-43b6-995e-a8c291e1eb3d",
+  "exhibitionId" : "8e417f2c-492e-4d54-8767-6230d20b24cb",
+  "categoryId" : "4dc3aacb-e3c5-41cf-9f19-37f1973409b0",
+  "eventPeriodId" : "3345c4fc-b28f-4d35-a1a5-a8949f66ebf6",
   "title" : "Smart Campus",
   "description" : "desc",
   "participantNames" : "홍길동,양현준",
@@ -2049,7 +2067,7 @@ Content-Length: 547
 <h4 id="_요청_예시_11">5.3.3. 요청 예시</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">POST /items/030ec509-9c6f-485e-a22b-747d95e1bdb2/like HTTP/1.1
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">POST /items/2f1ac09c-9487-4444-9da5-fadf40f4b90b/like HTTP/1.1
 Authorization: Bearer {accessToken}
 Host: localhost:8080
 Content-Type: application/x-www-form-urlencoded</code></pre>
@@ -2119,7 +2137,7 @@ X-Frame-Options: DENY</code></pre>
 <h4 id="_요청_예시_12">5.4.3. 요청 예시</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">DELETE /items/cb953b7a-7dd7-4856-9ca9-8d4811b9396a/like HTTP/1.1
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">DELETE /items/d7c32141-0c50-4c4e-9147-61fde1c2a167/like HTTP/1.1
 Authorization: Bearer {accessToken}
 Host: localhost:8080</code></pre>
 </div>
@@ -2226,8 +2244,8 @@ Content-Length: 206
 
 {
   "items" : [ {
-    "id" : "0d752657-28b2-41ce-89e6-3b9dc607cad8",
-    "exhibitionId" : "ad592ebd-a765-4d85-bfe4-f460a5facfba",
+    "id" : "1ca0245b-f246-4ad1-a34c-031b8c669c38",
+    "exhibitionId" : "4d2e667d-4c65-4fd5-8e05-1048357ff014",
     "name" : "작품"
   } ],
   "page" : 1,
@@ -2243,8 +2261,8 @@ Content-Length: 206
 <div class="content">
 <pre class="highlight nowrap"><code class="language-json" data-lang="json">{
   "items" : [ {
-    "id" : "0d752657-28b2-41ce-89e6-3b9dc607cad8",
-    "exhibitionId" : "ad592ebd-a765-4d85-bfe4-f460a5facfba",
+    "id" : "1ca0245b-f246-4ad1-a34c-031b8c669c38",
+    "exhibitionId" : "4d2e667d-4c65-4fd5-8e05-1048357ff014",
     "name" : "작품"
   } ],
   "page" : 1,
@@ -2261,7 +2279,7 @@ Content-Length: 206
 <h4 id="_요청_예시_14">6.2.1. 요청 예시</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /classifications/d44575fe-fae7-4f09-93ff-7d181da5d37a HTTP/1.1
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /classifications/216c76ae-8518-42eb-a4cd-51308c738892 HTTP/1.1
 Host: localhost:8080</code></pre>
 </div>
 </div>
@@ -2315,8 +2333,8 @@ X-Frame-Options: DENY
 Content-Length: 131
 
 {
-  "id" : "d44575fe-fae7-4f09-93ff-7d181da5d37a",
-  "exhibitionId" : "c7acee97-db7a-4297-9b3d-92cc2f1fcfa3",
+  "id" : "216c76ae-8518-42eb-a4cd-51308c738892",
+  "exhibitionId" : "4ff1414c-b067-4546-a0d8-7eb5b18aaa47",
   "name" : "논문"
 }</code></pre>
 </div>
@@ -2327,8 +2345,8 @@ Content-Length: 131
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-json" data-lang="json">{
-  "id" : "d44575fe-fae7-4f09-93ff-7d181da5d37a",
-  "exhibitionId" : "c7acee97-db7a-4297-9b3d-92cc2f1fcfa3",
+  "id" : "216c76ae-8518-42eb-a4cd-51308c738892",
+  "exhibitionId" : "4ff1414c-b067-4546-a0d8-7eb5b18aaa47",
   "name" : "논문"
 }</code></pre>
 </div>
@@ -2431,8 +2449,8 @@ Content-Length: 294
 
 {
   "items" : [ {
-    "id" : "df24cafe-2343-4c7b-8ef0-d8433d7c0f02",
-    "exhibitionId" : "1d9cec7a-3946-450c-8f87-6f453bc1e7be",
+    "id" : "0d633b0a-be64-48db-a31c-586981bfc735",
+    "exhibitionId" : "6ed4f1e0-acbb-446e-ad9b-b6f944ae6ce1",
     "name" : "2025-1학기",
     "startTime" : "2025-03-01T00:00:00Z",
     "endTime" : "2025-06-30T00:00:00Z"
@@ -2450,8 +2468,8 @@ Content-Length: 294
 <div class="content">
 <pre class="highlight nowrap"><code class="language-json" data-lang="json">{
   "items" : [ {
-    "id" : "df24cafe-2343-4c7b-8ef0-d8433d7c0f02",
-    "exhibitionId" : "1d9cec7a-3946-450c-8f87-6f453bc1e7be",
+    "id" : "0d633b0a-be64-48db-a31c-586981bfc735",
+    "exhibitionId" : "6ed4f1e0-acbb-446e-ad9b-b6f944ae6ce1",
     "name" : "2025-1학기",
     "startTime" : "2025-03-01T00:00:00Z",
     "endTime" : "2025-06-30T00:00:00Z"
@@ -2470,7 +2488,7 @@ Content-Length: 294
 <h4 id="_요청_예시_16">7.2.1. 요청 예시</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /event-periods/766d26ea-86f2-49e5-8ab2-f76e0edce307 HTTP/1.1
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /event-periods/e963b581-520b-4887-993c-b1d799db2c18 HTTP/1.1
 Host: localhost:8080</code></pre>
 </div>
 </div>
@@ -2534,8 +2552,8 @@ X-Frame-Options: DENY
 Content-Length: 215
 
 {
-  "id" : "766d26ea-86f2-49e5-8ab2-f76e0edce307",
-  "exhibitionId" : "075cbce9-dd83-4c89-b843-74ced558fe43",
+  "id" : "e963b581-520b-4887-993c-b1d799db2c18",
+  "exhibitionId" : "6f9baa04-681e-4c1e-9d10-5962a2739dba",
   "name" : "2025-2학기",
   "startTime" : "2025-09-01T00:00:00Z",
   "endTime" : "2025-12-31T00:00:00Z"
@@ -2548,8 +2566,8 @@ Content-Length: 215
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-json" data-lang="json">{
-  "id" : "766d26ea-86f2-49e5-8ab2-f76e0edce307",
-  "exhibitionId" : "075cbce9-dd83-4c89-b843-74ced558fe43",
+  "id" : "e963b581-520b-4887-993c-b1d799db2c18",
+  "exhibitionId" : "6f9baa04-681e-4c1e-9d10-5962a2739dba",
   "name" : "2025-2학기",
   "startTime" : "2025-09-01T00:00:00Z",
   "endTime" : "2025-12-31T00:00:00Z"
@@ -2684,18 +2702,18 @@ Content-Length: 598
 
 {
   "items" : [ {
-    "id" : "52f6fbb6-80fa-4f13-820a-feccdc06c4ce",
-    "exhibitionId" : "e521d621-b7d6-4d11-aba1-32d5688b47d6",
+    "id" : "c93db9e9-7d90-4d61-9213-bda7ae29a773",
+    "exhibitionId" : "e0893c3d-a695-4ba5-830c-ff54be5bbbc2",
     "title" : "공지",
     "content" : "안내 내용",
-    "attachmentMediaIds" : [ "af8e1919-44d8-45c5-9588-dd6c131a8cea" ],
+    "attachmentMediaIds" : [ "3c6bd819-9541-450e-ae32-feeb4a6251e0" ],
     "attachmentMedias" : [ {
-      "id" : "af8e1919-44d8-45c5-9588-dd6c131a8cea",
+      "id" : "3c6bd819-9541-450e-ae32-feeb4a6251e0",
       "fileName" : "notice-list.pdf"
     } ],
-    "authorUserId" : "60c99689-832f-4e81-b103-6ad83ceeb824",
-    "createdAt" : "2026-03-27T14:17:17.054900Z",
-    "updatedAt" : "2026-03-27T14:17:17.054901Z"
+    "authorUserId" : "fa470313-1b09-4726-82ad-ebf292a57a38",
+    "createdAt" : "2026-03-28T08:46:29.194175Z",
+    "updatedAt" : "2026-03-28T08:46:29.194177Z"
   } ],
   "page" : 1,
   "pageSize" : 1,
@@ -2710,18 +2728,18 @@ Content-Length: 598
 <div class="content">
 <pre class="highlight nowrap"><code class="language-json" data-lang="json">{
   "items" : [ {
-    "id" : "52f6fbb6-80fa-4f13-820a-feccdc06c4ce",
-    "exhibitionId" : "e521d621-b7d6-4d11-aba1-32d5688b47d6",
+    "id" : "c93db9e9-7d90-4d61-9213-bda7ae29a773",
+    "exhibitionId" : "e0893c3d-a695-4ba5-830c-ff54be5bbbc2",
     "title" : "공지",
     "content" : "안내 내용",
-    "attachmentMediaIds" : [ "af8e1919-44d8-45c5-9588-dd6c131a8cea" ],
+    "attachmentMediaIds" : [ "3c6bd819-9541-450e-ae32-feeb4a6251e0" ],
     "attachmentMedias" : [ {
-      "id" : "af8e1919-44d8-45c5-9588-dd6c131a8cea",
+      "id" : "3c6bd819-9541-450e-ae32-feeb4a6251e0",
       "fileName" : "notice-list.pdf"
     } ],
-    "authorUserId" : "60c99689-832f-4e81-b103-6ad83ceeb824",
-    "createdAt" : "2026-03-27T14:17:17.054900Z",
-    "updatedAt" : "2026-03-27T14:17:17.054901Z"
+    "authorUserId" : "fa470313-1b09-4726-82ad-ebf292a57a38",
+    "createdAt" : "2026-03-28T08:46:29.194175Z",
+    "updatedAt" : "2026-03-28T08:46:29.194177Z"
   } ],
   "page" : 1,
   "pageSize" : 1,
@@ -2737,7 +2755,7 @@ Content-Length: 598
 <h4 id="_요청_예시_18">8.2.1. 요청 예시</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /boards/17ebc6b3-ee0e-4889-a754-071e2392f345 HTTP/1.1
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /boards/d926eb28-b4c2-4081-92d4-d6fda0c07f64 HTTP/1.1
 Host: localhost:8080</code></pre>
 </div>
 </div>
@@ -2831,18 +2849,18 @@ X-Frame-Options: DENY
 Content-Length: 500
 
 {
-  "id" : "17ebc6b3-ee0e-4889-a754-071e2392f345",
-  "exhibitionId" : "c6c36816-b353-4934-8faf-7f894fd048e9",
+  "id" : "d926eb28-b4c2-4081-92d4-d6fda0c07f64",
+  "exhibitionId" : "e2746d5c-8434-45a2-8d4c-bd32c0f0c22b",
   "title" : "공지",
   "content" : "안내 내용",
-  "attachmentMediaIds" : [ "77481ab2-bd06-4bca-a723-2b1c39311d46" ],
+  "attachmentMediaIds" : [ "343c8a08-064b-4547-a391-a4549dda729c" ],
   "attachmentMedias" : [ {
-    "id" : "318f469d-7946-4366-bb5d-f91e243706b6",
+    "id" : "54687ab7-1835-4a68-b252-46439b7c343a",
     "fileName" : "notice.pdf"
   } ],
-  "authorUserId" : "c91b4191-0421-42e2-a740-2996692ced8a",
-  "createdAt" : "2026-03-27T14:17:16.952415Z",
-  "updatedAt" : "2026-03-27T14:17:16.952416Z"
+  "authorUserId" : "9a402677-0c19-45f6-ac5c-e9f9a8968dc5",
+  "createdAt" : "2026-03-28T08:46:29.083986Z",
+  "updatedAt" : "2026-03-28T08:46:29.083987Z"
 }</code></pre>
 </div>
 </div>
@@ -2852,18 +2870,18 @@ Content-Length: 500
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-json" data-lang="json">{
-  "id" : "17ebc6b3-ee0e-4889-a754-071e2392f345",
-  "exhibitionId" : "c6c36816-b353-4934-8faf-7f894fd048e9",
+  "id" : "d926eb28-b4c2-4081-92d4-d6fda0c07f64",
+  "exhibitionId" : "e2746d5c-8434-45a2-8d4c-bd32c0f0c22b",
   "title" : "공지",
   "content" : "안내 내용",
-  "attachmentMediaIds" : [ "77481ab2-bd06-4bca-a723-2b1c39311d46" ],
+  "attachmentMediaIds" : [ "343c8a08-064b-4547-a391-a4549dda729c" ],
   "attachmentMedias" : [ {
-    "id" : "318f469d-7946-4366-bb5d-f91e243706b6",
+    "id" : "54687ab7-1835-4a68-b252-46439b7c343a",
     "fileName" : "notice.pdf"
   } ],
-  "authorUserId" : "c91b4191-0421-42e2-a740-2996692ced8a",
-  "createdAt" : "2026-03-27T14:17:16.952415Z",
-  "updatedAt" : "2026-03-27T14:17:16.952416Z"
+  "authorUserId" : "9a402677-0c19-45f6-ac5c-e9f9a8968dc5",
+  "createdAt" : "2026-03-28T08:46:29.083986Z",
+  "updatedAt" : "2026-03-28T08:46:29.083987Z"
 }</code></pre>
 </div>
 </div>
@@ -2880,7 +2898,7 @@ Content-Length: 500
 <h4 id="_요청_예시_19">9.1.1. 요청 예시</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /media/9cdb16f9-9c66-436a-948a-35fa4a99092b HTTP/1.1
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /media/d711af2a-83a0-49b7-b8d4-9ed2800148ee HTTP/1.1
 Host: localhost:8080</code></pre>
 </div>
 </div>
