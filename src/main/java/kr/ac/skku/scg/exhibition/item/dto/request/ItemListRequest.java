@@ -8,6 +8,8 @@ public class ItemListRequest {
 
     private UUID categoryId;
 
+    private String categorySlug;
+
     private UUID eventPeriodId;
 
     private UUID classificationId;
@@ -28,6 +30,14 @@ public class ItemListRequest {
 
     public void setCategoryId(UUID categoryId) {
         this.categoryId = categoryId;
+    }
+
+    public String getCategorySlug() {
+        return categorySlug;
+    }
+
+    public void setCategorySlug(String categorySlug) {
+        this.categorySlug = categorySlug;
     }
 
     public UUID getEventPeriodId() {

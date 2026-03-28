@@ -8,6 +8,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.text.Normalizer;
+import java.util.Locale;
 import java.util.UUID;
 import org.hibernate.annotations.UuidGenerator;
 import kr.ac.skku.scg.exhibition.exhibition.domain.ExhibitionEntity;
@@ -26,6 +28,9 @@ public class CategoryEntity extends BaseEntity {
     @JoinColumn(name = "exhibition_id")
     private ExhibitionEntity exhibition;
 
+    @Column(nullable = false, length = 160)
+    private String slug;
+
     @Column(nullable = false, length = 128)
     private String name;
 
@@ -33,8 +38,13 @@ public class CategoryEntity extends BaseEntity {
     }
 
     public CategoryEntity(UUID id, ExhibitionEntity exhibition, String name) {
+        this(id, exhibition, createSlug(name), name);
+    }
+
+    public CategoryEntity(UUID id, ExhibitionEntity exhibition, String slug, String name) {
         this.id = id;
         this.exhibition = exhibition;
+        this.slug = slug;
         this.name = name;
     }
 
@@ -46,8 +56,31 @@ public class CategoryEntity extends BaseEntity {
         return exhibition;
     }
 
+    public String getSlug() {
+        return slug;
+    }
+
     public String getName() {
         return name;
+    }
+
+    private static String createSlug(String name) {
+        if (name == null) {
+            throw new IllegalArgumentException("Category name is required");
+        }
+
+        String normalized = Normalizer.normalize(name, Normalizer.Form.NFKC)
+                .trim()
+                .toLowerCase(Locale.ROOT)
+                .replaceAll("[\\s_]+", "-")
+                .replaceAll("[^\\p{IsAlphabetic}\\p{IsDigit}-]", "")
+                .replaceAll("-{2,}", "-")
+                .replaceAll("^-|-$", "");
+
+        if (normalized.isBlank()) {
+            throw new IllegalArgumentException("Category slug cannot be blank");
+        }
+        return normalized;
     }
 
 }

@@ -111,4 +111,16 @@ class ItemRepositoryTest {
 
         assertThat(page.getContent()).extracting(ItemEntity::getTitle).containsExactly("Alpha", "Beta");
     }
+
+    @Test
+    void search_filtersByCategorySlug() {
+        ItemListRequest request = new ItemListRequest();
+        request.setExhibitionId(exhibitionId);
+        request.setCategorySlug("소프트웨어");
+
+        Page<ItemEntity> page = itemRepository.search(request, PageRequest.of(0, 10));
+
+        assertThat(page.getTotalElements()).isEqualTo(2);
+        assertThat(page.getContent()).extracting(ItemEntity::getTitle).containsExactly("Beta", "Alpha");
+    }
 }
