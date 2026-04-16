@@ -76,6 +76,7 @@ class ItemControllerTest {
                 null,
                 null,
                 null,
+                false,
                 0,
                 false));
 
@@ -102,6 +103,7 @@ class ItemControllerTest {
                                 fieldWithPath("thumbnailMediaId").description("썸네일 미디어 ID").optional(),
                                 fieldWithPath("posterMediaId").description("포스터 미디어 ID").optional(),
                                 fieldWithPath("presentationVideoMediaId").description("발표 영상 미디어 ID").optional(),
+                                fieldWithPath("awarded").description("수상 여부"),
                                 fieldWithPath("likes").description("좋아요 수"),
                                 fieldWithPath("isLike").description("현재 로그인 사용자의 좋아요 여부 (비로그인 시 false)")
                         )));
@@ -115,6 +117,7 @@ class ItemControllerTest {
                 "Smart Campus", "desc",
                 "홍길동", "hong@example.com", "김교수",
                 null, null, null,
+                false,
                 0, false)), 1, 20, 1));
 
         mockMvc.perform(get("/items")
@@ -129,6 +132,7 @@ class ItemControllerTest {
                                 parameterWithName("categorySlug").optional().description("카테고리 슬러그"),
                                 parameterWithName("eventPeriodId").optional().description("이벤트 기간 ID"),
                                 parameterWithName("classificationId").optional().description("분야(분류) ID"),
+                                parameterWithName("awarded").optional().description("수상 여부 필터 (true: 수상작만, false: 미수상작만)"),
                                 parameterWithName("q").optional().description("검색어 (제목, 지도교수, 학생명)"),
                                 parameterWithName("page").optional().description("페이지 번호(0부터 시작)"),
                                 parameterWithName("size").optional().description("페이지 크기"),
@@ -148,6 +152,7 @@ class ItemControllerTest {
                                 fieldWithPath("items[].thumbnailMediaId").description("썸네일 미디어 ID").optional(),
                                 fieldWithPath("items[].posterMediaId").description("포스터 미디어 ID").optional(),
                                 fieldWithPath("items[].presentationVideoMediaId").description("발표 영상 미디어 ID").optional(),
+                                fieldWithPath("items[].awarded").description("수상 여부"),
                                 fieldWithPath("items[].likes").description("좋아요 수"),
                                 fieldWithPath("items[].isLike").description("현재 로그인 사용자의 좋아요 여부 (비로그인 시 false)"),
                                 fieldWithPath("page").description("페이지 번호"),
