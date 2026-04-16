@@ -14,6 +14,8 @@ public class ItemListRequest {
 
     private UUID classificationId;
 
+    private Boolean awarded;
+
     private String q;
 
     public UUID getExhibitionId() {
@@ -54,6 +56,14 @@ public class ItemListRequest {
 
     public void setClassificationId(UUID classificationId) {
         this.classificationId = classificationId;
+    }
+
+    public Boolean getAwarded() {
+        return awarded;
+    }
+
+    public void setAwarded(Boolean awarded) {
+        this.awarded = awarded;
     }
 
     public String getQ() {
