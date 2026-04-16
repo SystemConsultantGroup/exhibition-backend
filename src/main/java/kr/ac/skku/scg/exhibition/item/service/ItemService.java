@@ -117,6 +117,7 @@ public class ItemService {
                 thumbnailMediaId,
                 posterMediaId,
                 presentationVideoMediaId,
+                item.isAwarded(),
                 likes,
                 isLike);
     }

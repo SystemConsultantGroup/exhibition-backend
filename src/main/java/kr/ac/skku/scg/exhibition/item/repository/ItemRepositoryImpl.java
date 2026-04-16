@@ -56,6 +56,10 @@ public class ItemRepositoryImpl implements ItemRepositoryCustom {
                     .exists());
         }
 
+        if (request.getAwarded() != null) {
+            where.and(item.awarded.eq(request.getAwarded()));
+        }
+
         String q = normalize(request.getQ());
         if (q != null) {
             where.and(item.title.containsIgnoreCase(q)

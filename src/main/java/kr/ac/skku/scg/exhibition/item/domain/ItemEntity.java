@@ -64,6 +64,9 @@ public class ItemEntity extends BaseEntity {
     @JoinColumn(name = "presentation_video_media_id")
     private MediaAssetEntity presentationVideoMedia;
 
+    @Column(nullable = false)
+    private boolean awarded = false;
+
     protected ItemEntity() {
     }
 
@@ -123,6 +126,10 @@ public class ItemEntity extends BaseEntity {
 
     public MediaAssetEntity getPresentationVideoMedia() {
         return presentationVideoMedia;
+    }
+
+    public boolean isAwarded() {
+        return awarded;
     }
 
     public void updateParticipantAndAdvisor(String participantNames, String advisorNames) {
