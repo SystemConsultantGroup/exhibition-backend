@@ -20,6 +20,6 @@ public interface BoardRepository extends JpaRepository<BoardEntity, UUID> {
     Optional<BoardEntity> findDetailByIdAndExhibitionId(@Param("id") UUID id, @Param("exhibitionId") UUID exhibitionId);
 
     @EntityGraph(attributePaths = {"exhibition", "authorUser", "attachmentMediaList"})
-    @Query("select b from BoardEntity b where b.exhibition.id = :exhibitionId")
+    @Query("select b from BoardEntity b where b.exhibition.id = :exhibitionId order by b.createdAt desc")
     List<BoardEntity> findAllDetailByExhibitionId(@Param("exhibitionId") UUID exhibitionId);
 }
