@@ -29,6 +29,7 @@ import kr.ac.skku.scg.exhibition.item.dto.response.ItemResponse;
 import kr.ac.skku.scg.exhibition.item.repository.ItemLikeRepository;
 import kr.ac.skku.scg.exhibition.item.repository.ItemRepository;
 import kr.ac.skku.scg.exhibition.media.repository.MediaAssetRepository;
+import kr.ac.skku.scg.exhibition.media.service.MediaService;
 import kr.ac.skku.scg.exhibition.user.domain.UserType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -46,6 +47,7 @@ class AdminItemServiceTest {
     @Mock MediaAssetRepository media;
     @Mock AdminAuthorizationService authorization;
     @Mock MinioClient minio;
+    @Mock MediaService mediaService;
     private AdminItemService service;
 
     @BeforeEach
@@ -53,7 +55,7 @@ class AdminItemServiceTest {
         MinioProperties properties = new MinioProperties();
         properties.setBucket("exhibition");
         service = new AdminItemService(items, categories, periods, likes, mappings, media,
-                authorization, minio, properties);
+                authorization, minio, properties, mediaService);
     }
 
     @Test
@@ -75,7 +77,8 @@ class AdminItemServiceTest {
             return saved;
         });
 
-        ItemResponse response = service.create(exhibition, request(categoryId, periodId), user(UserType.SUB_ADMIN));
+        ItemResponse response = service.create(
+                exhibition, request(categoryId, periodId), null, null, null, user(UserType.SUB_ADMIN));
 
         assertThat(response.title()).isEqualTo("작품");
         verify(authorization).requireExhibitionAdmin(any(), org.mockito.ArgumentMatchers.eq(exhibitionId));
@@ -118,7 +121,7 @@ class AdminItemServiceTest {
                 .when(authorization).requireExhibitionAdmin(visitor, exhibition.getId());
 
         assertThatThrownBy(() -> service.create(exhibition,
-                request(UUID.randomUUID(), null), visitor)).isInstanceOf(ForbiddenException.class);
+                request(UUID.randomUUID(), null), null, null, null, visitor)).isInstanceOf(ForbiddenException.class);
         verifyNoInteractions(categories, periods, items);
     }
 

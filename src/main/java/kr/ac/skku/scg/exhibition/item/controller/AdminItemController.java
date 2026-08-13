@@ -11,6 +11,7 @@ import kr.ac.skku.scg.exhibition.item.dto.request.AdminItemRequest;
 import kr.ac.skku.scg.exhibition.item.dto.response.ItemResponse;
 import kr.ac.skku.scg.exhibition.item.service.AdminItemService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,7 +19,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/admin/items")
@@ -26,11 +29,18 @@ import org.springframework.web.bind.annotation.RestController;
 public class AdminItemController {
     private final AdminItemService service;
 
-    /** 아이템을 생성한다. */
-    @PostMapping
-    public ResponseEntity<ItemResponse> create(@Valid @RequestBody AdminItemRequest request,
-            @CurrentExhibition ExhibitionEntity exhibition, @CurrentUser AuthenticatedUser user) {
-        ItemResponse response = service.create(exhibition, request, user);
+    /** 미디어 파일과 함께 아이템을 생성한다. */
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ItemResponse> create(
+            @Valid @RequestPart("request") AdminItemRequest request,
+            @RequestPart(value = "thumbnailFile", required = false) MultipartFile thumbnailFile,
+            @RequestPart(value = "posterFile", required = false) MultipartFile posterFile,
+            @RequestPart(value = "presentationVideoFile", required = false) MultipartFile presentationVideoFile,
+            @CurrentExhibition ExhibitionEntity exhibition,
+            @CurrentUser AuthenticatedUser user
+    ) {
+        ItemResponse response = service.create(
+                exhibition, request, thumbnailFile, posterFile, presentationVideoFile, user);
         return ResponseEntity.created(URI.create("/admin/items/" + response.id())).body(response);
     }
 

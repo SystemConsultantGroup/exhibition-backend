@@ -7,10 +7,14 @@ import static org.mockito.Mockito.when;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
+import static org.springframework.restdocs.payload.PayloadDocumentation.requestPartFields;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.partWithName;
 import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
+import static org.springframework.restdocs.request.RequestDocumentation.requestParts;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -34,6 +38,7 @@ import org.springframework.boot.restdocs.test.autoconfigure.AutoConfigureRestDoc
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -60,17 +65,39 @@ class AdminItemControllerTest {
         when(exhibitionDomainCacheService.findByDomain("example.com")).thenReturn(Optional.of(exhibition));
         ItemResponse response = new ItemResponse(itemId, exhibitionId, categoryId, null, "작품", null,
                 null, null, null, null, null, null, false, 0, false);
-        when(service.create(eq(exhibition), any(), eq(authenticatedUser))).thenReturn(response);
+        when(service.create(eq(exhibition), any(), any(), any(), any(), eq(authenticatedUser))).thenReturn(response);
         when(service.update(eq(itemId), eq(exhibitionId), any(), eq(authenticatedUser))).thenReturn(response);
         String body = "{\"categoryId\":\"" + categoryId
                 + "\",\"eventPeriodId\":null,\"title\":\"작품\",\"description\":\"설명\""
                 + ",\"participantNames\":\"홍길동\",\"participantEmails\":\"user@example.com\""
                 + ",\"advisorNames\":\"교수님\",\"awarded\":false}";
 
-        mockMvc.perform(post("/admin/items").header("Host", "example.com").with(user(userId.toString()))
-                        .requestAttr("auth.userId", userId).contentType(MediaType.APPLICATION_JSON).content(body))
+        MockMultipartFile request = new MockMultipartFile(
+                "request", "", MediaType.APPLICATION_JSON_VALUE, body.getBytes());
+        MockMultipartFile thumbnail = new MockMultipartFile(
+                "thumbnailFile", "thumb.jpg", MediaType.IMAGE_JPEG_VALUE,
+                new byte[] {(byte) 0xff, (byte) 0xd8, (byte) 0xff});
+        mockMvc.perform(multipart("/admin/items").file(request).file(thumbnail)
+                        .header("Host", "example.com").with(user(userId.toString()))
+                        .requestAttr("auth.userId", userId))
                 .andExpect(status().isCreated())
-                .andDo(document("admin-items-create", itemRequestFields()));
+                .andDo(document("admin-items-create",
+                        requestParts(
+                                partWithName("request").description("항목 생성 정보 JSON"),
+                                partWithName("thumbnailFile").description("썸네일 이미지 (nullable)").optional(),
+                                partWithName("posterFile").description("포스터 이미지 (nullable)").optional(),
+                                partWithName("presentationVideoFile").description("발표 영상 (nullable)").optional()
+                        ),
+                        requestPartFields("request",
+                                fieldWithPath("categoryId").description("카테고리 ID"),
+                                fieldWithPath("eventPeriodId").description("발표회차 ID (미디어 업로드 시 필수)"),
+                                fieldWithPath("title").description("항목 제목 (최대 200자)"),
+                                fieldWithPath("description").description("항목 설명 (nullable)").optional(),
+                                fieldWithPath("participantNames").description("참여자 이름 (nullable)").optional(),
+                                fieldWithPath("participantEmails").description("참여자 이메일 (nullable)").optional(),
+                                fieldWithPath("advisorNames").description("지도교수 이름 (nullable)").optional(),
+                                fieldWithPath("awarded").description("수상 여부")
+                        )));
         mockMvc.perform(put("/admin/items/{id}", itemId).header("Host", "example.com").with(user(userId.toString()))
                         .requestAttr("auth.userId", userId).contentType(MediaType.APPLICATION_JSON).content(body))
                 .andExpect(status().isOk())
@@ -82,7 +109,7 @@ class AdminItemControllerTest {
                 .andDo(document("admin-items-delete",
                         pathParameters(parameterWithName("id").description("삭제할 항목 ID"))));
 
-        verify(service).create(eq(exhibition), any(), eq(authenticatedUser));
+        verify(service).create(eq(exhibition), any(), any(), any(), any(), eq(authenticatedUser));
         verify(service).update(eq(itemId), eq(exhibitionId), any(), eq(authenticatedUser));
         verify(service).delete(itemId, exhibitionId, authenticatedUser);
     }

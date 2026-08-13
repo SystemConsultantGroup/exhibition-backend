@@ -21,10 +21,12 @@ import kr.ac.skku.scg.exhibition.item.repository.ItemLikeRepository;
 import kr.ac.skku.scg.exhibition.item.repository.ItemRepository;
 import kr.ac.skku.scg.exhibition.media.domain.MediaAssetEntity;
 import kr.ac.skku.scg.exhibition.media.repository.MediaAssetRepository;
+import kr.ac.skku.scg.exhibition.media.service.MediaService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class AdminItemService {
@@ -37,25 +39,34 @@ public class AdminItemService {
     private final AdminAuthorizationService authorization;
     private final MinioClient minio;
     private final MinioProperties minioProperties;
+    private final MediaService mediaService;
 
     public AdminItemService(ItemRepository items, CategoryRepository categories, EventPeriodRepository periods,
             ItemLikeRepository likes, ItemClassificationMapRepository mappings, MediaAssetRepository media,
-            AdminAuthorizationService authorization, MinioClient minio, MinioProperties minioProperties) {
+            AdminAuthorizationService authorization, MinioClient minio, MinioProperties minioProperties,
+            MediaService mediaService) {
         this.items = items; this.categories = categories; this.periods = periods; this.likes = likes;
         this.mappings = mappings; this.media = media; this.authorization = authorization;
-        this.minio = minio; this.minioProperties = minioProperties;
+        this.minio = minio; this.minioProperties = minioProperties; this.mediaService = mediaService;
     }
 
-    /** 미디어 없이 아이템을 생성한다. */
+    /** 미디어 파일과 함께 아이템을 생성한다. */
     @Transactional
-    public ItemResponse create(ExhibitionEntity exhibition, AdminItemRequest request, AuthenticatedUser user) {
+    public ItemResponse create(ExhibitionEntity exhibition, AdminItemRequest request, MultipartFile thumbnailFile,
+            MultipartFile posterFile, MultipartFile presentationVideoFile, AuthenticatedUser user) {
         authorization.requireExhibitionAdmin(user, exhibition.getId());
         CategoryEntity category = category(request.categoryId(), exhibition.getId());
         EventPeriodEntity period = period(request.eventPeriodId(), exhibition.getId());
         ItemEntity item = new ItemEntity(null, exhibition, category, period, request.title().trim(), request.description());
         item.updateMetadata(category, period, request.title().trim(), request.description(), request.participantNames(),
                 request.participantEmails(), request.advisorNames(), request.awarded());
-        return response(items.save(item));
+        item = items.save(item);
+        item.updateMedia(
+                mediaService.uploadForItem(item, thumbnailFile, "image"),
+                mediaService.uploadForItem(item, posterFile, "image"),
+                mediaService.uploadForItem(item, presentationVideoFile, "video")
+        );
+        return response(item);
     }
 
     /** 아이템 메타데이터를 수정하고 기존 미디어 연결은 유지한다. */

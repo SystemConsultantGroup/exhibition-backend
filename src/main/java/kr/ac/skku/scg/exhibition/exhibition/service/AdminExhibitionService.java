@@ -102,12 +102,10 @@ public class AdminExhibitionService {
         try {
             ExhibitionEntity exhibition = exhibitionRepository.saveAndFlush(new ExhibitionEntity(
                     null, slug, defaultDomain, customDomain, name, request.description()));
-            MediaAssetEntity logo = mediaService.uploadForExhibition(exhibition, logoFile, "logo", "image");
-            MediaAssetEntity banner = mediaService.uploadForExhibition(exhibition, bannerFile, "banner", "image");
-            MediaAssetEntity popupImage = mediaService.uploadForExhibition(
-                    exhibition, popupImageFile, "popup", "image");
-            MediaAssetEntity introVideo = mediaService.uploadForExhibition(
-                    exhibition, introVideoFile, "intro-video", "video");
+            MediaAssetEntity logo = mediaService.uploadForExhibition(exhibition, logoFile, "image");
+            MediaAssetEntity banner = mediaService.uploadForExhibition(exhibition, bannerFile, "image");
+            MediaAssetEntity popupImage = mediaService.uploadForExhibition(exhibition, popupImageFile, "image");
+            MediaAssetEntity introVideo = mediaService.uploadForExhibition(exhibition, introVideoFile, "video");
             exhibition.updateMetadata(defaultDomain, customDomain, name, request.description(),
                     logo, request.bannerEnabled(), banner, request.popupEnabled(), popupImage, request.popupUrl(),
                     request.introTitle(), request.introDescription(), introVideo);

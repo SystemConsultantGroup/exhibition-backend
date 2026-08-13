@@ -126,7 +126,7 @@ class AdminExhibitionServiceTest {
         adminExhibitionService.create(request(), logo, null, null, null, admin);
 
         verify(mediaService).uploadForExhibition(any(), org.mockito.ArgumentMatchers.same(logo),
-                org.mockito.ArgumentMatchers.eq("logo"), org.mockito.ArgumentMatchers.eq("image"));
+                org.mockito.ArgumentMatchers.eq("image"));
     }
 
     @Test

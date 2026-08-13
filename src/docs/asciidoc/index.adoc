@@ -180,8 +180,10 @@ include::{snippets}/admin-categories-reorder/http-request.adoc[]
 include::{snippets}/admin-categories-reorder/http-response.adoc[]
 
 === 항목 생성
-==== 요청 필드
-include::{snippets}/admin-items-create/request-fields.adoc[]
+==== Multipart 파트
+include::{snippets}/admin-items-create/request-parts.adoc[]
+==== request JSON 필드
+include::{snippets}/admin-items-create/request-part-request-fields.adoc[]
 ==== 요청 예시
 include::{snippets}/admin-items-create/http-request.adoc[]
 ==== 응답 예시

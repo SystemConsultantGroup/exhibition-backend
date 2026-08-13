@@ -13,6 +13,7 @@ import java.util.UUID;
 import kr.ac.skku.scg.exhibition.exhibition.domain.ExhibitionEntity;
 import kr.ac.skku.scg.exhibition.global.config.MinioProperties;
 import kr.ac.skku.scg.exhibition.global.error.NotFoundException;
+import kr.ac.skku.scg.exhibition.item.domain.ItemEntity;
 import kr.ac.skku.scg.exhibition.media.domain.MediaAssetEntity;
 import kr.ac.skku.scg.exhibition.media.dto.response.MediaFileResponse;
 import kr.ac.skku.scg.exhibition.media.repository.MediaAssetRepository;
@@ -45,20 +46,36 @@ public class MediaService {
     public MediaAssetEntity uploadForExhibition(
             ExhibitionEntity exhibition,
             MultipartFile file,
-            String kind,
             String expectedType
     ) {
+        return upload(exhibition, null, file, exhibition.getSlug() + "/", expectedType);
+    }
+
+    /** 아이템 미디어를 전시 slug와 발표회차 경로에 저장한다. */
+    @Transactional
+    public MediaAssetEntity uploadForItem(ItemEntity item, MultipartFile file, String expectedType) {
+        if (file != null && !file.isEmpty() && item.getEventPeriod() == null) {
+            throw new IllegalArgumentException("Item media requires an event period");
+        }
+        String prefix = item.getExhibition().getSlug() + "/"
+                + (item.getEventPeriod() == null ? "" : item.getEventPeriod().getId() + "/");
+        return upload(item.getExhibition(), item, file, prefix, expectedType);
+    }
+
+    /** 검증한 미디어 파일을 지정 경로에 저장한다. */
+    private MediaAssetEntity upload(ExhibitionEntity exhibition, ItemEntity item, MultipartFile file,
+            String prefix, String expectedType) {
         if (file == null || file.isEmpty()) {
             return null;
         }
-        String extension = extension(file.getOriginalFilename());
-        String contentType = mediaType(extension);
+        String fileName = fileName(file.getOriginalFilename());
+        String contentType = mediaType(extension(fileName));
         if (!contentType.startsWith(expectedType + "/")) {
-            throw new IllegalArgumentException(kind + " must be an " + expectedType + " file");
+            throw new IllegalArgumentException("Media must be an " + expectedType + " file");
         }
         validateSignature(file, contentType);
 
-        String key = "exhibitions/" + exhibition.getId() + "/" + kind + "/" + UUID.randomUUID() + extension;
+        String key = prefix + fileName;
         try (InputStream input = file.getInputStream()) {
             minioClient.putObject(PutObjectArgs.builder()
                     .bucket(minioProperties.getBucket())
@@ -71,7 +88,7 @@ public class MediaService {
         }
         removeOnRollback(key);
         return mediaAssetRepository.save(
-                new MediaAssetEntity(null, null, exhibition, key, contentType, file.getSize()));
+                new MediaAssetEntity(null, item, exhibition, key, contentType, file.getSize()));
     }
 
     public MediaFileResponse getFile(UUID id) {
@@ -94,6 +111,19 @@ public class MediaService {
         } catch (Exception e) {
             throw new IllegalStateException("Unexpected MinIO error: " + media.getObjectKey(), e);
         }
+    }
+
+    /** 업로드 경로를 제거한 파일명만 반환한다. */
+    private String fileName(String raw) {
+        if (raw == null) {
+            throw new IllegalArgumentException("Media file name is required");
+        }
+        String normalized = raw.replace('\\', '/');
+        String fileName = normalized.substring(normalized.lastIndexOf('/') + 1);
+        if (fileName.isBlank()) {
+            throw new IllegalArgumentException("Media file name is required");
+        }
+        return fileName;
     }
 
     /** 파일 확장자를 안전한 소문자 형식으로 반환한다. */
