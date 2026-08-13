@@ -147,4 +147,17 @@ public class ItemEntity extends BaseEntity {
         this.posterMedia = posterMedia;
         this.presentationVideoMedia = presentationVideoMedia;
     }
+
+    /** 관리자 입력으로 아이템 메타데이터를 수정한다. */
+    public void updateMetadata(CategoryEntity category, EventPeriodEntity eventPeriod, String title,
+            String description, String participantNames, String participantEmails, String advisorNames, boolean awarded) {
+        this.category = category;
+        this.eventPeriod = eventPeriod;
+        this.title = title;
+        this.description = description;
+        this.participantNames = participantNames;
+        this.participantEmails = participantEmails;
+        this.advisorNames = advisorNames;
+        this.awarded = awarded;
+    }
 }

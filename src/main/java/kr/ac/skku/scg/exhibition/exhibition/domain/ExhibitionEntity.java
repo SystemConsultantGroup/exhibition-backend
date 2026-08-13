@@ -72,9 +72,23 @@ public class ExhibitionEntity extends BaseEntity {
     }
 
     public ExhibitionEntity(UUID id, String slug, String name) {
+        this(id, slug, null, null, name, null);
+    }
+
+    public ExhibitionEntity(
+            UUID id,
+            String slug,
+            String defaultDomain,
+            String customDomain,
+            String name,
+            String description
+    ) {
         this.id = id;
         this.slug = slug;
+        this.defaultDomain = defaultDomain;
+        this.customDomain = customDomain;
         this.name = name;
+        this.description = description;
     }
 
     public UUID getId() {
@@ -135,6 +149,14 @@ public class ExhibitionEntity extends BaseEntity {
 
     public MediaAssetEntity getIntroVideoMedia() {
         return introVideoMedia;
+    }
+
+    /** 관리자 입력으로 전시회 기본 정보를 수정한다. */
+    public void updateMetadata(String defaultDomain, String customDomain, String name, String description) {
+        this.defaultDomain = defaultDomain;
+        this.customDomain = customDomain;
+        this.name = name;
+        this.description = description;
     }
 
 }

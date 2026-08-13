@@ -3,14 +3,17 @@ package kr.ac.skku.scg.exhibition.global.config;
 import java.util.List;
 import java.util.Locale;
 import kr.ac.skku.scg.exhibition.global.auth.security.JwtAuthenticationFilter;
+import java.nio.charset.StandardCharsets;
 import kr.ac.skku.scg.exhibition.global.auth.service.JwtTokenService;
 import kr.ac.skku.scg.exhibition.global.tenant.ExhibitionDomainCacheService;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
@@ -67,7 +70,17 @@ public class SecurityConfig {
         return http
                 .csrf(csrf -> csrf.disable())
                 .cors(Customizer.withDefaults())
-                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .exceptionHandling(exceptions -> exceptions.authenticationEntryPoint((request, response, exception) -> {
+                    response.setStatus(401);
+                    response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                    response.getOutputStream().write(
+                            "{\"code\":\"UNAUTHORIZED\",\"message\":\"Authentication is required\"}"
+                                    .getBytes(StandardCharsets.UTF_8));
+                }))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/admin/**").authenticated()
+                        .anyRequest().permitAll())
                 .build();
     }
 

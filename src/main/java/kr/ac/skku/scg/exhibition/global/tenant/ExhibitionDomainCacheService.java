@@ -3,6 +3,7 @@ package kr.ac.skku.scg.exhibition.global.tenant;
 import java.util.Optional;
 import kr.ac.skku.scg.exhibition.exhibition.domain.ExhibitionEntity;
 import kr.ac.skku.scg.exhibition.exhibition.repository.ExhibitionRepository;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
@@ -24,5 +25,10 @@ public class ExhibitionDomainCacheService {
     @Cacheable(value = "exhibition-by-domain", unless = "#result == null")
     public Optional<ExhibitionEntity> findByDomain(String host) {
         return exhibitionRepository.findFirstByDefaultDomainIgnoreCaseOrCustomDomainIgnoreCase(host, host);
+    }
+
+    /** 전시 생성·수정·삭제 후 도메인 캐시를 비웁니다. */
+    @CacheEvict(value = "exhibition-by-domain", allEntries = true)
+    public void evictAll() {
     }
 }

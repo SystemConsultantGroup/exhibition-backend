@@ -67,4 +67,11 @@ public class EventPeriodEntity extends BaseEntity {
         return endTime;
     }
 
+    /** 발표회차 이름과 기간을 수정한다. */
+    public void update(String name, Instant startTime, Instant endTime) {
+        this.name = name;
+        this.startTime = startTime;
+        this.endTime = endTime;
+    }
+
 }

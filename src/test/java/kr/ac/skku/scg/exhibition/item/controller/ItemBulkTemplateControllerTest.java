@@ -2,6 +2,7 @@ package kr.ac.skku.scg.exhibition.item.controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -51,6 +52,7 @@ class ItemBulkTemplateControllerTest {
         mockMvc.perform(get("/admin/items/bulk/template")
                         .requestAttr("auth.userId", userId)
                         .requestAttr(CurrentExhibitionArgumentResolver.REQUEST_ATTR_EXHIBITION, currentExhibition(exhibitionId))
+                        .with(user(userId.toString()))
                         .param("eventPeriodId", eventPeriodId.toString()))
                 .andExpect(status().isOk())
                 .andExpect(header().string("Content-Type",

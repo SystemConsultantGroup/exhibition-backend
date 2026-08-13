@@ -89,4 +89,10 @@ public class BoardEntity extends BaseEntity {
         return authorUser;
     }
 
+    /** 공지사항 제목과 내용을 수정한다. */
+    public void update(String title, String content) {
+        this.title = title;
+        this.content = content;
+    }
+
 }
