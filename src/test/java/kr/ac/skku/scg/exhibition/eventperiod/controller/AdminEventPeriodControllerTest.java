@@ -4,6 +4,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -26,6 +31,7 @@ import kr.ac.skku.scg.exhibition.user.domain.UserType;
 import kr.ac.skku.scg.exhibition.user.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.restdocs.test.autoconfigure.AutoConfigureRestDocs;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
@@ -34,6 +40,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(controllers = AdminEventPeriodController.class)
 @Import({SecurityConfig.class, ApiExceptionHandler.class, WebConfig.class})
+@AutoConfigureRestDocs
 class AdminEventPeriodControllerTest {
 
     @Autowired private MockMvc mockMvc;
@@ -60,18 +67,32 @@ class AdminEventPeriodControllerTest {
 
         mockMvc.perform(post("/admin/event-periods").header("Host", "example.com").with(user(userId.toString()))
                         .requestAttr("auth.userId", userId).contentType(MediaType.APPLICATION_JSON).content(body))
-                .andExpect(status().isCreated());
+                .andExpect(status().isCreated())
+                .andDo(document("admin-event-periods-create", eventPeriodRequestFields()));
         mockMvc.perform(put("/admin/event-periods/{id}", periodId).header("Host", "example.com")
                         .with(user(userId.toString())).requestAttr("auth.userId", userId)
                         .contentType(MediaType.APPLICATION_JSON).content(body))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andDo(document("admin-event-periods-update",
+                        pathParameters(parameterWithName("id").description("수정할 발표회차 ID")),
+                        eventPeriodRequestFields()));
         mockMvc.perform(delete("/admin/event-periods/{id}", periodId).header("Host", "example.com")
                         .with(user(userId.toString())).requestAttr("auth.userId", userId))
-                .andExpect(status().isNoContent());
+                .andExpect(status().isNoContent())
+                .andDo(document("admin-event-periods-delete",
+                        pathParameters(parameterWithName("id").description("삭제할 발표회차 ID"))));
 
         verify(service).create(eq(exhibition), any(), eq(authenticatedUser));
         verify(service).update(eq(periodId), eq(exhibitionId), any(), eq(authenticatedUser));
         verify(service).delete(periodId, exhibitionId, authenticatedUser);
+    }
+
+    private org.springframework.restdocs.payload.RequestFieldsSnippet eventPeriodRequestFields() {
+        return requestFields(
+                fieldWithPath("name").description("발표회차 이름 (최대 50자)"),
+                fieldWithPath("startTime").description("시작 시각 (ISO-8601)"),
+                fieldWithPath("endTime").description("종료 시각 (ISO-8601)")
+        );
     }
 
     private UserEntity admin(UUID id) {

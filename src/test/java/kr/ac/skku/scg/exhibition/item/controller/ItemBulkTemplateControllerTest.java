@@ -2,6 +2,9 @@ package kr.ac.skku.scg.exhibition.item.controller;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
@@ -21,6 +24,7 @@ import kr.ac.skku.scg.exhibition.user.domain.UserType;
 import kr.ac.skku.scg.exhibition.user.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.restdocs.test.autoconfigure.AutoConfigureRestDocs;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -28,6 +32,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(controllers = ItemBulkTemplateController.class)
 @Import({SecurityConfig.class, ApiExceptionHandler.class, WebConfig.class})
+@AutoConfigureRestDocs
 class ItemBulkTemplateControllerTest {
 
     @Autowired
@@ -58,7 +63,9 @@ class ItemBulkTemplateControllerTest {
                 .andExpect(header().string("Content-Type",
                         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
                 .andExpect(header().string("Content-Disposition",
-                        "attachment; filename=\"item-bulk-template.xlsx\""));
+                        "attachment; filename=\"item-bulk-template.xlsx\""))
+                .andDo(document("admin-items-bulk-template",
+                        queryParameters(parameterWithName("eventPeriodId").description("양식에 포함할 발표회차 ID"))));
     }
 
     private ExhibitionEntity currentExhibition(UUID exhibitionId) {

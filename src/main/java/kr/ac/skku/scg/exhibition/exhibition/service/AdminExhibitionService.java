@@ -1,5 +1,6 @@
 package kr.ac.skku.scg.exhibition.exhibition.service;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 import kr.ac.skku.scg.exhibition.exhibition.domain.ExhibitionEntity;
@@ -10,8 +11,13 @@ import kr.ac.skku.scg.exhibition.exhibition.repository.ExhibitionRepository;
 import kr.ac.skku.scg.exhibition.global.auth.resolver.AuthenticatedUser;
 import kr.ac.skku.scg.exhibition.global.auth.service.AdminAuthorizationService;
 import kr.ac.skku.scg.exhibition.global.error.ConflictException;
+import kr.ac.skku.scg.exhibition.global.error.ForbiddenException;
 import kr.ac.skku.scg.exhibition.global.error.NotFoundException;
 import kr.ac.skku.scg.exhibition.global.tenant.ExhibitionDomainCacheService;
+import kr.ac.skku.scg.exhibition.media.domain.MediaAssetEntity;
+import kr.ac.skku.scg.exhibition.media.repository.MediaAssetRepository;
+import kr.ac.skku.scg.exhibition.media.service.MediaService;
+import kr.ac.skku.scg.exhibition.user.domain.UserType;
 import kr.ac.skku.scg.exhibition.user.repository.UserExhibitionAdminRepository;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -20,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class AdminExhibitionService {
@@ -28,22 +35,49 @@ public class AdminExhibitionService {
     private final UserExhibitionAdminRepository userExhibitionAdminRepository;
     private final AdminAuthorizationService adminAuthorizationService;
     private final ExhibitionDomainCacheService exhibitionDomainCacheService;
+    private final MediaAssetRepository mediaAssetRepository;
+    private final MediaService mediaService;
 
     public AdminExhibitionService(
             ExhibitionRepository exhibitionRepository,
             UserExhibitionAdminRepository userExhibitionAdminRepository,
             AdminAuthorizationService adminAuthorizationService,
-            ExhibitionDomainCacheService exhibitionDomainCacheService
+            ExhibitionDomainCacheService exhibitionDomainCacheService,
+            MediaAssetRepository mediaAssetRepository,
+            MediaService mediaService
     ) {
         this.exhibitionRepository = exhibitionRepository;
         this.userExhibitionAdminRepository = userExhibitionAdminRepository;
         this.adminAuthorizationService = adminAuthorizationService;
         this.exhibitionDomainCacheService = exhibitionDomainCacheService;
+        this.mediaAssetRepository = mediaAssetRepository;
+        this.mediaService = mediaService;
     }
 
-    /** 슈퍼유저 권한으로 전시회를 생성한다. */
+    /** 현재 관리자가 접근할 수 있는 전시회 목록을 조회한다. */
+    @Transactional(readOnly = true)
+    public List<ExhibitionResponse> listAccessible(AuthenticatedUser currentUser) {
+        List<ExhibitionEntity> exhibitions;
+        if (currentUser.role() == UserType.ADMIN) {
+            exhibitions = exhibitionRepository.findAllByOrderByNameAsc();
+        } else if (currentUser.role() == UserType.SUB_ADMIN) {
+            exhibitions = userExhibitionAdminRepository.findExhibitionsByUserId(currentUser.id());
+        } else {
+            throw new ForbiddenException("Admin role is required");
+        }
+        return exhibitions.stream().map(ExhibitionResponse::from).toList();
+    }
+
+    /** 슈퍼유저 권한으로 미디어 파일과 함께 전시회를 생성한다. */
     @Transactional(isolation = Isolation.SERIALIZABLE)
-    public ExhibitionResponse create(AdminExhibitionCreateRequest request, AuthenticatedUser currentUser) {
+    public ExhibitionResponse create(
+            AdminExhibitionCreateRequest request,
+            MultipartFile logoFile,
+            MultipartFile bannerFile,
+            MultipartFile popupImageFile,
+            MultipartFile introVideoFile,
+            AuthenticatedUser currentUser
+    ) {
         adminAuthorizationService.requireSuperAdmin(currentUser);
 
         String slug = request.slug().trim();
@@ -68,6 +102,16 @@ public class AdminExhibitionService {
         try {
             ExhibitionEntity exhibition = exhibitionRepository.saveAndFlush(new ExhibitionEntity(
                     null, slug, defaultDomain, customDomain, name, request.description()));
+            MediaAssetEntity logo = mediaService.uploadForExhibition(exhibition, logoFile, "logo", "image");
+            MediaAssetEntity banner = mediaService.uploadForExhibition(exhibition, bannerFile, "banner", "image");
+            MediaAssetEntity popupImage = mediaService.uploadForExhibition(
+                    exhibition, popupImageFile, "popup", "image");
+            MediaAssetEntity introVideo = mediaService.uploadForExhibition(
+                    exhibition, introVideoFile, "intro-video", "video");
+            exhibition.updateMetadata(defaultDomain, customDomain, name, request.description(),
+                    logo, request.bannerEnabled(), banner, request.popupEnabled(), popupImage, request.popupUrl(),
+                    request.introTitle(), request.introDescription(), introVideo);
+            exhibitionRepository.flush();
             evictCacheAfterCommit();
             return ExhibitionResponse.from(exhibition);
         } catch (DataIntegrityViolationException ex) {
@@ -101,7 +145,11 @@ public class AdminExhibitionService {
         }
 
         try {
-            exhibition.updateMetadata(defaultDomain, customDomain, name, request.description());
+            exhibition.updateMetadata(defaultDomain, customDomain, name, request.description(),
+                    findMedia(request.logoMediaId(), exhibitionId), request.bannerEnabled(),
+                    findMedia(request.bannerMediaId(), exhibitionId), request.popupEnabled(),
+                    findMedia(request.popupImageMediaId(), exhibitionId), request.popupUrl(),
+                    request.introTitle(), request.introDescription(), findMedia(request.introVideoMediaId(), exhibitionId));
             exhibitionRepository.flush();
             evictCacheAfterCommit();
             return ExhibitionResponse.from(exhibition);
@@ -126,6 +174,21 @@ public class AdminExhibitionService {
         } catch (DataIntegrityViolationException ex) {
             throw new ConflictException("Exhibition contains data and cannot be deleted: " + exhibitionId);
         }
+    }
+
+    /** 선택한 미디어를 조회한다. */
+    private MediaAssetEntity findMedia(UUID mediaId) {
+        return mediaId == null ? null : mediaAssetRepository.findById(mediaId)
+                .orElseThrow(() -> new NotFoundException("Media asset not found: " + mediaId));
+    }
+
+    /** 선택한 미디어가 수정 대상 전시에 속하는지 확인한다. */
+    private MediaAssetEntity findMedia(UUID mediaId, UUID exhibitionId) {
+        MediaAssetEntity media = findMedia(mediaId);
+        if (media != null && !media.getExhibition().getId().equals(exhibitionId)) {
+            throw new NotFoundException("Media asset not found: " + mediaId);
+        }
+        return media;
     }
 
     /** 트랜잭션 커밋 뒤 도메인 캐시를 비운다. */

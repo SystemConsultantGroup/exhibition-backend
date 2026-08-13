@@ -21,6 +21,11 @@ public record AdminExhibitionCreateRequest(
         @NotBlank
         @Size(max = 128)
         String name,
-        String description
+        String description,
+        boolean bannerEnabled,
+        boolean popupEnabled,
+        String popupUrl,
+        @Size(max = 200) String introTitle,
+        String introDescription
 ) {
 }

@@ -4,6 +4,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -30,6 +35,7 @@ import kr.ac.skku.scg.exhibition.user.domain.UserType;
 import kr.ac.skku.scg.exhibition.user.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.restdocs.test.autoconfigure.AutoConfigureRestDocs;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
@@ -38,6 +44,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(controllers = AdminBoardController.class)
 @Import({SecurityConfig.class, ApiExceptionHandler.class, WebConfig.class})
+@AutoConfigureRestDocs
 class AdminBoardControllerTest {
 
     @Autowired private MockMvc mockMvc;
@@ -64,14 +71,20 @@ class AdminBoardControllerTest {
                         .requestAttr("auth.userId", userId).contentType(MediaType.APPLICATION_JSON).content(body()))
                 .andExpect(status().isCreated())
                 .andExpect(header().string("Location", "/admin/boards/" + boardId))
-                .andExpect(jsonPath("$.id").value(boardId.toString()));
+                .andExpect(jsonPath("$.id").value(boardId.toString()))
+                .andDo(document("admin-boards-create", boardRequestFields()));
         mockMvc.perform(put("/admin/boards/{id}", boardId).header("Host", "example.com").with(user(userId.toString()))
                         .requestAttr("auth.userId", userId).contentType(MediaType.APPLICATION_JSON).content(body()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.title").value("공지"));
+                .andExpect(jsonPath("$.title").value("공지"))
+                .andDo(document("admin-boards-update",
+                        pathParameters(parameterWithName("id").description("수정할 게시글 ID")),
+                        boardRequestFields()));
         mockMvc.perform(delete("/admin/boards/{id}", boardId).header("Host", "example.com")
                         .with(user(userId.toString())).requestAttr("auth.userId", userId))
-                .andExpect(status().isNoContent());
+                .andExpect(status().isNoContent())
+                .andDo(document("admin-boards-delete",
+                        pathParameters(parameterWithName("id").description("삭제할 게시글 ID"))));
 
         verify(boardService).create(eq(exhibition), any(), eq(authenticatedUser));
         verify(boardService).update(eq(boardId), eq(exhibitionId), any(), eq(authenticatedUser));
@@ -104,6 +117,13 @@ class AdminBoardControllerTest {
                         .contentType(MediaType.APPLICATION_JSON).content(body()))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
+    }
+
+    private org.springframework.restdocs.payload.RequestFieldsSnippet boardRequestFields() {
+        return requestFields(
+                fieldWithPath("title").description("게시글 제목 (최대 200자)"),
+                fieldWithPath("content").description("게시글 내용 (최대 16000자)")
+        );
     }
 
     private String body() {

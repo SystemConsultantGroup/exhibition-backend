@@ -5,6 +5,9 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.request.RequestDocumentation.partWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.requestParts;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -25,6 +28,7 @@ import kr.ac.skku.scg.exhibition.user.domain.UserType;
 import kr.ac.skku.scg.exhibition.user.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.restdocs.test.autoconfigure.AutoConfigureRestDocs;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.mock.web.MockMultipartFile;
@@ -33,6 +37,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(controllers = ItemBulkUploadController.class)
 @Import({SecurityConfig.class, ApiExceptionHandler.class, WebConfig.class})
+@AutoConfigureRestDocs
 class ItemBulkUploadControllerTest {
 
     @Autowired
@@ -89,7 +94,12 @@ class ItemBulkUploadControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.createdItems").value(2))
                 .andExpect(jsonPath("$.createdMediaAssets").value(3))
-                .andExpect(jsonPath("$.createdClassificationMappings").value(4));
+                .andExpect(jsonPath("$.createdClassificationMappings").value(4))
+                .andDo(document("admin-items-bulk-upload",
+                        requestParts(
+                                partWithName("file").description("항목 정보가 담긴 Excel 파일"),
+                                partWithName("mediaFiles").description("Excel에서 참조하는 미디어 파일 목록").optional()
+                        )));
 
         verify(itemBulkUploadService).upload(any(), anyList(), eq(exhibitionId), eq(authenticatedAdmin));
     }

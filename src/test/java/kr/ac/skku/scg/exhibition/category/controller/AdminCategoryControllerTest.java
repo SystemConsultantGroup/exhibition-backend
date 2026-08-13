@@ -4,6 +4,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
+import static org.springframework.restdocs.payload.PayloadDocumentation.requestFields;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.pathParameters;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -24,6 +29,7 @@ import kr.ac.skku.scg.exhibition.user.domain.UserType;
 import kr.ac.skku.scg.exhibition.user.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.restdocs.test.autoconfigure.AutoConfigureRestDocs;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
@@ -32,6 +38,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(controllers = AdminCategoryController.class)
 @Import({SecurityConfig.class, ApiExceptionHandler.class, WebConfig.class})
+@AutoConfigureRestDocs
 class AdminCategoryControllerTest {
 
     @Autowired private MockMvc mockMvc;
@@ -56,12 +63,17 @@ class AdminCategoryControllerTest {
         mockMvc.perform(put("/admin/categories/{id}", categoryId).header("Host", "example.com")
                         .with(user(userId.toString())).requestAttr("auth.userId", userId)
                         .contentType(MediaType.APPLICATION_JSON).content("{\"name\":\"새 이름\"}"))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andDo(document("admin-categories-update",
+                        pathParameters(parameterWithName("id").description("수정할 카테고리 ID")),
+                        requestFields(fieldWithPath("name").description("새 카테고리 이름 (최대 128자)"))));
         mockMvc.perform(put("/admin/categories/order").header("Host", "example.com")
                         .with(user(userId.toString())).requestAttr("auth.userId", userId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"categoryIds\":[\"" + categoryId + "\"]}"))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andDo(document("admin-categories-reorder",
+                        requestFields(fieldWithPath("categoryIds").description("노출 순서대로 정렬한 전체 카테고리 ID 목록"))));
 
         verify(service).update(eq(categoryId), eq(exhibitionId), any(), eq(authenticatedUser));
         verify(service).reorder(eq(exhibitionId), any(), eq(authenticatedUser));

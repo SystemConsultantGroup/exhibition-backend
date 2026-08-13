@@ -1,5 +1,6 @@
 package kr.ac.skku.scg.exhibition.exhibition.repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import kr.ac.skku.scg.exhibition.exhibition.domain.ExhibitionEntity;
@@ -8,6 +9,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface ExhibitionRepository extends JpaRepository<ExhibitionEntity, UUID> {
+
+    List<ExhibitionEntity> findAllByOrderByNameAsc();
 
     Optional<ExhibitionEntity> findBySlug(String slug);
 
