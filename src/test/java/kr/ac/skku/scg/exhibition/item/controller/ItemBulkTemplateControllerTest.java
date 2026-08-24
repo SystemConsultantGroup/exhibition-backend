@@ -16,7 +16,7 @@ import kr.ac.skku.scg.exhibition.exhibition.domain.ExhibitionEntity;
 import kr.ac.skku.scg.exhibition.global.config.SecurityConfig;
 import kr.ac.skku.scg.exhibition.global.config.WebConfig;
 import kr.ac.skku.scg.exhibition.global.error.ApiExceptionHandler;
-import kr.ac.skku.scg.exhibition.global.tenant.CurrentExhibitionArgumentResolver;
+import kr.ac.skku.scg.exhibition.global.tenant.ExhibitionDomainCacheService;
 import kr.ac.skku.scg.exhibition.item.dto.response.ItemBulkTemplateFile;
 import kr.ac.skku.scg.exhibition.item.service.ItemBulkTemplateService;
 import kr.ac.skku.scg.exhibition.user.domain.UserEntity;
@@ -44,6 +44,9 @@ class ItemBulkTemplateControllerTest {
     @MockitoBean
     private UserRepository userRepository;
 
+    @MockitoBean
+    private ExhibitionDomainCacheService exhibitionDomainCacheService;
+
     @Test
     void downloadTemplate() throws Exception {
         UUID userId = UUID.randomUUID();
@@ -51,12 +54,14 @@ class ItemBulkTemplateControllerTest {
         UUID eventPeriodId = UUID.randomUUID();
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(testAdminUser(userId)));
+        when(exhibitionDomainCacheService.findById(exhibitionId))
+                .thenReturn(Optional.of(currentExhibition(exhibitionId)));
         when(itemBulkTemplateService.generateTemplate(any(), any())).thenReturn(
                 new ItemBulkTemplateFile("item-bulk-template.xlsx", new byte[] {1, 2, 3}));
 
         mockMvc.perform(get("/admin/items/bulk/template")
                         .requestAttr("auth.userId", userId)
-                        .requestAttr(CurrentExhibitionArgumentResolver.REQUEST_ATTR_EXHIBITION, currentExhibition(exhibitionId))
+                        .header("X-Exhibition-Id", exhibitionId)
                         .with(user(userId.toString()))
                         .param("eventPeriodId", eventPeriodId.toString()))
                 .andExpect(status().isOk())

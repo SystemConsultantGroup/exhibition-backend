@@ -55,19 +55,19 @@ class AdminCategoryControllerTest {
         UserEntity admin = admin(userId);
         AuthenticatedUser authenticatedUser = AuthenticatedUser.from(admin);
         when(userRepository.findById(userId)).thenReturn(Optional.of(admin));
-        when(exhibitionDomainCacheService.findByDomain("example.com")).thenReturn(Optional.of(exhibition));
+        when(exhibitionDomainCacheService.findById(exhibitionId)).thenReturn(Optional.of(exhibition));
         CategoryResponse response = new CategoryResponse(categoryId, exhibitionId, "new-name", "새 이름");
         when(service.update(eq(categoryId), eq(exhibitionId), any(), eq(authenticatedUser))).thenReturn(response);
         when(service.reorder(eq(exhibitionId), any(), eq(authenticatedUser))).thenReturn(List.of(response));
 
-        mockMvc.perform(put("/admin/categories/{id}", categoryId).header("Host", "example.com")
+        mockMvc.perform(put("/admin/categories/{id}", categoryId).header("X-Exhibition-Id", exhibitionId)
                         .with(user(userId.toString())).requestAttr("auth.userId", userId)
                         .contentType(MediaType.APPLICATION_JSON).content("{\"name\":\"새 이름\"}"))
                 .andExpect(status().isOk())
                 .andDo(document("admin-categories-update",
                         pathParameters(parameterWithName("id").description("수정할 카테고리 ID")),
                         requestFields(fieldWithPath("name").description("새 카테고리 이름 (최대 128자)"))));
-        mockMvc.perform(put("/admin/categories/order").header("Host", "example.com")
+        mockMvc.perform(put("/admin/categories/order").header("X-Exhibition-Id", exhibitionId)
                         .with(user(userId.toString())).requestAttr("auth.userId", userId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"categoryIds\":[\"" + categoryId + "\"]}"))

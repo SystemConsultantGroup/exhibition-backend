@@ -113,6 +113,9 @@ include::{snippets}/exhibitions-get-slug/response-body.adoc[]
 
 == 관리자(Admin)
 
+전시별 관리자 API는 `Authorization` 헤더와 함께 `X-Exhibition-Id` 헤더로 관리 대상 전시 UUID를 전달해야 합니다.
+전역 전시 관리 API(`/admin/exhibitions/**`)는 `X-Exhibition-Id` 헤더를 사용하지 않습니다.
+
 === 관리 가능한 전시 목록 조회
 ==== 요청 헤더
 include::{snippets}/admin-exhibitions-list/request-headers.adoc[]

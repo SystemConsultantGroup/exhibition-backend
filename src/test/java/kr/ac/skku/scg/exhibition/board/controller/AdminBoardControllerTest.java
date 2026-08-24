@@ -63,24 +63,24 @@ class AdminBoardControllerTest {
         BoardResponse response = new BoardResponse(
                 boardId, exhibitionId, "공지", "내용", List.of(), List.of(), userId, Instant.now(), Instant.now());
         when(userRepository.findById(userId)).thenReturn(Optional.of(admin));
-        when(exhibitionDomainCacheService.findByDomain("example.com")).thenReturn(Optional.of(exhibition));
+        when(exhibitionDomainCacheService.findById(exhibitionId)).thenReturn(Optional.of(exhibition));
         when(boardService.create(eq(exhibition), any(), eq(authenticatedUser))).thenReturn(response);
         when(boardService.update(eq(boardId), eq(exhibitionId), any(), eq(authenticatedUser))).thenReturn(response);
 
-        mockMvc.perform(post("/admin/boards").header("Host", "example.com").with(user(userId.toString()))
+        mockMvc.perform(post("/admin/boards").header("X-Exhibition-Id", exhibitionId).with(user(userId.toString()))
                         .requestAttr("auth.userId", userId).contentType(MediaType.APPLICATION_JSON).content(body()))
                 .andExpect(status().isCreated())
                 .andExpect(header().string("Location", "/admin/boards/" + boardId))
                 .andExpect(jsonPath("$.id").value(boardId.toString()))
                 .andDo(document("admin-boards-create", boardRequestFields()));
-        mockMvc.perform(put("/admin/boards/{id}", boardId).header("Host", "example.com").with(user(userId.toString()))
+        mockMvc.perform(put("/admin/boards/{id}", boardId).header("X-Exhibition-Id", exhibitionId).with(user(userId.toString()))
                         .requestAttr("auth.userId", userId).contentType(MediaType.APPLICATION_JSON).content(body()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.title").value("공지"))
                 .andDo(document("admin-boards-update",
                         pathParameters(parameterWithName("id").description("수정할 게시글 ID")),
                         boardRequestFields()));
-        mockMvc.perform(delete("/admin/boards/{id}", boardId).header("Host", "example.com")
+        mockMvc.perform(delete("/admin/boards/{id}", boardId).header("X-Exhibition-Id", exhibitionId)
                         .with(user(userId.toString())).requestAttr("auth.userId", userId))
                 .andExpect(status().isNoContent())
                 .andDo(document("admin-boards-delete",
@@ -100,11 +100,11 @@ class AdminBoardControllerTest {
         UserEntity admin = admin(userId);
         AuthenticatedUser authenticatedUser = AuthenticatedUser.from(admin);
         when(userRepository.findById(userId)).thenReturn(Optional.of(admin));
-        when(exhibitionDomainCacheService.findByDomain("example.com")).thenReturn(Optional.of(exhibition));
+        when(exhibitionDomainCacheService.findById(exhibitionId)).thenReturn(Optional.of(exhibition));
         when(boardService.update(eq(boardId), eq(exhibitionId), any(), eq(authenticatedUser)))
                 .thenThrow(new NotFoundException("Board not found: " + boardId));
 
-        mockMvc.perform(put("/admin/boards/{id}", boardId).header("Host", "example.com")
+        mockMvc.perform(put("/admin/boards/{id}", boardId).header("X-Exhibition-Id", exhibitionId)
                         .with(user(userId.toString())).requestAttr("auth.userId", userId)
                         .contentType(MediaType.APPLICATION_JSON).content(body()))
                 .andExpect(status().isNotFound())
@@ -117,6 +117,20 @@ class AdminBoardControllerTest {
                         .contentType(MediaType.APPLICATION_JSON).content(body()))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
+    }
+
+    @Test
+    void authenticatedAdminRequestRequiresExhibitionIdHeader() throws Exception {
+        UUID userId = UUID.randomUUID();
+
+        mockMvc.perform(post("/admin/boards")
+                        .with(user(userId.toString()))
+                        .requestAttr("auth.userId", userId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body()))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("BAD_REQUEST"))
+                .andExpect(jsonPath("$.message").value("X-Exhibition-Id header is required"));
     }
 
     private org.springframework.restdocs.payload.RequestFieldsSnippet boardRequestFields() {

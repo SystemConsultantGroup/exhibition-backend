@@ -60,23 +60,23 @@ class AdminEventPeriodControllerTest {
         Instant end = Instant.parse("2026-12-31T00:00:00Z");
         EventPeriodResponse response = new EventPeriodResponse(periodId, exhibitionId, "2026", start, end);
         when(userRepository.findById(userId)).thenReturn(Optional.of(admin));
-        when(exhibitionDomainCacheService.findByDomain("example.com")).thenReturn(Optional.of(exhibition));
+        when(exhibitionDomainCacheService.findById(exhibitionId)).thenReturn(Optional.of(exhibition));
         when(service.create(eq(exhibition), any(), eq(authenticatedUser))).thenReturn(response);
         when(service.update(eq(periodId), eq(exhibitionId), any(), eq(authenticatedUser))).thenReturn(response);
         String body = "{\"name\":\"2026\",\"startTime\":\"" + start + "\",\"endTime\":\"" + end + "\"}";
 
-        mockMvc.perform(post("/admin/event-periods").header("Host", "example.com").with(user(userId.toString()))
+        mockMvc.perform(post("/admin/event-periods").header("X-Exhibition-Id", exhibitionId).with(user(userId.toString()))
                         .requestAttr("auth.userId", userId).contentType(MediaType.APPLICATION_JSON).content(body))
                 .andExpect(status().isCreated())
                 .andDo(document("admin-event-periods-create", eventPeriodRequestFields()));
-        mockMvc.perform(put("/admin/event-periods/{id}", periodId).header("Host", "example.com")
+        mockMvc.perform(put("/admin/event-periods/{id}", periodId).header("X-Exhibition-Id", exhibitionId)
                         .with(user(userId.toString())).requestAttr("auth.userId", userId)
                         .contentType(MediaType.APPLICATION_JSON).content(body))
                 .andExpect(status().isOk())
                 .andDo(document("admin-event-periods-update",
                         pathParameters(parameterWithName("id").description("수정할 발표회차 ID")),
                         eventPeriodRequestFields()));
-        mockMvc.perform(delete("/admin/event-periods/{id}", periodId).header("Host", "example.com")
+        mockMvc.perform(delete("/admin/event-periods/{id}", periodId).header("X-Exhibition-Id", exhibitionId)
                         .with(user(userId.toString())).requestAttr("auth.userId", userId))
                 .andExpect(status().isNoContent())
                 .andDo(document("admin-event-periods-delete",

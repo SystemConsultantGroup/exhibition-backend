@@ -1,12 +1,13 @@
 package kr.ac.skku.scg.exhibition.global.config;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Locale;
 import kr.ac.skku.scg.exhibition.global.auth.security.JwtAuthenticationFilter;
-import java.nio.charset.StandardCharsets;
 import kr.ac.skku.scg.exhibition.global.auth.service.JwtTokenService;
 import kr.ac.skku.scg.exhibition.global.tenant.ExhibitionDomainCacheService;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
@@ -24,7 +25,10 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class SecurityConfig {
 
     @Bean
-    public CorsConfigurationSource corsConfigurationSource(ObjectProvider<ExhibitionDomainCacheService> cacheServiceProvider) {
+    public CorsConfigurationSource corsConfigurationSource(
+            ObjectProvider<ExhibitionDomainCacheService> cacheServiceProvider,
+            @Value("${app.cors.admin-allowed-hosts:manage.exhibition.scg.sh}") List<String> adminAllowedHosts
+    ) {
         return request -> {
             String origin = request.getHeader(HttpHeaders.ORIGIN);
             if (origin == null || origin.isBlank()) {
@@ -42,7 +46,7 @@ public class SecurityConfig {
                 return null;
             }
 
-            if (!isAllowedOrigin(host.toLowerCase(Locale.ROOT), cacheServiceProvider.getIfAvailable())) {
+            if (!isAllowedOrigin(host.toLowerCase(Locale.ROOT), cacheServiceProvider.getIfAvailable(), adminAllowedHosts)) {
                 return null;
             }
 
@@ -84,8 +88,15 @@ public class SecurityConfig {
                 .build();
     }
 
-    private boolean isAllowedOrigin(String host, ExhibitionDomainCacheService cacheService) {
+    private boolean isAllowedOrigin(String host, ExhibitionDomainCacheService cacheService,
+            List<String> adminAllowedHosts) {
         if ("localhost".equals(host) || "127.0.0.1".equals(host)) {
+            return true;
+        }
+        if (adminAllowedHosts.stream()
+                .map(String::trim)
+                .map(value -> value.toLowerCase(Locale.ROOT))
+                .anyMatch(host::equals)) {
             return true;
         }
         return cacheService != null && cacheService.findByDomain(host).isPresent();

@@ -69,7 +69,7 @@ class ItemBulkUploadControllerTest {
         UserEntity admin = testAdminUser(userId);
         AuthenticatedUser authenticatedAdmin = AuthenticatedUser.from(admin);
         when(userRepository.findById(userId)).thenReturn(Optional.of(admin));
-        when(exhibitionDomainCacheService.findByDomain("example.com")).thenReturn(Optional.of(
+        when(exhibitionDomainCacheService.findById(exhibitionId)).thenReturn(Optional.of(
                 new ExhibitionEntity(exhibitionId, "slug", "전시")));
         when(itemBulkUploadService.upload(any(), anyList(), eq(exhibitionId), eq(authenticatedAdmin)))
                 .thenReturn(new ItemBulkUploadResponse(2, 3, 4));
@@ -88,7 +88,7 @@ class ItemBulkUploadControllerTest {
         mockMvc.perform(multipart("/admin/items/bulk/upload")
                         .file(file)
                         .file(mediaFile)
-                        .header("Host", "example.com")
+                        .header("X-Exhibition-Id", exhibitionId)
                         .requestAttr("auth.userId", userId)
                         .with(user(userId.toString())))
                 .andExpect(status().isOk())

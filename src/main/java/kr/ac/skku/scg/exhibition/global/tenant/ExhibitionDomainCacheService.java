@@ -1,6 +1,7 @@
 package kr.ac.skku.scg.exhibition.global.tenant;
 
 import java.util.Optional;
+import java.util.UUID;
 import kr.ac.skku.scg.exhibition.exhibition.domain.ExhibitionEntity;
 import kr.ac.skku.scg.exhibition.exhibition.repository.ExhibitionRepository;
 import org.springframework.cache.annotation.CacheEvict;
@@ -27,8 +28,14 @@ public class ExhibitionDomainCacheService {
         return exhibitionRepository.findFirstByDefaultDomainIgnoreCaseOrCustomDomainIgnoreCase(host, host);
     }
 
+    /** 관리자 요청의 전시 ID로 전시를 조회하고 결과를 캐싱한다. */
+    @Cacheable(value = "exhibition-by-id", unless = "#result == null")
+    public Optional<ExhibitionEntity> findById(UUID exhibitionId) {
+        return exhibitionRepository.findById(exhibitionId);
+    }
+
     /** 전시 생성·수정·삭제 후 도메인 캐시를 비웁니다. */
-    @CacheEvict(value = "exhibition-by-domain", allEntries = true)
+    @CacheEvict(value = {"exhibition-by-domain", "exhibition-by-id"}, allEntries = true)
     public void evictAll() {
     }
 }

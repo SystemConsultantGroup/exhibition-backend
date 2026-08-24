@@ -62,7 +62,7 @@ class AdminItemControllerTest {
         UserEntity admin = admin(userId);
         AuthenticatedUser authenticatedUser = AuthenticatedUser.from(admin);
         when(userRepository.findById(userId)).thenReturn(Optional.of(admin));
-        when(exhibitionDomainCacheService.findByDomain("example.com")).thenReturn(Optional.of(exhibition));
+        when(exhibitionDomainCacheService.findById(exhibitionId)).thenReturn(Optional.of(exhibition));
         ItemResponse response = new ItemResponse(itemId, exhibitionId, categoryId, null, "작품", null,
                 null, null, null, null, null, null, false, 0, false);
         when(service.create(eq(exhibition), any(), any(), any(), any(), eq(authenticatedUser))).thenReturn(response);
@@ -78,7 +78,7 @@ class AdminItemControllerTest {
                 "thumbnailFile", "thumb.jpg", MediaType.IMAGE_JPEG_VALUE,
                 new byte[] {(byte) 0xff, (byte) 0xd8, (byte) 0xff});
         mockMvc.perform(multipart("/admin/items").file(request).file(thumbnail)
-                        .header("Host", "example.com").with(user(userId.toString()))
+                        .header("X-Exhibition-Id", exhibitionId).with(user(userId.toString()))
                         .requestAttr("auth.userId", userId))
                 .andExpect(status().isCreated())
                 .andDo(document("admin-items-create",
@@ -98,12 +98,12 @@ class AdminItemControllerTest {
                                 fieldWithPath("advisorNames").description("지도교수 이름 (nullable)").optional(),
                                 fieldWithPath("awarded").description("수상 여부")
                         )));
-        mockMvc.perform(put("/admin/items/{id}", itemId).header("Host", "example.com").with(user(userId.toString()))
+        mockMvc.perform(put("/admin/items/{id}", itemId).header("X-Exhibition-Id", exhibitionId).with(user(userId.toString()))
                         .requestAttr("auth.userId", userId).contentType(MediaType.APPLICATION_JSON).content(body))
                 .andExpect(status().isOk())
                 .andDo(document("admin-items-update",
                         pathParameters(parameterWithName("id").description("수정할 항목 ID")), itemRequestFields()));
-        mockMvc.perform(delete("/admin/items/{id}", itemId).header("Host", "example.com").with(user(userId.toString()))
+        mockMvc.perform(delete("/admin/items/{id}", itemId).header("X-Exhibition-Id", exhibitionId).with(user(userId.toString()))
                         .requestAttr("auth.userId", userId))
                 .andExpect(status().isNoContent())
                 .andDo(document("admin-items-delete",

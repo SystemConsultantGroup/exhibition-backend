@@ -33,6 +33,7 @@ import kr.ac.skku.scg.exhibition.exhibition.service.AdminExhibitionService;
 import kr.ac.skku.scg.exhibition.global.config.SecurityConfig;
 import kr.ac.skku.scg.exhibition.global.config.WebConfig;
 import kr.ac.skku.scg.exhibition.global.error.ApiExceptionHandler;
+import kr.ac.skku.scg.exhibition.global.tenant.ExhibitionDomainCacheService;
 import kr.ac.skku.scg.exhibition.user.domain.UserEntity;
 import kr.ac.skku.scg.exhibition.user.domain.UserType;
 import kr.ac.skku.scg.exhibition.user.repository.UserRepository;
@@ -59,6 +60,9 @@ class AdminExhibitionControllerTest {
 
     @MockitoBean
     private UserRepository userRepository;
+
+    @MockitoBean
+    private ExhibitionDomainCacheService exhibitionDomainCacheService;
 
     @Test
     void list_returnsAccessibleExhibitions() throws Exception {
