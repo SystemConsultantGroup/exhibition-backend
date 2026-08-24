@@ -44,3 +44,6 @@ src/main/resources/application-dev.yml
 
 #cache
 .gradle-home
+
+# pi-agent runtime
+.pi/

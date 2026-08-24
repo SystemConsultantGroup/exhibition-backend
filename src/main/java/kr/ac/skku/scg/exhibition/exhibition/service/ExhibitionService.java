@@ -1,7 +1,6 @@
 package kr.ac.skku.scg.exhibition.exhibition.service;
 
 import java.util.List;
-import java.util.UUID;
 import kr.ac.skku.scg.exhibition.exhibition.domain.ExhibitionEntity;
 import kr.ac.skku.scg.exhibition.exhibition.dto.request.ExhibitionListRequest;
 import kr.ac.skku.scg.exhibition.exhibition.dto.response.ExhibitionResponse;
@@ -44,26 +43,6 @@ public class ExhibitionService {
     }
 
     private ExhibitionResponse toResponse(ExhibitionEntity exhibition) {
-        UUID logoMediaId = exhibition.getLogoMedia() == null ? null : exhibition.getLogoMedia().getId();
-        UUID bannerMediaId = exhibition.getBannerMedia() == null ? null : exhibition.getBannerMedia().getId();
-        UUID popupImageMediaId = exhibition.getPopupImageMedia() == null ? null : exhibition.getPopupImageMedia().getId();
-        UUID introVideoMediaId = exhibition.getIntroVideoMedia() == null ? null : exhibition.getIntroVideoMedia().getId();
-
-        return new ExhibitionResponse(
-                exhibition.getId(),
-                exhibition.getSlug(),
-                exhibition.getDefaultDomain(),
-                exhibition.getCustomDomain(),
-                exhibition.getName(),
-                exhibition.getDescription(),
-                logoMediaId,
-                exhibition.isBannerEnabled(),
-                bannerMediaId,
-                exhibition.isPopupEnabled(),
-                popupImageMediaId,
-                exhibition.getPopupUrl(),
-                exhibition.getIntroTitle(),
-                exhibition.getIntroDescription(),
-                introVideoMediaId);
+        return ExhibitionResponse.from(exhibition);
     }
 }

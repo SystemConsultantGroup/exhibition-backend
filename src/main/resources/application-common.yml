@@ -19,6 +19,8 @@ spring:
     open-in-view: false
 
 app:
+  cors:
+    admin-allowed-hosts: ${APP_CORS_ADMIN_ALLOWED_HOSTS:manage.exhibition.scg.sh}
   minio:
     endpoint: ${MINIO_ENDPOINT}
     port: ${MINIO_PORT}

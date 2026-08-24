@@ -22,4 +22,8 @@ public interface CategoryRepository extends JpaRepository<CategoryEntity, UUID> 
     Optional<CategoryEntity> findByExhibition_IdAndName(UUID exhibitionId, String name);
 
     Optional<CategoryEntity> findByExhibition_IdAndSlug(UUID exhibitionId, String slug);
+
+    boolean existsByExhibition_IdAndNameAndIdNot(UUID exhibitionId, String name, UUID id);
+
+    boolean existsByExhibition_IdAndSlugAndIdNot(UUID exhibitionId, String slug, UUID id);
 }

@@ -1,16 +1,20 @@
 package kr.ac.skku.scg.exhibition.global.config;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Locale;
 import kr.ac.skku.scg.exhibition.global.auth.security.JwtAuthenticationFilter;
 import kr.ac.skku.scg.exhibition.global.auth.service.JwtTokenService;
 import kr.ac.skku.scg.exhibition.global.tenant.ExhibitionDomainCacheService;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
@@ -21,7 +25,10 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class SecurityConfig {
 
     @Bean
-    public CorsConfigurationSource corsConfigurationSource(ObjectProvider<ExhibitionDomainCacheService> cacheServiceProvider) {
+    public CorsConfigurationSource corsConfigurationSource(
+            ObjectProvider<ExhibitionDomainCacheService> cacheServiceProvider,
+            @Value("${app.cors.admin-allowed-hosts:manage.exhibition.scg.sh}") List<String> adminAllowedHosts
+    ) {
         return request -> {
             String origin = request.getHeader(HttpHeaders.ORIGIN);
             if (origin == null || origin.isBlank()) {
@@ -39,7 +46,7 @@ public class SecurityConfig {
                 return null;
             }
 
-            if (!isAllowedOrigin(host.toLowerCase(Locale.ROOT), cacheServiceProvider.getIfAvailable())) {
+            if (!isAllowedOrigin(host.toLowerCase(Locale.ROOT), cacheServiceProvider.getIfAvailable(), adminAllowedHosts)) {
                 return null;
             }
 
@@ -67,12 +74,29 @@ public class SecurityConfig {
         return http
                 .csrf(csrf -> csrf.disable())
                 .cors(Customizer.withDefaults())
-                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .exceptionHandling(exceptions -> exceptions.authenticationEntryPoint((request, response, exception) -> {
+                    response.setStatus(401);
+                    response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                    response.getOutputStream().write(
+                            "{\"code\":\"UNAUTHORIZED\",\"message\":\"Authentication is required\"}"
+                                    .getBytes(StandardCharsets.UTF_8));
+                }))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/admin/**").authenticated()
+                        .anyRequest().permitAll())
                 .build();
     }
 
-    private boolean isAllowedOrigin(String host, ExhibitionDomainCacheService cacheService) {
+    private boolean isAllowedOrigin(String host, ExhibitionDomainCacheService cacheService,
+            List<String> adminAllowedHosts) {
         if ("localhost".equals(host) || "127.0.0.1".equals(host)) {
+            return true;
+        }
+        if (adminAllowedHosts.stream()
+                .map(String::trim)
+                .map(value -> value.toLowerCase(Locale.ROOT))
+                .anyMatch(host::equals)) {
             return true;
         }
         return cacheService != null && cacheService.findByDomain(host).isPresent();

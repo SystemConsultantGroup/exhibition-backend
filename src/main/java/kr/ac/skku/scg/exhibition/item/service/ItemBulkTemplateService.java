@@ -13,11 +13,10 @@ import kr.ac.skku.scg.exhibition.eventperiod.domain.EventPeriodEntity;
 import kr.ac.skku.scg.exhibition.eventperiod.repository.EventPeriodRepository;
 import kr.ac.skku.scg.exhibition.exhibition.repository.ExhibitionRepository;
 import kr.ac.skku.scg.exhibition.global.auth.resolver.AuthenticatedUser;
-import kr.ac.skku.scg.exhibition.global.error.ForbiddenException;
+import kr.ac.skku.scg.exhibition.global.auth.service.AdminAuthorizationService;
 import kr.ac.skku.scg.exhibition.global.error.NotFoundException;
 import kr.ac.skku.scg.exhibition.item.dto.request.ItemBulkTemplateRequest;
 import kr.ac.skku.scg.exhibition.item.dto.response.ItemBulkTemplateFile;
-import kr.ac.skku.scg.exhibition.user.domain.UserType;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.DataValidation;
@@ -45,30 +44,37 @@ public class ItemBulkTemplateService {
     private static final int DATA_ROW_START = 1;
     private static final int DATA_ROW_END = 1000;
     private static final int OPTIONS_START_ROW = 4;
-    private static final int LAST_TEMPLATE_COLUMN_INDEX = 11;
+    private static final int LAST_TEMPLATE_COLUMN_INDEX = 10;
+    static final List<String> TEMPLATE_HEADERS = List.of(
+            "category_name", "classification_name", "title", "description", "participant_names_csv",
+            "participant_emails_csv", "advisor_names_csv", "awarded_y_n", "thumbnail_file_name",
+            "poster_file_name", "presentation_video_file_name");
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.BASIC_ISO_DATE;
 
     private final ExhibitionRepository exhibitionRepository;
     private final EventPeriodRepository eventPeriodRepository;
     private final CategoryRepository categoryRepository;
     private final ItemClassificationRepository classificationRepository;
+    private final AdminAuthorizationService adminAuthorizationService;
 
     public ItemBulkTemplateService(
             ExhibitionRepository exhibitionRepository,
             EventPeriodRepository eventPeriodRepository,
             CategoryRepository categoryRepository,
-            ItemClassificationRepository classificationRepository
+            ItemClassificationRepository classificationRepository,
+            AdminAuthorizationService adminAuthorizationService
     ) {
         this.exhibitionRepository = exhibitionRepository;
         this.eventPeriodRepository = eventPeriodRepository;
         this.categoryRepository = categoryRepository;
         this.classificationRepository = classificationRepository;
+        this.adminAuthorizationService = adminAuthorizationService;
     }
 
+    /** 사용자 친화적인 아이템 일괄 등록 템플릿을 생성한다. */
     public ItemBulkTemplateFile generateTemplate(ItemBulkTemplateRequest request, AuthenticatedUser currentUser) {
-        validateAdmin(currentUser);
-
         UUID exhibitionId = request.getExhibitionId();
+        adminAuthorizationService.requireExhibitionAdmin(currentUser, exhibitionId);
         UUID eventPeriodId = request.getEventPeriodId();
 
         exhibitionRepository.findById(exhibitionId)
@@ -108,14 +114,15 @@ public class ItemBulkTemplateService {
 
             CellStyle headerStyle = createHeaderStyle(workbook);
             createTemplateHeader(templateSheet, headerStyle);
-            fillFixedColumns(templateSheet, exhibitionId, eventPeriod.getId(), eventPeriod.getName());
+            fillEmptyRows(templateSheet);
             populateOptionsSheet(optionsSheet, exhibitionId, eventPeriod.getId(), eventPeriod.getName(), categories, classifications);
             registerNamedRange(workbook, "category_options", OPTIONS_SHEET + "!$A$" + (OPTIONS_START_ROW + 1) + ":$A$"
                     + Math.max(OPTIONS_START_ROW + categories.size(), OPTIONS_START_ROW + 1));
             registerNamedRange(workbook, "classification_options", OPTIONS_SHEET + "!$B$" + (OPTIONS_START_ROW + 1) + ":$B$"
                     + Math.max(OPTIONS_START_ROW + classifications.size(), OPTIONS_START_ROW + 1));
-            applyDropDown(templateSheet, 3, "category_options");
-            applyDropDown(templateSheet, 4, "classification_options");
+            applyDropDown(templateSheet, 0, "category_options");
+            applyDropDown(templateSheet, 1, "classification_options");
+            applyYesNoDropDown(templateSheet, 7);
 
             workbook.setSheetHidden(workbook.getSheetIndex(optionsSheet), true);
 
@@ -131,35 +138,17 @@ public class ItemBulkTemplateService {
     }
 
     private void createTemplateHeader(Sheet templateSheet, CellStyle headerStyle) {
-        String[] headers = {
-                "exhibition_id",
-                "event_period_id",
-                "event_period_name",
-                "category_name",
-                "classification_name",
-                "title",
-                "description",
-                "participant_names_csv",
-                "advisor_names_csv",
-                "thumbnail_object_key",
-                "poster_object_key",
-                "presentation_video_object_key"
-        };
-
         Row headerRow = templateSheet.createRow(HEADER_ROW_INDEX);
-        for (int i = 0; i < headers.length; i++) {
+        for (int i = 0; i < TEMPLATE_HEADERS.size(); i++) {
             Cell cell = headerRow.createCell(i);
-            cell.setCellValue(headers[i]);
+            cell.setCellValue(TEMPLATE_HEADERS.get(i));
             cell.setCellStyle(headerStyle);
         }
     }
 
-    private void fillFixedColumns(Sheet templateSheet, UUID exhibitionId, UUID eventPeriodId, String eventPeriodName) {
+    private void fillEmptyRows(Sheet templateSheet) {
         for (int rowIndex = DATA_ROW_START; rowIndex <= DATA_ROW_END; rowIndex++) {
-            Row row = templateSheet.createRow(rowIndex);
-            row.createCell(0).setCellValue(exhibitionId.toString());
-            row.createCell(1).setCellValue(eventPeriodId.toString());
-            row.createCell(2).setCellValue(eventPeriodName);
+            templateSheet.createRow(rowIndex);
         }
     }
 
@@ -214,6 +203,16 @@ public class ItemBulkTemplateService {
         templateSheet.addValidationData(validation);
     }
 
+    /** 수상 여부 Y/N 드롭다운을 적용한다. */
+    private void applyYesNoDropDown(Sheet sheet, int columnIndex) {
+        DataValidationHelper helper = sheet.getDataValidationHelper();
+        DataValidation validation = helper.createValidation(
+                helper.createExplicitListConstraint(new String[] {"Y", "N"}),
+                new CellRangeAddressList(DATA_ROW_START, DATA_ROW_END, columnIndex, columnIndex));
+        validation.setShowErrorBox(true);
+        sheet.addValidationData(validation);
+    }
+
     private CellStyle createHeaderStyle(Workbook workbook) {
         CellStyle style = workbook.createCellStyle();
         style.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
@@ -230,9 +229,4 @@ public class ItemBulkTemplateService {
         return "item-bulk-template-" + exhibitionId + "-" + eventPeriodId + "-" + date + ".xlsx";
     }
 
-    private void validateAdmin(AuthenticatedUser currentUser) {
-        if (currentUser.role() != UserType.ADMIN) {
-            throw new ForbiddenException("Admin role is required");
-        }
-    }
 }

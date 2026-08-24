@@ -82,6 +82,7 @@ Each domain has: `controller/`, `service/`, `domain/`, `repository/`, `dto/reque
 | `SPRING_DATASOURCE_URL` | MySQL JDBC URL |
 | `SPRING_DATASOURCE_USERNAME` / `_PASSWORD` | MySQL credentials |
 | `MINIO_ENDPOINT`, `MINIO_PORT`, `MINIO_ACCESS_KEY`, `MINIO_SECRET_KEY`, `MINIO_BUCKET` | MinIO config |
+| `APP_CORS_ADMIN_ALLOWED_HOSTS` | Comma-separated hosts allowed to serve the shared admin frontend (defaults to `manage.exhibition.scg.sh`) |
 | `APP_AUTH_JWT_SECRET`, `APP_AUTH_JWT_ACCESS_TOKEN_EXPIRATION_SECONDS`, `APP_AUTH_JWT_REFRESH_TOKEN_EXPIRATION_SECONDS`, `APP_AUTH_JWT_ISSUER` | JWT config |
 | `APP_AUTH_KAKAO_CLIENT_ID`, `APP_AUTH_KAKAO_CLIENT_SECRET`, `APP_AUTH_KAKAO_REDIRECT_URI`, `APP_AUTH_KAKAO_TOKEN_URI`, `APP_AUTH_KAKAO_USER_INFO_URI` | Kakao OAuth config |
 

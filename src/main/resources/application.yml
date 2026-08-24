@@ -5,6 +5,10 @@ spring:
     type: caffeine
     caffeine:
       spec: maximumSize=500,expireAfterWrite=5m
+  servlet:
+    multipart:
+      max-file-size: ${APP_UPLOAD_MAX_FILE_SIZE:500MB}
+      max-request-size: ${APP_UPLOAD_MAX_REQUEST_SIZE:2GB}
   profiles:
     active: prod
     group:
