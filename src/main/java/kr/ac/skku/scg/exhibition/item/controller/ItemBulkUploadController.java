@@ -1,7 +1,10 @@
 package kr.ac.skku.scg.exhibition.item.controller;
 
+import java.util.List;
+import kr.ac.skku.scg.exhibition.exhibition.domain.ExhibitionEntity;
 import kr.ac.skku.scg.exhibition.global.auth.resolver.AuthenticatedUser;
 import kr.ac.skku.scg.exhibition.global.auth.resolver.CurrentUser;
+import kr.ac.skku.scg.exhibition.global.tenant.CurrentExhibition;
 import kr.ac.skku.scg.exhibition.item.dto.response.ItemBulkUploadResponse;
 import kr.ac.skku.scg.exhibition.item.service.ItemBulkUploadService;
 import lombok.RequiredArgsConstructor;
@@ -25,9 +28,12 @@ public class ItemBulkUploadController {
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ItemBulkUploadResponse> upload(
             @RequestPart("file") MultipartFile file,
+            @RequestPart(value = "mediaFiles", required = false) List<MultipartFile> mediaFiles,
+            @CurrentExhibition ExhibitionEntity currentExhibition,
             @CurrentUser AuthenticatedUser currentUser
     ) {
-        ItemBulkUploadResponse response = itemBulkUploadService.upload(file, currentUser);
+        ItemBulkUploadResponse response = itemBulkUploadService.upload(
+                file, mediaFiles, currentExhibition.getId(), currentUser);
         return ResponseEntity.ok(response);
     }
 }

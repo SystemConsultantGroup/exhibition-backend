@@ -72,9 +72,53 @@ public class ExhibitionEntity extends BaseEntity {
     }
 
     public ExhibitionEntity(UUID id, String slug, String name) {
+        this(id, slug, null, null, name, null);
+    }
+
+    public ExhibitionEntity(
+            UUID id,
+            String slug,
+            String defaultDomain,
+            String customDomain,
+            String name,
+            String description
+    ) {
+        this(id, slug, defaultDomain, customDomain, name, description, null, false, null,
+                false, null, null, null, null, null);
+    }
+
+    public ExhibitionEntity(
+            UUID id,
+            String slug,
+            String defaultDomain,
+            String customDomain,
+            String name,
+            String description,
+            MediaAssetEntity logoMedia,
+            boolean bannerEnabled,
+            MediaAssetEntity bannerMedia,
+            boolean popupEnabled,
+            MediaAssetEntity popupImageMedia,
+            String popupUrl,
+            String introTitle,
+            String introDescription,
+            MediaAssetEntity introVideoMedia
+    ) {
         this.id = id;
         this.slug = slug;
+        this.defaultDomain = defaultDomain;
+        this.customDomain = customDomain;
         this.name = name;
+        this.description = description;
+        this.logoMedia = logoMedia;
+        this.bannerEnabled = bannerEnabled;
+        this.bannerMedia = bannerMedia;
+        this.popupEnabled = popupEnabled;
+        this.popupImageMedia = popupImageMedia;
+        this.popupUrl = popupUrl;
+        this.introTitle = introTitle;
+        this.introDescription = introDescription;
+        this.introVideoMedia = introVideoMedia;
     }
 
     public UUID getId() {
@@ -135,6 +179,26 @@ public class ExhibitionEntity extends BaseEntity {
 
     public MediaAssetEntity getIntroVideoMedia() {
         return introVideoMedia;
+    }
+
+    /** 관리자 입력으로 전시회 정보를 수정한다. */
+    public void updateMetadata(String defaultDomain, String customDomain, String name, String description,
+            MediaAssetEntity logoMedia, boolean bannerEnabled, MediaAssetEntity bannerMedia,
+            boolean popupEnabled, MediaAssetEntity popupImageMedia, String popupUrl,
+            String introTitle, String introDescription, MediaAssetEntity introVideoMedia) {
+        this.defaultDomain = defaultDomain;
+        this.customDomain = customDomain;
+        this.name = name;
+        this.description = description;
+        this.logoMedia = logoMedia;
+        this.bannerEnabled = bannerEnabled;
+        this.bannerMedia = bannerMedia;
+        this.popupEnabled = popupEnabled;
+        this.popupImageMedia = popupImageMedia;
+        this.popupUrl = popupUrl;
+        this.introTitle = introTitle;
+        this.introDescription = introDescription;
+        this.introVideoMedia = introVideoMedia;
     }
 
 }

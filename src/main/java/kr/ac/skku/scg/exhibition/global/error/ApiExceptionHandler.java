@@ -29,6 +29,12 @@ public class ApiExceptionHandler {
                 .body(ApiErrorResponse.of("FORBIDDEN", ex.getMessage()));
     }
 
+    @ExceptionHandler(ConflictException.class)
+    public ResponseEntity<ApiErrorResponse> handleConflict(ConflictException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ApiErrorResponse.of("CONFLICT", ex.getMessage()));
+    }
+
     @ExceptionHandler({MethodArgumentNotValidException.class, ConstraintViolationException.class})
     public ResponseEntity<ApiErrorResponse> handleValidation(Exception ex) {
         String message = "Validation failed";

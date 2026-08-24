@@ -5,4 +5,6 @@ import kr.ac.skku.scg.exhibition.classification.domain.ItemClassificationMapEnti
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ItemClassificationMapRepository extends JpaRepository<ItemClassificationMapEntity, UUID> {
+
+    void deleteAllByItem_Id(UUID itemId);
 }

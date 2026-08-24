@@ -18,6 +18,7 @@ import kr.ac.skku.scg.exhibition.eventperiod.repository.EventPeriodRepository;
 import kr.ac.skku.scg.exhibition.exhibition.domain.ExhibitionEntity;
 import kr.ac.skku.scg.exhibition.exhibition.repository.ExhibitionRepository;
 import kr.ac.skku.scg.exhibition.global.auth.resolver.AuthenticatedUser;
+import kr.ac.skku.scg.exhibition.global.auth.service.AdminAuthorizationService;
 import kr.ac.skku.scg.exhibition.global.error.ForbiddenException;
 import kr.ac.skku.scg.exhibition.item.dto.request.ItemBulkTemplateRequest;
 import kr.ac.skku.scg.exhibition.item.dto.response.ItemBulkTemplateFile;
@@ -45,6 +46,9 @@ class ItemBulkTemplateServiceTest {
     @Mock
     private ItemClassificationRepository classificationRepository;
 
+    @Mock
+    private AdminAuthorizationService adminAuthorizationService;
+
     private ItemBulkTemplateService itemBulkTemplateService;
 
     @BeforeEach
@@ -53,7 +57,8 @@ class ItemBulkTemplateServiceTest {
                 exhibitionRepository,
                 eventPeriodRepository,
                 categoryRepository,
-                classificationRepository
+                classificationRepository,
+                adminAuthorizationService
         );
     }
 
@@ -73,6 +78,9 @@ class ItemBulkTemplateServiceTest {
                 null,
                 true
         );
+
+        org.mockito.Mockito.doThrow(new ForbiddenException("Admin role is required"))
+                .when(adminAuthorizationService).requireExhibitionAdmin(nonAdmin, request.getExhibitionId());
 
         assertThatThrownBy(() -> itemBulkTemplateService.generateTemplate(request, nonAdmin))
                 .isInstanceOf(ForbiddenException.class)
@@ -126,12 +134,18 @@ class ItemBulkTemplateServiceTest {
         try (Workbook workbook = new XSSFWorkbook(new ByteArrayInputStream(file.bytes()))) {
             assertThat(workbook.getSheet("items_template")).isNotNull();
             assertThat(workbook.getSheet("options")).isNotNull();
-            assertThat(workbook.getSheet("items_template").getRow(1).getCell(0).getStringCellValue())
+            assertThat(workbook.getSheet("options").getRow(1).getCell(0).getStringCellValue())
                     .isEqualTo(exhibitionId.toString());
-            assertThat(workbook.getSheet("items_template").getRow(1).getCell(1).getStringCellValue())
+            assertThat(workbook.getSheet("options").getRow(1).getCell(1).getStringCellValue())
                     .isEqualTo(eventPeriodId.toString());
-            assertThat(workbook.getSheet("items_template").getRow(1).getCell(2).getStringCellValue())
+            assertThat(workbook.getSheet("options").getRow(1).getCell(2).getStringCellValue())
                     .isEqualTo("2026-1");
+            assertThat(workbook.getSheet("items_template").getRow(0).getCell(8).getStringCellValue())
+                    .isEqualTo("thumbnail_file_name");
+            assertThat(workbook.getSheet("items_template").getRow(0).getCell(9).getStringCellValue())
+                    .isEqualTo("poster_file_name");
+            assertThat(workbook.getSheet("items_template").getRow(0).getCell(10).getStringCellValue())
+                    .isEqualTo("presentation_video_file_name");
             assertThat(workbook.getSheet("options").getRow(4).getCell(0).getStringCellValue()).isEqualTo("AI");
             assertThat(workbook.getSheet("options").getRow(4).getCell(1).getStringCellValue()).isEqualTo("논문");
         }

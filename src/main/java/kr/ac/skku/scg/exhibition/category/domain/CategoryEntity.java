@@ -8,7 +8,9 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import java.text.Normalizer;
+import java.time.Instant;
 import java.util.Locale;
 import java.util.UUID;
 import org.hibernate.annotations.UuidGenerator;
@@ -16,7 +18,10 @@ import kr.ac.skku.scg.exhibition.exhibition.domain.ExhibitionEntity;
 import kr.ac.skku.scg.exhibition.global.entity.BaseEntity;
 
 @Entity
-@Table(name = "categories")
+@Table(name = "categories", uniqueConstraints = {
+        @UniqueConstraint(name = "uk_categories_exhibition_name", columnNames = {"exhibition_id", "name"}),
+        @UniqueConstraint(name = "uk_categories_exhibition_slug", columnNames = {"exhibition_id", "slug"})
+})
 public class CategoryEntity extends BaseEntity {
 
     @Id
@@ -62,6 +67,17 @@ public class CategoryEntity extends BaseEntity {
 
     public String getName() {
         return name;
+    }
+
+    /** 이름과 파생 슬러그를 함께 수정한다. */
+    public void updateName(String name) {
+        this.name = name;
+        this.slug = createSlug(name);
+    }
+
+    /** createdAt 기반 노출 순서를 수정한다. */
+    public void reorderAt(Instant createdAt) {
+        rewriteCreatedAt(createdAt);
     }
 
     private static String createSlug(String name) {

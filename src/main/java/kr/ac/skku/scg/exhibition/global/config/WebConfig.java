@@ -2,6 +2,7 @@ package kr.ac.skku.scg.exhibition.global.config;
 
 import java.util.List;
 import kr.ac.skku.scg.exhibition.global.auth.resolver.CurrentUserArgumentResolver;
+import kr.ac.skku.scg.exhibition.global.tenant.AdminExhibitionInterceptor;
 import kr.ac.skku.scg.exhibition.global.tenant.CurrentExhibitionArgumentResolver;
 import kr.ac.skku.scg.exhibition.global.tenant.ExhibitionDomainCacheService;
 import kr.ac.skku.scg.exhibition.global.tenant.ExhibitionTenantInterceptor;
@@ -47,11 +48,19 @@ public class WebConfig implements WebMvcConfigurer {
                 .addPathPatterns("/**")
                 .excludePathPatterns(
                         "/auth/**",
+                        "/admin/**",
                         "/media/**",
                         "/users/**",
                         "/error",
                         "/docs/**",
                         "/favicon.ico"
+                );
+
+        registry.addInterceptor(new AdminExhibitionInterceptor(cacheService))
+                .addPathPatterns("/admin/**")
+                .excludePathPatterns(
+                        "/admin/exhibitions",
+                        "/admin/exhibitions/**"
                 );
     }
 }

@@ -2,6 +2,11 @@ package kr.ac.skku.scg.exhibition.item.service;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import kr.ac.skku.scg.exhibition.category.domain.CategoryEntity;
 import kr.ac.skku.scg.exhibition.category.repository.CategoryRepository;
@@ -14,14 +19,13 @@ import kr.ac.skku.scg.exhibition.eventperiod.repository.EventPeriodRepository;
 import kr.ac.skku.scg.exhibition.exhibition.domain.ExhibitionEntity;
 import kr.ac.skku.scg.exhibition.exhibition.repository.ExhibitionRepository;
 import kr.ac.skku.scg.exhibition.global.auth.resolver.AuthenticatedUser;
-import kr.ac.skku.scg.exhibition.global.error.ForbiddenException;
+import kr.ac.skku.scg.exhibition.global.auth.service.AdminAuthorizationService;
 import kr.ac.skku.scg.exhibition.global.error.NotFoundException;
 import kr.ac.skku.scg.exhibition.item.domain.ItemEntity;
 import kr.ac.skku.scg.exhibition.item.dto.response.ItemBulkUploadResponse;
 import kr.ac.skku.scg.exhibition.item.repository.ItemRepository;
 import kr.ac.skku.scg.exhibition.media.domain.MediaAssetEntity;
-import kr.ac.skku.scg.exhibition.media.repository.MediaAssetRepository;
-import kr.ac.skku.scg.exhibition.user.domain.UserType;
+import kr.ac.skku.scg.exhibition.media.service.MediaService;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -33,218 +37,225 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class ItemBulkUploadService {
-
     private static final String TEMPLATE_SHEET = "items_template";
+    private static final String OPTIONS_SHEET = "options";
+    private static final int MAX_ROWS = 1000;
+    private static final long MAX_EXCEL_BYTES = 10L * 1024 * 1024;
 
-    private final ExhibitionRepository exhibitionRepository;
-    private final EventPeriodRepository eventPeriodRepository;
-    private final CategoryRepository categoryRepository;
-    private final ItemClassificationRepository classificationRepository;
-    private final ItemClassificationMapRepository itemClassificationMapRepository;
-    private final ItemRepository itemRepository;
-    private final MediaAssetRepository mediaAssetRepository;
+    private final ExhibitionRepository exhibitions;
+    private final EventPeriodRepository periods;
+    private final CategoryRepository categories;
+    private final ItemClassificationRepository classifications;
+    private final ItemClassificationMapRepository mappings;
+    private final ItemRepository items;
+    private final MediaService mediaService;
+    private final AdminAuthorizationService authorization;
 
-    public ItemBulkUploadService(
-            ExhibitionRepository exhibitionRepository,
-            EventPeriodRepository eventPeriodRepository,
-            CategoryRepository categoryRepository,
-            ItemClassificationRepository classificationRepository,
-            ItemClassificationMapRepository itemClassificationMapRepository,
-            ItemRepository itemRepository,
-            MediaAssetRepository mediaAssetRepository
-    ) {
-        this.exhibitionRepository = exhibitionRepository;
-        this.eventPeriodRepository = eventPeriodRepository;
-        this.categoryRepository = categoryRepository;
-        this.classificationRepository = classificationRepository;
-        this.itemClassificationMapRepository = itemClassificationMapRepository;
-        this.itemRepository = itemRepository;
-        this.mediaAssetRepository = mediaAssetRepository;
+    public ItemBulkUploadService(ExhibitionRepository exhibitions, EventPeriodRepository periods,
+            CategoryRepository categories, ItemClassificationRepository classifications,
+            ItemClassificationMapRepository mappings, ItemRepository items, MediaService mediaService,
+            AdminAuthorizationService authorization) {
+        this.exhibitions = exhibitions;
+        this.periods = periods;
+        this.categories = categories;
+        this.classifications = classifications;
+        this.mappings = mappings;
+        this.items = items;
+        this.mediaService = mediaService;
+        this.authorization = authorization;
     }
 
+    /** XLSX와 함께 전달된 미디어를 한 트랜잭션으로 등록한다. */
     @Transactional
-    public ItemBulkUploadResponse upload(MultipartFile file, AuthenticatedUser currentUser) {
-        validateAdmin(currentUser);
+    public ItemBulkUploadResponse upload(MultipartFile file, List<MultipartFile> mediaFiles,
+            UUID currentExhibitionId, AuthenticatedUser user) {
+        authorization.requireExhibitionAdmin(user, currentExhibitionId);
         validateFile(file);
-
-        int createdItems = 0;
-        int createdMediaAssets = 0;
-        int createdClassificationMappings = 0;
+        Map<String, MultipartFile> files = indexMediaFiles(mediaFiles);
+        Set<String> used = new HashSet<>();
+        int itemCount = 0, mediaCount = 0, mappingCount = 0;
         DataFormatter formatter = new DataFormatter();
 
-        try (InputStream inputStream = file.getInputStream(); Workbook workbook = new XSSFWorkbook(inputStream)) {
+        try (InputStream input = file.getInputStream(); Workbook workbook = new XSSFWorkbook(input)) {
             Sheet sheet = workbook.getSheet(TEMPLATE_SHEET);
-            if (sheet == null) {
-                sheet = workbook.getNumberOfSheets() > 0 ? workbook.getSheetAt(0) : null;
+            Sheet options = workbook.getSheet(OPTIONS_SHEET);
+            validateWorkbook(sheet, options, formatter);
+            UUID metadataExhibitionId = parseUuid(cellValue(options.getRow(1), 0, formatter), "metadata exhibition_id", 2);
+            if (!currentExhibitionId.equals(metadataExhibitionId)) {
+                throw new IllegalArgumentException("Workbook exhibition does not match current exhibition");
             }
-            if (sheet == null) {
-                throw new IllegalArgumentException("Invalid excel file: no worksheet");
-            }
+            UUID eventPeriodId = parseUuid(cellValue(options.getRow(1), 1, formatter), "metadata event_period_id", 2);
+            ExhibitionEntity exhibition = exhibitions.findById(currentExhibitionId)
+                    .orElseThrow(() -> new NotFoundException("Exhibition not found: " + currentExhibitionId));
+            EventPeriodEntity period = periods.findByIdAndExhibition_Id(eventPeriodId, currentExhibitionId)
+                    .orElseThrow(() -> new NotFoundException("Event period not found: " + eventPeriodId));
 
+            int populatedRows = 0;
             for (int rowIndex = 1; rowIndex <= sheet.getLastRowNum(); rowIndex++) {
                 Row row = sheet.getRow(rowIndex);
                 if (isDataRowEmpty(row, formatter)) {
                     continue;
                 }
-
-                int excelRowNum = rowIndex + 1;
-                UUID exhibitionId = parseUuid(cellValue(row, 0, formatter), "exhibition_id", excelRowNum);
-                UUID eventPeriodId = parseUuid(cellValue(row, 1, formatter), "event_period_id", excelRowNum);
-                String categoryName = required(cellValue(row, 3, formatter), "category_name", excelRowNum);
-                String title = required(cellValue(row, 5, formatter), "title", excelRowNum);
-
-                ExhibitionEntity exhibition = exhibitionRepository.findById(exhibitionId)
-                        .orElseThrow(() -> new NotFoundException("Row " + excelRowNum + ": exhibition not found: " + exhibitionId));
-
-                EventPeriodEntity eventPeriod = eventPeriodRepository.findByIdAndExhibition_Id(eventPeriodId, exhibitionId)
-                        .orElseThrow(() -> new NotFoundException(
-                                "Row " + excelRowNum + ": event period not found for exhibition: " + eventPeriodId));
-
-                CategoryEntity category = categoryRepository.findByExhibition_IdAndName(exhibitionId, categoryName)
-                        .orElseThrow(() -> new NotFoundException(
-                                "Row " + excelRowNum + ": category not found for exhibition: " + categoryName));
-
-                String description = nullable(cellValue(row, 6, formatter));
-                String participantNames = nullable(cellValue(row, 7, formatter));
-                String advisorNames = nullable(cellValue(row, 8, formatter));
-
-                ItemEntity item = new ItemEntity(null, exhibition, category, eventPeriod, title, description);
-                item.updateParticipantAndAdvisor(participantNames, advisorNames);
-                item = itemRepository.save(item);
-                createdItems++;
-
-                MediaAssetEntity thumbnailMedia = createMediaIfPresent(item, exhibition, cellValue(row, 9, formatter));
-                MediaAssetEntity posterMedia = createMediaIfPresent(item, exhibition, cellValue(row, 10, formatter));
-                MediaAssetEntity presentationMedia = createMediaIfPresent(item, exhibition, cellValue(row, 11, formatter));
-
-                if (thumbnailMedia != null) {
-                    thumbnailMedia = mediaAssetRepository.save(thumbnailMedia);
-                    createdMediaAssets++;
+                if (++populatedRows > MAX_ROWS) {
+                    throw new IllegalArgumentException("At most 1000 item rows are allowed");
                 }
-                if (posterMedia != null) {
-                    posterMedia = mediaAssetRepository.save(posterMedia);
-                    createdMediaAssets++;
+                int rowNumber = rowIndex + 1;
+                String categoryName = required(cellValue(row, 0, formatter), "category_name", rowNumber);
+                String title = required(cellValue(row, 2, formatter), "title", rowNumber);
+                if (title.length() > 200) {
+                    throw new IllegalArgumentException(
+                            "Row " + rowNumber + ": title must be at most 200 characters");
                 }
-                if (presentationMedia != null) {
-                    presentationMedia = mediaAssetRepository.save(presentationMedia);
-                    createdMediaAssets++;
-                }
+                CategoryEntity category = categories.findByExhibition_IdAndName(currentExhibitionId, categoryName)
+                        .orElseThrow(() -> new NotFoundException("Row " + rowNumber + ": category not found: " + categoryName));
+                ItemEntity item = new ItemEntity(null, exhibition, category, period, title, nullable(cellValue(row, 3, formatter)));
+                item.updateMetadata(category, period, title, nullable(cellValue(row, 3, formatter)),
+                        nullable(cellValue(row, 4, formatter)), nullable(cellValue(row, 5, formatter)),
+                        nullable(cellValue(row, 6, formatter)), parseAwarded(cellValue(row, 7, formatter), rowNumber));
+                item = items.save(item);
+                itemCount++;
 
-                item.updateMedia(thumbnailMedia, posterMedia, presentationMedia);
+                MediaAssetEntity thumbnail = createMedia(item, cellValue(row, 8, formatter), "thumbnail_file_name",
+                        rowNumber, "image", files, used);
+                MediaAssetEntity poster = createMedia(item, cellValue(row, 9, formatter), "poster_file_name",
+                        rowNumber, "image", files, used);
+                MediaAssetEntity video = createMedia(item, cellValue(row, 10, formatter), "presentation_video_file_name",
+                        rowNumber, "video", files, used);
+                if (thumbnail != null) mediaCount++;
+                if (poster != null) mediaCount++;
+                if (video != null) mediaCount++;
+                item.updateMedia(thumbnail, poster, video);
 
-                String classificationName = nullable(cellValue(row, 4, formatter));
+                String classificationName = nullable(cellValue(row, 1, formatter));
                 if (classificationName != null) {
-                    ItemClassificationEntity classification = classificationRepository.findByExhibition_IdAndName(
-                                    exhibitionId, classificationName)
-                            .orElseThrow(() -> new NotFoundException(
-                                    "Row " + excelRowNum + ": classification not found for exhibition: " + classificationName));
-                    itemClassificationMapRepository.save(new ItemClassificationMapEntity(null, item, classification));
-                    createdClassificationMappings++;
+                    ItemClassificationEntity classification = classifications.findByExhibition_IdAndName(
+                            currentExhibitionId, classificationName).orElseThrow(() -> new NotFoundException(
+                                    "Row " + rowNumber + ": classification not found: " + classificationName));
+                    mappings.save(new ItemClassificationMapEntity(null, item, classification));
+                    mappingCount++;
                 }
+            }
+            Set<String> unused = new HashSet<>(files.keySet());
+            unused.removeAll(used);
+            if (!unused.isEmpty()) {
+                throw new IllegalArgumentException("Unused mediaFiles: " + unused);
             }
         } catch (IOException ex) {
             throw new IllegalArgumentException("Failed to read excel file", ex);
         }
-
-        return new ItemBulkUploadResponse(createdItems, createdMediaAssets, createdClassificationMappings);
+        return new ItemBulkUploadResponse(itemCount, mediaCount, mappingCount);
     }
 
-    private MediaAssetEntity createMediaIfPresent(ItemEntity item, ExhibitionEntity exhibition, String objectKeyRaw) {
-        String objectKey = nullable(objectKeyRaw);
-        if (objectKey == null) {
+    /** 템플릿 시트와 숨은 메타데이터 및 헤더를 검증한다. */
+    private void validateWorkbook(Sheet sheet, Sheet options, DataFormatter formatter) {
+        if (sheet == null || options == null || options.getRow(0) == null || options.getRow(1) == null) {
+            throw new IllegalArgumentException("Invalid item bulk template");
+        }
+        Row header = sheet.getRow(0);
+        for (int i = 0; i < ItemBulkTemplateService.TEMPLATE_HEADERS.size(); i++) {
+            String expectedHeader = ItemBulkTemplateService.TEMPLATE_HEADERS.get(i);
+            if (!expectedHeader.equals(cellValue(header, i, formatter))) {
+                throw new IllegalArgumentException("Invalid template header: " + expectedHeader);
+            }
+        }
+        String[] metadataHeaders = {"exhibition_id", "event_period_id", "event_period_name"};
+        for (int i = 0; i < metadataHeaders.length; i++) {
+            if (!metadataHeaders[i].equals(cellValue(options.getRow(0), i, formatter))) {
+                throw new IllegalArgumentException("Invalid template metadata header: " + metadataHeaders[i]);
+            }
+        }
+    }
+
+    /** 미디어 참조를 검증하고 공통 미디어 서비스로 업로드한다. */
+    private MediaAssetEntity createMedia(ItemEntity item, String raw, String column, int row, String expectedType,
+            Map<String, MultipartFile> files, Set<String> used) {
+        String reference = nullable(raw);
+        if (reference == null) {
             return null;
         }
-
-        return new MediaAssetEntity(
-                null,
-                item,
-                exhibition,
-                objectKey,
-                inferMediaType(objectKey),
-                0L
-        );
+        String name = fileName(reference);
+        MultipartFile file = files.get(name);
+        if (file == null) {
+            throw new IllegalArgumentException(
+                    "Row " + row + ": " + column + " has no matching mediaFiles file: " + name);
+        }
+        used.add(name);
+        try {
+            return mediaService.uploadForItem(item, file, expectedType);
+        } catch (IllegalArgumentException ex) {
+            throw new IllegalArgumentException(
+                    "Row " + row + ": invalid media type or signature for " + column + ": " + name
+                            + " (" + ex.getMessage() + ")",
+                    ex);
+        }
     }
 
-    private String inferMediaType(String objectKey) {
-        String lower = objectKey.toLowerCase();
-        if (lower.endsWith(".png")) {
-            return "image/png";
+    /** multipart 미디어를 파일명으로 색인한다. */
+    private Map<String, MultipartFile> indexMediaFiles(List<MultipartFile> mediaFiles) {
+        Map<String, MultipartFile> result = new HashMap<>();
+        if (mediaFiles == null) {
+            return result;
         }
-        if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) {
-            return "image/jpeg";
+        for (MultipartFile file : mediaFiles) {
+            if (file == null || file.isEmpty()) throw new IllegalArgumentException("mediaFiles must not contain empty files");
+            String name = fileName(file.getOriginalFilename());
+            if (name.isBlank()) throw new IllegalArgumentException("Every media file must have a file name");
+            if (result.putIfAbsent(name, file) != null) throw new IllegalArgumentException("Duplicate media file name: " + name);
         }
-        if (lower.endsWith(".gif")) {
-            return "image/gif";
-        }
-        if (lower.endsWith(".webp")) {
-            return "image/webp";
-        }
-        if (lower.endsWith(".mp4")) {
-            return "video/mp4";
-        }
-        if (lower.endsWith(".webm")) {
-            return "video/webm";
-        }
-        if (lower.endsWith(".mov")) {
-            return "video/quicktime";
-        }
-        return "application/octet-stream";
+        return result;
     }
 
+    /** 경로 입력에서 안전한 파일명만 추출한다. */
+    private String fileName(String raw) {
+        if (raw == null) return "";
+        String value = raw.trim().replace('\\', '/'); return value.substring(value.lastIndexOf('/') + 1);
+    }
+
+    /** Y/N 수상 여부를 읽는다. */
+    private boolean parseAwarded(String raw, int row) {
+        String value = nullable(raw); if (value == null || "N".equalsIgnoreCase(value)) return false;
+        if ("Y".equalsIgnoreCase(value)) return true;
+        throw new IllegalArgumentException("Row " + row + ": awarded_y_n must be Y or N");
+    }
+
+    /** 사용자 입력 행이 비어 있는지 확인한다. */
     private boolean isDataRowEmpty(Row row, DataFormatter formatter) {
-        if (row == null) {
-            return true;
-        }
-
-        for (int col = 3; col <= 11; col++) {
-            if (!cellValue(row, col, formatter).isBlank()) {
+        if (row == null) return true;
+        for (int i = 0; i < ItemBulkTemplateService.TEMPLATE_HEADERS.size(); i++) {
+            if (!cellValue(row, i, formatter).isBlank()) {
                 return false;
             }
         }
         return true;
     }
 
-    private String required(String value, String columnName, int excelRowNum) {
-        String normalized = nullable(value);
-        if (normalized == null) {
-            throw new IllegalArgumentException("Row " + excelRowNum + ": " + columnName + " is required");
-        }
+    /** 필수 셀 값을 읽는다. */
+    private String required(String value, String column, int row) {
+        String normalized = nullable(value); if (normalized == null) throw new IllegalArgumentException("Row " + row + ": " + column + " is required");
         return normalized;
     }
 
-    private UUID parseUuid(String value, String columnName, int excelRowNum) {
-        String normalized = required(value, columnName, excelRowNum);
-        try {
-            return UUID.fromString(normalized);
-        } catch (IllegalArgumentException ex) {
-            throw new IllegalArgumentException("Row " + excelRowNum + ": invalid UUID in " + columnName + ": " + normalized);
-        }
+    /** UUID 셀 값을 읽는다. */
+    private UUID parseUuid(String value, String column, int row) {
+        try { return UUID.fromString(required(value, column, row)); }
+        catch (IllegalArgumentException ex) { throw new IllegalArgumentException("Row " + row + ": invalid UUID in " + column); }
     }
 
-    private String nullable(String value) {
-        if (value == null) {
-            return null;
-        }
-        String trimmed = value.trim();
-        return trimmed.isEmpty() ? null : trimmed;
+    /** 빈 문자열을 null로 정규화한다. */
+    private String nullable(String value) { if (value == null) return null; String v = value.trim(); return v.isEmpty() ? null : v; }
+
+    /** 셀 표시값을 읽는다. */
+    private String cellValue(Row row, int index, DataFormatter formatter) {
+        return row == null || row.getCell(index) == null ? "" : formatter.formatCellValue(row.getCell(index));
     }
 
-    private String cellValue(Row row, int columnIndex, DataFormatter formatter) {
-        if (row == null || row.getCell(columnIndex) == null) {
-            return "";
-        }
-        return formatter.formatCellValue(row.getCell(columnIndex));
-    }
-
-    private void validateAdmin(AuthenticatedUser currentUser) {
-        if (currentUser.role() != UserType.ADMIN) {
-            throw new ForbiddenException("Admin role is required");
-        }
-    }
-
+    /** XLSX 파일 존재 여부를 검증한다. */
     private void validateFile(MultipartFile file) {
         if (file == null || file.isEmpty()) {
             throw new IllegalArgumentException("Excel file is required");
+        }
+        if (file.getSize() > MAX_EXCEL_BYTES) {
+            throw new IllegalArgumentException("Excel file must be at most 10 MiB");
         }
     }
 }

@@ -19,6 +19,8 @@ public interface ItemLikeRepository extends JpaRepository<ItemLikeEntity, UUID> 
 
     void deleteByItem_IdAndUser_Id(UUID itemId, UUID userId);
 
+    void deleteAllByItem_Id(UUID itemId);
+
     @Query("""
             select il.item.id as itemId, count(il) as likeCount
             from ItemLikeEntity il
