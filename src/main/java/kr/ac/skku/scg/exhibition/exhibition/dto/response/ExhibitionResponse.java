@@ -18,8 +18,11 @@ public record ExhibitionResponse(
         String popupUrl,
         String introTitle,
         String introDescription,
-        UUID introVideoMediaId
+        UUID introVideoMediaId,
+        boolean showAwards,
+        boolean defaultToLatestEventPeriod
 ) {
+    /** 전시 메타데이터와 프론트엔드 표시 설정을 응답으로 변환한다. */
     public static ExhibitionResponse from(ExhibitionEntity exhibition) {
         return new ExhibitionResponse(
                 exhibition.getId(),
@@ -36,7 +39,9 @@ public record ExhibitionResponse(
                 exhibition.getPopupUrl(),
                 exhibition.getIntroTitle(),
                 exhibition.getIntroDescription(),
-                exhibition.getIntroVideoMedia() == null ? null : exhibition.getIntroVideoMedia().getId()
+                exhibition.getIntroVideoMedia() == null ? null : exhibition.getIntroVideoMedia().getId(),
+                exhibition.isShowAwards(),
+                exhibition.isDefaultToLatestEventPeriod()
         );
     }
 }
