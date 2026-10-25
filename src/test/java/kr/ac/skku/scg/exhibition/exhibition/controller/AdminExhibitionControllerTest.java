@@ -1,5 +1,6 @@
 package kr.ac.skku.scg.exhibition.exhibition.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -28,6 +29,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import kr.ac.skku.scg.exhibition.exhibition.dto.request.AdminExhibitionCreateRequest;
+import kr.ac.skku.scg.exhibition.exhibition.dto.request.AdminExhibitionUpdateRequest;
 import kr.ac.skku.scg.exhibition.exhibition.dto.response.ExhibitionResponse;
 import kr.ac.skku.scg.exhibition.exhibition.service.AdminExhibitionService;
 import kr.ac.skku.scg.exhibition.global.config.SecurityConfig;
@@ -38,6 +40,9 @@ import kr.ac.skku.scg.exhibition.user.domain.UserEntity;
 import kr.ac.skku.scg.exhibition.user.domain.UserType;
 import kr.ac.skku.scg.exhibition.user.repository.UserRepository;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.restdocs.test.autoconfigure.AutoConfigureRestDocs;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -77,6 +82,8 @@ class AdminExhibitionControllerTest {
                         .requestAttr("auth.userId", userId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.items[0].id").value(exhibitionId.toString()))
+                .andExpect(jsonPath("$.items[0].showAwards").value(false))
+                .andExpect(jsonPath("$.items[0].defaultToLatestEventPeriod").value(true))
                 .andExpect(jsonPath("$.total").value(1))
                 .andDo(document("admin-exhibitions-list",
                         authorizationHeader(),
@@ -97,6 +104,8 @@ class AdminExhibitionControllerTest {
                                 fieldWithPath("items[].introTitle").description("인트로 제목").optional(),
                                 fieldWithPath("items[].introDescription").description("인트로 설명").optional(),
                                 fieldWithPath("items[].introVideoMediaId").description("인트로 영상 미디어 ID").optional(),
+                                fieldWithPath("items[].showAwards").description("수상작 탭 및 수상 아이콘 표시 여부 (기본 true)"),
+                                fieldWithPath("items[].defaultToLatestEventPeriod").description("최신 회차 기본 선택 여부 (기본 false, 프론트엔드 전용)"),
                                 fieldWithPath("page").description("페이지 번호"),
                                 fieldWithPath("pageSize").description("페이지 크기"),
                                 fieldWithPath("total").description("전체 개수")
@@ -177,11 +186,16 @@ class AdminExhibitionControllerTest {
                                 fieldWithPath("popupEnabled").description("팝업 활성화 여부"),
                                 fieldWithPath("popupUrl").description("팝업 이동 URL (nullable)").optional(),
                                 fieldWithPath("introTitle").description("인트로 제목 (nullable, 최대 200자)").optional(),
-                                fieldWithPath("introDescription").description("인트로 설명 (nullable)").optional()
+                                fieldWithPath("introDescription").description("인트로 설명 (nullable)").optional(),
+                                fieldWithPath("showAwards").description("수상작 탭 및 수상 아이콘 표시 여부 (생략/null 시 true)").optional(),
+                                fieldWithPath("defaultToLatestEventPeriod").description("최신 회차 기본 선택 여부 (생략/null 시 false)").optional()
                         ),
                         responseFields(exhibitionResponseFields())));
 
-        verify(adminExhibitionService).create(any(), any(), any(), any(), any(), any());
+        ArgumentCaptor<AdminExhibitionCreateRequest> captured = ArgumentCaptor.forClass(AdminExhibitionCreateRequest.class);
+        verify(adminExhibitionService).create(captured.capture(), any(), any(), any(), any(), any());
+        assertThat(captured.getValue().showAwards()).isFalse();
+        assertThat(captured.getValue().defaultToLatestEventPeriod()).isTrue();
     }
 
     @Test
@@ -204,6 +218,60 @@ class AdminExhibitionControllerTest {
                         pathParameters(parameterWithName("exhibitionId").description("수정할 전시 ID")),
                         exhibitionRequestFields(),
                         responseFields(exhibitionResponseFields())));
+
+        ArgumentCaptor<AdminExhibitionUpdateRequest> captured = ArgumentCaptor.forClass(AdminExhibitionUpdateRequest.class);
+        verify(adminExhibitionService).update(any(), captured.capture(), any());
+        assertThat(captured.getValue().showAwards()).isFalse();
+        assertThat(captured.getValue().defaultToLatestEventPeriod()).isTrue();
+    }
+
+    /** 생성 요청에서 표시 설정을 생략하거나 null로 보내면 기본값을 적용한다. */
+    @ParameterizedTest
+    @ValueSource(strings = {"", ",\"showAwards\":null,\"defaultToLatestEventPeriod\":null"})
+    void create_defaultsOmittedDisplaySettings(String displaySettings) throws Exception {
+        UUID userId = UUID.randomUUID();
+        when(userRepository.findById(userId)).thenReturn(Optional.of(admin(userId)));
+        when(adminExhibitionService.create(any(), any(), any(), any(), any(), any()))
+                .thenReturn(response(UUID.randomUUID()));
+        MockMultipartFile request = new MockMultipartFile(
+                "request", "", MediaType.APPLICATION_JSON_VALUE,
+                """
+                {"slug":"new-exhibition","defaultDomain":"new.example.com","name":"전시",
+                 "bannerEnabled":false,"popupEnabled":false%s}
+                """.formatted(displaySettings).getBytes(java.nio.charset.StandardCharsets.UTF_8));
+
+        mockMvc.perform(multipart("/admin/exhibitions").file(request)
+                        .with(user(userId.toString())).requestAttr("auth.userId", userId))
+                .andExpect(status().isCreated());
+
+        ArgumentCaptor<AdminExhibitionCreateRequest> captured = ArgumentCaptor.forClass(AdminExhibitionCreateRequest.class);
+        verify(adminExhibitionService).create(captured.capture(), any(), any(), any(), any(), any());
+        assertThat(captured.getValue().showAwards()).isTrue();
+        assertThat(captured.getValue().defaultToLatestEventPeriod()).isFalse();
+    }
+
+    /** 수정 요청에서 표시 설정을 생략하거나 null로 보내면 기존 값을 유지하도록 전달한다. */
+    @ParameterizedTest
+    @ValueSource(strings = {"", ",\"showAwards\":null,\"defaultToLatestEventPeriod\":null"})
+    void update_keepsOmittedDisplaySettingsUnspecified(String displaySettings) throws Exception {
+        UUID userId = UUID.randomUUID();
+        UUID exhibitionId = UUID.randomUUID();
+        when(userRepository.findById(userId)).thenReturn(Optional.of(admin(userId)));
+        when(adminExhibitionService.update(any(), any(), any())).thenReturn(response(exhibitionId));
+
+        mockMvc.perform(put("/admin/exhibitions/{exhibitionId}", exhibitionId)
+                        .with(user(userId.toString())).requestAttr("auth.userId", userId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"defaultDomain":"new.example.com","name":"전시",
+                                 "bannerEnabled":false,"popupEnabled":false%s}
+                                """.formatted(displaySettings)))
+                .andExpect(status().isOk());
+
+        ArgumentCaptor<AdminExhibitionUpdateRequest> captured = ArgumentCaptor.forClass(AdminExhibitionUpdateRequest.class);
+        verify(adminExhibitionService).update(any(), captured.capture(), any());
+        assertThat(captured.getValue().showAwards()).isNull();
+        assertThat(captured.getValue().defaultToLatestEventPeriod()).isNull();
     }
 
     @Test
@@ -234,7 +302,9 @@ class AdminExhibitionControllerTest {
                   "popupEnabled": true,
                   "popupUrl": null,
                   "introTitle": null,
-                  "introDescription": null
+                  "introDescription": null,
+                  "showAwards": false,
+                  "defaultToLatestEventPeriod": true
                 }
                 """;
     }
@@ -254,7 +324,9 @@ class AdminExhibitionControllerTest {
                   "popupUrl": "https://example.com/notice",
                   "introTitle": "인트로",
                   "introDescription": "전시 소개",
-                  "introVideoMediaId": null
+                  "introVideoMediaId": null,
+                  "showAwards": false,
+                  "defaultToLatestEventPeriod": true
                 }
                 """;
     }
@@ -277,7 +349,9 @@ class AdminExhibitionControllerTest {
                 fieldWithPath("popupUrl").description("팝업 이동 URL (nullable)").optional(),
                 fieldWithPath("introTitle").description("인트로 제목 (nullable, 최대 200자)").optional(),
                 fieldWithPath("introDescription").description("인트로 설명 (nullable)").optional(),
-                fieldWithPath("introVideoMediaId").description("인트로 영상 미디어 ID (nullable)").optional()
+                fieldWithPath("introVideoMediaId").description("인트로 영상 미디어 ID (nullable)").optional(),
+                fieldWithPath("showAwards").description("수상작 탭 및 수상 아이콘 표시 여부 (생략/null 시 기존 값 유지)").optional(),
+                fieldWithPath("defaultToLatestEventPeriod").description("최신 회차 기본 선택 여부 (생략/null 시 기존 값 유지)").optional()
         );
     }
 
@@ -297,14 +371,16 @@ class AdminExhibitionControllerTest {
                 fieldWithPath("popupUrl").description("팝업 이동 URL (nullable)").optional(),
                 fieldWithPath("introTitle").description("인트로 제목 (nullable)").optional(),
                 fieldWithPath("introDescription").description("인트로 설명 (nullable)").optional(),
-                fieldWithPath("introVideoMediaId").description("인트로 영상 미디어 ID (nullable)").optional()
+                fieldWithPath("introVideoMediaId").description("인트로 영상 미디어 ID (nullable)").optional(),
+                fieldWithPath("showAwards").description("수상작 탭 및 수상 아이콘 표시 여부 (기본 true)"),
+                fieldWithPath("defaultToLatestEventPeriod").description("최신 회차 기본 선택 여부 (기본 false, 프론트엔드 전용)")
         };
     }
 
     private ExhibitionResponse response(UUID id) {
         return new ExhibitionResponse(
                 id, "graduation-2026", "graduation.example.com", null, "졸업 전시", "설명",
-                null, false, null, false, null, null, null, null, null);
+                null, false, null, false, null, null, null, null, null, false, true);
     }
 
     private UserEntity admin(UUID id) {

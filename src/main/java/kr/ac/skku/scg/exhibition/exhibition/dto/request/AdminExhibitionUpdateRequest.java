@@ -24,6 +24,8 @@ public record AdminExhibitionUpdateRequest(
         String popupUrl,
         @Size(max = 200) String introTitle,
         String introDescription,
-        UUID introVideoMediaId
+        UUID introVideoMediaId,
+        Boolean showAwards,
+        Boolean defaultToLatestEventPeriod
 ) {
 }

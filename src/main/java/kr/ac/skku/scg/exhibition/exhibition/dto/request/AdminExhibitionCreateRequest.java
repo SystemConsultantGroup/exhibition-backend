@@ -26,6 +26,13 @@ public record AdminExhibitionCreateRequest(
         boolean popupEnabled,
         String popupUrl,
         @Size(max = 200) String introTitle,
-        String introDescription
+        String introDescription,
+        Boolean showAwards,
+        Boolean defaultToLatestEventPeriod
 ) {
+    /** 생략되거나 null인 표시 설정에는 신규 전시의 기본값을 적용한다. */
+    public AdminExhibitionCreateRequest {
+        showAwards = showAwards == null ? true : showAwards;
+        defaultToLatestEventPeriod = defaultToLatestEventPeriod == null ? false : defaultToLatestEventPeriod;
+    }
 }

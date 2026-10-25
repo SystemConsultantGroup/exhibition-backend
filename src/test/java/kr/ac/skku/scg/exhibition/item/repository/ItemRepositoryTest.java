@@ -18,6 +18,8 @@ import kr.ac.skku.scg.exhibition.item.domain.ItemEntity;
 import kr.ac.skku.scg.exhibition.item.dto.request.ItemListRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.data.domain.Page;
@@ -75,7 +77,8 @@ class ItemRepositoryTest {
         itemRepository.save(itemA);
 
         ItemEntity itemB = new ItemEntity(null, exhibition, category, period2026_2, "Beta", "desc-b");
-        itemB.updateParticipantAndAdvisor("이몽룡", "lee@example.com", "박교수");
+        itemB.updateMetadata(category, period2026_2, "Beta", "desc-b",
+                "이몽룡", "lee@example.com", "박교수", true);
         itemRepository.save(itemB);
 
         ItemClassificationEntity classification = classificationRepository.save(
@@ -85,6 +88,32 @@ class ItemRepositoryTest {
         exhibitionId = exhibition.getId();
         eventPeriodId = period2026_2.getId();
         classificationId = classification.getId();
+    }
+
+    /** 전시 표시 설정은 전체 작품, 수상 여부 및 명시적인 회차 필터를 변경하지 않는다. */
+    @ParameterizedTest
+    @CsvSource({"true,false", "false,true", "true,true", "false,false"})
+    void search_ignoresExhibitionDisplaySettings(boolean showAwards, boolean defaultToLatestEventPeriod) {
+        ExhibitionEntity exhibition = exhibitionRepository.findById(exhibitionId).orElseThrow();
+        exhibition.updateDisplaySettings(showAwards, defaultToLatestEventPeriod);
+        exhibitionRepository.flush();
+        ItemListRequest request = new ItemListRequest();
+        request.setExhibitionId(exhibitionId);
+
+        Page<ItemEntity> all = itemRepository.search(request, PageRequest.of(0, 10));
+        assertThat(all.getTotalElements()).isEqualTo(2);
+        assertThat(all.getContent()).extracting(ItemEntity::getTitle).containsExactlyInAnyOrder("Alpha", "Beta");
+        assertThat(all.getContent()).filteredOn(ItemEntity::isAwarded)
+                .extracting(ItemEntity::getTitle).containsExactly("Beta");
+
+        request.setAwarded(true);
+        assertThat(itemRepository.search(request, PageRequest.of(0, 10)).getContent())
+                .extracting(ItemEntity::getTitle).containsExactly("Beta");
+
+        request.setAwarded(null);
+        request.setEventPeriodId(eventPeriodId);
+        assertThat(itemRepository.search(request, PageRequest.of(0, 10)).getContent())
+                .extracting(ItemEntity::getTitle).containsExactly("Beta");
     }
 
     @Test
