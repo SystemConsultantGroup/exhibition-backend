@@ -58,6 +58,13 @@ public class ExhibitionEntity extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String popupUrl;
 
+    // 프론트엔드 표시 설정이며 작품 조회 데이터에는 영향을 주지 않는다.
+    @Column(name = "show_awards", nullable = false)
+    private boolean showAwards = true;
+
+    @Column(name = "default_to_latest_event_period", nullable = false)
+    private boolean defaultToLatestEventPeriod = false;
+
     @Column(length = 200)
     private String introTitle;
 
@@ -167,6 +174,22 @@ public class ExhibitionEntity extends BaseEntity {
 
     public String getPopupUrl() {
         return popupUrl;
+    }
+
+    /** 수상작 탭과 수상 아이콘 표시 여부를 반환한다. */
+    public boolean isShowAwards() {
+        return showAwards;
+    }
+
+    /** 프론트엔드의 초기 회차 선택을 최신 회차로 할지 반환한다. */
+    public boolean isDefaultToLatestEventPeriod() {
+        return defaultToLatestEventPeriod;
+    }
+
+    /** 작품 조회 동작을 바꾸지 않고 프론트엔드 표시 설정을 수정한다. */
+    public void updateDisplaySettings(boolean showAwards, boolean defaultToLatestEventPeriod) {
+        this.showAwards = showAwards;
+        this.defaultToLatestEventPeriod = defaultToLatestEventPeriod;
     }
 
     public String getIntroTitle() {

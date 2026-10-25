@@ -27,6 +27,8 @@ import kr.ac.skku.scg.exhibition.user.repository.UserExhibitionAdminRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
@@ -113,7 +115,24 @@ class AdminExhibitionServiceTest {
         assertThat(response.slug()).isEqualTo("graduation-2026");
         assertThat(response.defaultDomain()).isEqualTo("graduation.example.com");
         assertThat(response.customDomain()).isEqualTo("custom.example.com");
+        assertThat(response.showAwards()).isTrue();
+        assertThat(response.defaultToLatestEventPeriod()).isFalse();
         verify(adminAuthorizationService).requireSuperAdmin(admin);
+        verify(exhibitionDomainCacheService).evictAll();
+    }
+
+    /** 생성 시 명시한 표시 설정의 모든 조합을 저장하고 응답한다. */
+    @ParameterizedTest
+    @CsvSource({"true,false", "false,true", "true,true", "false,false"})
+    void create_savesDisplaySettings(boolean showAwards, boolean defaultToLatestEventPeriod) {
+        when(exhibitionRepository.saveAndFlush(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        ExhibitionResponse response = adminExhibitionService.create(
+                request(showAwards, defaultToLatestEventPeriod), null, null, null, null, user(UserType.ADMIN));
+
+        assertThat(response.showAwards()).isEqualTo(showAwards);
+        assertThat(response.defaultToLatestEventPeriod()).isEqualTo(defaultToLatestEventPeriod);
+        verify(exhibitionRepository).flush();
         verify(exhibitionDomainCacheService).evictAll();
     }
 
@@ -149,12 +168,76 @@ class AdminExhibitionServiceTest {
 
         ExhibitionResponse response = adminExhibitionService.update(exhibitionId,
                 new AdminExhibitionUpdateRequest("NEW.EXAMPLE.COM", "", "새 이름", "설명",
-                        null, true, null, true, null, "https://example.com", "인트로", "소개", null), subAdmin);
+                        null, true, null, true, null, "https://example.com", "인트로", "소개", null, false, true), subAdmin);
 
         verify(adminAuthorizationService).requireExhibitionAdmin(subAdmin, exhibitionId);
         assertThat(response.defaultDomain()).isEqualTo("new.example.com");
         assertThat(response.customDomain()).isNull();
         assertThat(response.name()).isEqualTo("새 이름");
+        assertThat(exhibition.isShowAwards()).isFalse();
+        assertThat(exhibition.isDefaultToLatestEventPeriod()).isTrue();
+        assertThat(response.showAwards()).isFalse();
+        assertThat(response.defaultToLatestEventPeriod()).isTrue();
+    }
+
+    /** 수정 요청에서 명시한 true/false를 적용하여 설정을 다시 켜거나 끌 수 있다. */
+    @ParameterizedTest
+    @CsvSource({"true,false", "false,true", "true,true", "false,false"})
+    void update_changesDisplaySettings(boolean showAwards, boolean defaultToLatestEventPeriod) {
+        UUID exhibitionId = UUID.randomUUID();
+        ExhibitionEntity exhibition = new ExhibitionEntity(exhibitionId, "slug", "전시");
+        exhibition.updateDisplaySettings(!showAwards, !defaultToLatestEventPeriod);
+        when(exhibitionRepository.findById(exhibitionId)).thenReturn(Optional.of(exhibition));
+        AdminExhibitionUpdateRequest request = new AdminExhibitionUpdateRequest(
+                "example.com", null, "전시", null, null, false, null, false, null, null, null, null, null,
+                showAwards, defaultToLatestEventPeriod);
+
+        ExhibitionResponse response = adminExhibitionService.update(exhibitionId, request, user(UserType.ADMIN));
+
+        assertThat(exhibition.isShowAwards()).isEqualTo(showAwards);
+        assertThat(exhibition.isDefaultToLatestEventPeriod()).isEqualTo(defaultToLatestEventPeriod);
+        assertThat(response.showAwards()).isEqualTo(showAwards);
+        assertThat(response.defaultToLatestEventPeriod()).isEqualTo(defaultToLatestEventPeriod);
+        verify(exhibitionRepository).flush();
+        verify(exhibitionDomainCacheService).evictAll();
+    }
+
+    /** 구형 클라이언트의 수정 요청은 이미 설정한 표시 정책을 초기화하지 않는다. */
+    @Test
+    void update_preservesOmittedDisplaySettings() {
+        UUID exhibitionId = UUID.randomUUID();
+        ExhibitionEntity exhibition = new ExhibitionEntity(exhibitionId, "slug", "전시");
+        exhibition.updateDisplaySettings(false, true);
+        when(exhibitionRepository.findById(exhibitionId)).thenReturn(Optional.of(exhibition));
+        AdminExhibitionUpdateRequest request = new AdminExhibitionUpdateRequest(
+                "example.com", null, "전시", null, null, false, null, false, null, null, null, null, null,
+                null, null);
+
+        ExhibitionResponse response = adminExhibitionService.update(exhibitionId, request, user(UserType.ADMIN));
+
+        assertThat(exhibition.isShowAwards()).isFalse();
+        assertThat(exhibition.isDefaultToLatestEventPeriod()).isTrue();
+        assertThat(response.showAwards()).isFalse();
+        assertThat(response.defaultToLatestEventPeriod()).isTrue();
+    }
+
+    /** 두 표시 설정은 독립적으로 변경하며 누락된 설정은 유지한다. */
+    @ParameterizedTest
+    @CsvSource({"true,", ",false"})
+    void update_changesOnlySpecifiedDisplaySetting(Boolean showAwards, Boolean defaultToLatestEventPeriod) {
+        UUID exhibitionId = UUID.randomUUID();
+        ExhibitionEntity exhibition = new ExhibitionEntity(exhibitionId, "slug", "전시");
+        exhibition.updateDisplaySettings(false, true);
+        when(exhibitionRepository.findById(exhibitionId)).thenReturn(Optional.of(exhibition));
+        AdminExhibitionUpdateRequest request = new AdminExhibitionUpdateRequest(
+                "example.com", null, "전시", null, null, false, null, false, null, null, null, null, null,
+                showAwards, defaultToLatestEventPeriod);
+
+        ExhibitionResponse response = adminExhibitionService.update(exhibitionId, request, user(UserType.ADMIN));
+
+        assertThat(response.showAwards()).isEqualTo(showAwards != null ? showAwards : false);
+        assertThat(response.defaultToLatestEventPeriod())
+                .isEqualTo(defaultToLatestEventPeriod != null ? defaultToLatestEventPeriod : true);
     }
 
     @Test
@@ -184,7 +267,13 @@ class AdminExhibitionServiceTest {
         verifyNoInteractions(exhibitionRepository);
     }
 
+    /** 생략된 표시 설정으로 생성 요청을 만든다. */
     private AdminExhibitionCreateRequest request() {
+        return request(null, null);
+    }
+
+    /** 지정한 표시 설정으로 생성 요청을 만든다. */
+    private AdminExhibitionCreateRequest request(Boolean showAwards, Boolean defaultToLatestEventPeriod) {
         return new AdminExhibitionCreateRequest(
                 "graduation-2026",
                 "Graduation.Example.com",
@@ -195,7 +284,9 @@ class AdminExhibitionServiceTest {
                 true,
                 "https://example.com",
                 "인트로",
-                "소개"
+                "소개",
+                showAwards,
+                defaultToLatestEventPeriod
         );
     }
 

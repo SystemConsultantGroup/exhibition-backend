@@ -109,6 +109,7 @@ public class AdminExhibitionService {
             exhibition.updateMetadata(defaultDomain, customDomain, name, request.description(),
                     logo, request.bannerEnabled(), banner, request.popupEnabled(), popupImage, request.popupUrl(),
                     request.introTitle(), request.introDescription(), introVideo);
+            exhibition.updateDisplaySettings(request.showAwards(), request.defaultToLatestEventPeriod());
             exhibitionRepository.flush();
             evictCacheAfterCommit();
             return ExhibitionResponse.from(exhibition);
@@ -148,6 +149,10 @@ public class AdminExhibitionService {
                     findMedia(request.bannerMediaId(), exhibitionId), request.popupEnabled(),
                     findMedia(request.popupImageMediaId(), exhibitionId), request.popupUrl(),
                     request.introTitle(), request.introDescription(), findMedia(request.introVideoMediaId(), exhibitionId));
+            exhibition.updateDisplaySettings(
+                    request.showAwards() == null ? exhibition.isShowAwards() : request.showAwards(),
+                    request.defaultToLatestEventPeriod() == null
+                            ? exhibition.isDefaultToLatestEventPeriod() : request.defaultToLatestEventPeriod());
             exhibitionRepository.flush();
             evictCacheAfterCommit();
             return ExhibitionResponse.from(exhibition);

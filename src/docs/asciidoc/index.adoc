@@ -77,6 +77,18 @@ include::{snippets}/auth-register/http-response.adoc[]
 
 == 전시(Exhibition)
 
+=== 프론트엔드 표시 설정
+
+전시 조회 응답에는 아래 테넌트별 설정이 포함됩니다.
+두 설정은 프론트엔드에서만 적용하며, 백엔드의 작품 응답 데이터나 필터링·정렬 동작은 변경하지 않습니다.
+
+* `showAwards`: 수상작 탭과 수상 아이콘 표시 여부입니다. 기본값은 `true`입니다.
+* `defaultToLatestEventPeriod`: 초기 조회에서 최신 회차를 기본 선택할지 여부입니다. 기본값은 `false`입니다.
+  최신 회차는 `createdAt` 기준이며, 프론트엔드가 회차를 선택하여 기존 `eventPeriodId` 필터로 요청합니다.
+
+관리자 전시 생성 요청에서 설정을 생략하거나 `null`로 전달하면 기본값을 적용합니다.
+수정 요청에서 설정을 생략하거나 `null`로 전달하면 기존 값을 유지합니다.
+
 === 전시 목록 조회
 ==== 요청 예시
 include::{snippets}/exhibitions-list/http-request.adoc[]

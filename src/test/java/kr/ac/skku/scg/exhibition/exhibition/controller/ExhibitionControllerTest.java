@@ -63,13 +63,17 @@ class ExhibitionControllerTest {
                 null,
                 null,
                 null,
-                null
+                null,
+                false,
+                true
         ));
 
         mockMvc.perform(get("/exhibitions/{id}", id)
                         .requestAttr(CurrentExhibitionArgumentResolver.REQUEST_ATTR_EXHIBITION, currentExhibition(id)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(id.toString()))
+                .andExpect(jsonPath("$.showAwards").value(false))
+                .andExpect(jsonPath("$.defaultToLatestEventPeriod").value(true))
                 .andDo(document("exhibitions-get",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
@@ -91,7 +95,9 @@ class ExhibitionControllerTest {
                                 fieldWithPath("popupUrl").description("팝업 링크 URL").optional(),
                                 fieldWithPath("introTitle").description("인트로 제목").optional(),
                                 fieldWithPath("introDescription").description("인트로 설명").optional(),
-                                fieldWithPath("introVideoMediaId").description("인트로 비디오 미디어 ID").optional()
+                                fieldWithPath("introVideoMediaId").description("인트로 비디오 미디어 ID").optional(),
+                                fieldWithPath("showAwards").description("수상작 탭 및 수상 아이콘 표시 여부 (기본 true)"),
+                                fieldWithPath("defaultToLatestEventPeriod").description("최신 회차 기본 선택 여부 (기본 false, 프론트엔드 전용)")
                         )));
     }
 
@@ -114,7 +120,9 @@ class ExhibitionControllerTest {
                         null,
                         null,
                         null,
-                        null
+                        null,
+                        true,
+                        false
                 )
         ));
 
@@ -122,6 +130,8 @@ class ExhibitionControllerTest {
                         .requestAttr(CurrentExhibitionArgumentResolver.REQUEST_ATTR_EXHIBITION, currentExhibition(exhibitionId)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.items[0].name").value("소프트웨어융합대학 졸업작품 전시회"))
+                .andExpect(jsonPath("$.items[0].showAwards").value(true))
+                .andExpect(jsonPath("$.items[0].defaultToLatestEventPeriod").value(false))
                 .andDo(document("exhibitions-list",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
@@ -146,6 +156,8 @@ class ExhibitionControllerTest {
                                 fieldWithPath("items[].introTitle").description("인트로 제목").optional(),
                                 fieldWithPath("items[].introDescription").description("인트로 설명").optional(),
                                 fieldWithPath("items[].introVideoMediaId").description("인트로 비디오 미디어 ID").optional(),
+                                fieldWithPath("items[].showAwards").description("수상작 탭 및 수상 아이콘 표시 여부 (기본 true)"),
+                                fieldWithPath("items[].defaultToLatestEventPeriod").description("최신 회차 기본 선택 여부 (기본 false, 프론트엔드 전용)"),
                                 fieldWithPath("page").description("페이지 번호"),
                                 fieldWithPath("pageSize").description("페이지 크기"),
                                 fieldWithPath("total").description("전체 건수")
