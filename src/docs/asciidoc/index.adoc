@@ -260,9 +260,10 @@ MinIO 전송만 제한된 공유 작업자(`APP_UPLOAD_WORKERS`, 기본 4)에서
 엔티티/DB 작업은 호출 트랜잭션 스레드에 남고 실패/롤백 시 전송 객체를 정리합니다.
 `X-Upload-Id` 요청 헤더는 선택 사항이며 응답에서 반환합니다.
 
-매니저의 `BULK_UPLOAD_API_BASE_URL`로 공개 API 주소를 지정하면 브라우저에서 직접 업로드할 수
-있습니다. 이때 API CORS의 관리자 호스트와 게이트웨이 업로드 제한도 설정해야 합니다.
-미설정 매니저는 기존 프록시를 사용합니다. 상세 운영 설정은 README를 참고하세요.
+업로드는 반드시 브라우저 → 매니저 사이트 → 백엔드 경로를 따릅니다.
+브라우저는 매니저의 동일 출처 `/api/backend/admin/items/bulk/upload`로만 요청하고,
+매니저는 서버 전용 `API_BASE_URL`로 본문을 그대로 스트리밍합니다.
+공개 업로드 URL이나 백엔드 직접 전송 경로는 제공하지 않습니다. 상세 운영 설정은 README를 참고하세요.
 
 ==== Multipart 파트
 include::{snippets}/admin-items-bulk-upload/request-parts.adoc[]

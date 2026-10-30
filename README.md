@@ -86,19 +86,20 @@ export MINIO_BUCKET=exhibition
 | `APP_UPLOAD_MAX_FILE_SIZE` | `500MB` | 파일 한 개의 multipart 제한 |
 | `APP_UPLOAD_MAX_REQUEST_SIZE` | `10GB` | multipart 전체 요청 제한 |
 | `APP_UPLOAD_MAX_PART_COUNT` | `3001` | 최대 파트 수 (엑셀 1 + 미디어 최대 3000) |
-| `APP_CORS_ADMIN_ALLOWED_HOSTS` | `manage.exhibition.scg.sh` | 브라우저 직접 업로드를 허용할 매니저 호스트 목록 |
+| `APP_CORS_ADMIN_ALLOWED_HOSTS` | `manage.exhibition.scg.sh` | 기존 관리자 CORS 호스트 목록 (업로드 경로 변경 용도가 아님) |
 
 Excel 제한은 10 MiB / 1000행입니다. 큰 파일을 메모리에 적재하지 않도록 multipart 임시 파일을
 사용하므로 임시 디스크에 충분한 공간을 확보해야 합니다. 역프록시의 본문 크기/버퍼링/시간 제한도
 일치시켜야 합니다. DB 배치의 네트워크 최적화가 필요하면 MySQL JDBC URL의
 `rewriteBatchedStatements=true`를 환경에 맞춰 검토하세요.
 
-`exhibition-manage`는 표준 `next start`를 사용합니다. 매니저에 런타임 변수
-`BULK_UPLOAD_API_BASE_URL=https://공개-API-주소`를 지정하면 브라우저에서 이 API로 직접 전송해
-매니저 경유와 Next의 대용량 본문 수신 제한을 피합니다. 미설정 시 기존 스트리밍 프록시를 유지하지만
-표준 Node/Next의 수신 제한이 적용되므로 대형 업로드는 직접 경로를 권장합니다. API의 CORS에
-매니저 호스트를 등록하고 공개 API 게이트웨이에서 OPTIONS/POST와 인증/전시/업로드 ID 헤더를
-허용해야 합니다. MinIO 주소/자격증명은 브라우저에 노출하지 않습니다.
+업로드 경로는 반드시 **브라우저 → 매니저 사이트 → 백엔드 → MinIO**입니다.
+`exhibition-manage`는 표준 `next start`와 동일 출처 스트리밍 프록시를 사용하며,
+백엔드 주소(`API_BASE_URL`)는 매니저 서버에서만 사용합니다. 공개 업로드 URL이나 브라우저의
+백엔드 직접 접속 기능은 제공하지 않습니다. 매니저는 본문 수신이 끝나기 전에 백엔드로 전송을
+시작하고, 파일을 JS 메모리나 매니저 디스크에 통째로 적재하지 않습니다. 매니저 ingress와
+백엔드 사이에 불필요한 공개 게이트웨이를 추가하지 않도록 내부 서비스 주소 사용을 권장합니다.
+매니저 ingress의 본문 크기·요청 버퍼링·송수신 제한도 함께 확인해야 합니다.
 
 로컬 테스트는 반복 참조 조회 수, 병렬성, 실패 정리와 H2/JPA 배치 FK 및 롤백을 검증합니다.
 실제 처리량은 배포된 네트워크·MySQL·MinIO에 따라 달라지므로 동일 파일의 업로드 시간과 API 로그의
