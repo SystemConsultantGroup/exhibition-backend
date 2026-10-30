@@ -50,7 +50,7 @@ class MediaServiceTest {
 
         assertThat(media.getMediaType()).isEqualTo("image/png");
         assertThat(media.getExhibition()).isSameAs(exhibition);
-        assertThat(media.getObjectKey()).startsWith("slug/").endsWith("/logo.png");
+        assertThat(media.getObjectKey()).isEqualTo("slug/logo.png");
         verify(minio).putObject(any(PutObjectArgs.class));
     }
 
@@ -67,7 +67,7 @@ class MediaServiceTest {
 
         MediaAssetEntity media = service.uploadForItem(item, file, "image");
 
-        assertThat(media.getObjectKey()).startsWith("slug/" + period.getId() + "/").endsWith("/thumb.jpg");
+        assertThat(media.getObjectKey()).isEqualTo("slug/" + period.getId() + "/thumb.jpg");
     }
 
     /** 두 전송이 실제로 겹치며 DB 저장은 호출 스레드에서만 수행한다. */
@@ -90,12 +90,14 @@ class MediaServiceTest {
                 return call.getArgument(0);
             });
             var item = itemWithPeriod();
-            var file = image();
+            var first = image();
+            var second = new MockMultipartFile("mediaFiles", "second.jpg", "image/jpeg", first.getBytes());
             var assets = batch.uploadForItems(java.util.List.of(
-                    new MediaService.ItemMediaUpload(item, file, "image"),
-                    new MediaService.ItemMediaUpload(item, file, "image")));
+                    new MediaService.ItemMediaUpload(item, first, "image"),
+                    new MediaService.ItemMediaUpload(item, second, "image")));
             assertThat(assets).hasSize(2);
-            assertThat(assets.get(0).getObjectKey()).isNotEqualTo(assets.get(1).getObjectKey());
+            assertThat(assets.get(0).getObjectKey()).isEqualTo("slug/" + item.getEventPeriod().getId() + "/same.jpg");
+            assertThat(assets.get(1).getObjectKey()).isEqualTo("slug/" + item.getEventPeriod().getId() + "/second.jpg");
         } finally { executor.shutdownNow(); }
     }
 
@@ -120,7 +122,7 @@ class MediaServiceTest {
                     new MediaService.ItemMediaUpload(itemWithPeriod(), image(), "image"))))
                     .isInstanceOf(IllegalStateException.class);
             assertThat(succeeded).isTrue();
-            verify(minio, org.mockito.Mockito.times(2)).removeObject(any(io.minio.RemoveObjectArgs.class));
+            verify(minio).removeObject(any(io.minio.RemoveObjectArgs.class));
             org.mockito.Mockito.verifyNoInteractions(repository);
         } finally { executor.shutdownNow(); }
     }
@@ -139,6 +141,42 @@ class MediaServiceTest {
             }
             verify(minio).removeObject(any(io.minio.RemoveObjectArgs.class));
         } finally { org.springframework.transaction.support.TransactionSynchronizationManager.clearSynchronization(); }
+    }
+
+    /** 같은 파일이 여러 작품/슬롯에서 참조되어도 기존 경로와 각 미디어 레코드를 유지한다. */
+    @Test
+    void repeatedFileUsesTheOriginalPathAndUploadsOnlyOnce() throws Exception {
+        var item = itemWithPeriod();
+        var file = image();
+        when(repository.saveAll(any())).thenAnswer(call -> call.getArgument(0));
+        var assets = service.uploadForItems(java.util.List.of(
+                new MediaService.ItemMediaUpload(item, file, "image"),
+                new MediaService.ItemMediaUpload(item, file, "image")));
+        assertThat(assets).hasSize(2);
+        assertThat(assets).extracting(MediaAssetEntity::getObjectKey)
+                .containsExactly("slug/" + item.getEventPeriod().getId() + "/same.jpg",
+                        "slug/" + item.getEventPeriod().getId() + "/same.jpg");
+        verify(minio).putObject(any(PutObjectArgs.class));
+    }
+
+    /** 확장자 대소문자/파일명/Content-Type과 실제 전송 바이트를 모두 그대로 유지한다. */
+    @Test
+    void preservesOriginalFileNameContentTypeAndBytes() throws Exception {
+        byte[] bytes = {(byte) 0xff, (byte) 0xd8, (byte) 0xff, 1, 2, 3, 4};
+        var file = new MockMultipartFile("logoFile", "folder/Original Name.JPG", "image/jpeg", bytes);
+        var exhibition = new ExhibitionEntity(UUID.randomUUID(), "original-slug", "전시");
+        when(repository.save(any())).thenAnswer(call -> call.getArgument(0));
+        when(minio.putObject(any())).thenAnswer(call -> {
+            PutObjectArgs args = call.getArgument(0);
+            assertThat(args.bucket()).isEqualTo("test");
+            assertThat(args.object()).isEqualTo("original-slug/Original Name.JPG");
+            assertThat(args.contentType()).isEqualTo("image/jpeg");
+            assertThat(args.stream().readAllBytes()).isEqualTo(bytes);
+            return null;
+        });
+        var asset = service.uploadForExhibition(exhibition, file, "image");
+        assertThat(asset.getObjectKey()).isEqualTo("original-slug/Original Name.JPG");
+        assertThat(asset.getSize()).isEqualTo(bytes.length);
     }
 
     private ItemEntity itemWithPeriod() {

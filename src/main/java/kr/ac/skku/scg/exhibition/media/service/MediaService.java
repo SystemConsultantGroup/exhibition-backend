@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Locale;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -100,11 +102,21 @@ public class MediaService {
             validateUpload(upload.file(), upload.expectedType());
             String name = fileName(upload.file().getOriginalFilename());
             return new PreparedUpload(item.getExhibition().getSlug() + "/" + item.getEventPeriod().getId()
-                    + "/" + UUID.randomUUID() + "/" + name, mediaType(extension(name)),
+                    + "/" + name, mediaType(extension(name)),
                     upload.file().getSize(), upload.file());
         }).toList();
-        List<CompletableFuture<Void>> transfers = new ArrayList<>();
+        // 기존 키를 그대로 사용한다. 같은 파일의 반복 참조는 한 번만 전송해
+        // 동일 객체를 병렬로 덮어쓰는 경합과 불필요한 전송을 방지한다.
+        Map<String, PreparedUpload> byKey = new LinkedHashMap<>();
         for (PreparedUpload upload : prepared) {
+            PreparedUpload existing = byKey.putIfAbsent(upload.key(), upload);
+            if (existing != null && existing.file() != upload.file()) {
+                throw new IllegalArgumentException("Different files use the same media path: " + upload.key());
+            }
+        }
+        List<PreparedUpload> unique = new ArrayList<>(byKey.values());
+        List<CompletableFuture<Void>> transfers = new ArrayList<>();
+        for (PreparedUpload upload : unique) {
             try {
                 transfers.add(CompletableFuture.runAsync(() -> putObject(upload), uploadExecutor));
             } catch (RuntimeException ex) {
@@ -117,12 +129,12 @@ public class MediaService {
             CompletableFuture.allOf(transfers.toArray(CompletableFuture[]::new)).join();
         } catch (CompletionException ex) {
             for (int i = 0; i < transfers.size(); i++) {
-                if (!transfers.get(i).isCompletedExceptionally()) removeObject(prepared.get(i).key());
+                if (!transfers.get(i).isCompletedExceptionally()) removeObject(unique.get(i).key());
             }
             throw new IllegalStateException("Failed to upload bulk media", ex.getCause());
         }
         // DB 저장 중 오류가 발생해도 모든 성공 객체가 롤백 정리 대상이어야 한다.
-        prepared.forEach(upload -> removeOnRollback(upload.key()));
+        unique.forEach(upload -> removeOnRollback(upload.key()));
         List<MediaAssetEntity> assets = new ArrayList<>();
         for (int i = 0; i < prepared.size(); i++) {
             PreparedUpload upload = prepared.get(i);
@@ -138,8 +150,6 @@ public class MediaService {
             minioClient.putObject(PutObjectArgs.builder().bucket(minioProperties.getBucket())
                     .object(upload.key()).stream(input, upload.size(), -1).contentType(upload.contentType()).build());
         } catch (Exception ex) {
-            // 응답/스트림 종료 오류는 객체 저장 여부가 불명확하므로 고유 키를 정리한다.
-            removeObject(upload.key());
             throw new IllegalStateException("Failed to upload media file: " + upload.file().getOriginalFilename(), ex);
         }
     }
@@ -162,8 +172,8 @@ public class MediaService {
         validateUpload(file, expectedType);
         String fileName = fileName(file.getOriginalFilename());
         String contentType = mediaType(extension(fileName));
-        // 원본 이름이 같아도 다른 작품/이전 버전을 덮어쓰지 않는다.
-        String key = prefix + UUID.randomUUID() + "/" + fileName;
+        // 저장 형식은 기존과 동일하다: 전시 slug[/회차 ID]/원본 파일명.
+        String key = prefix + fileName;
         putObject(new PreparedUpload(key, contentType, file.getSize(), file));
         removeOnRollback(key);
         return mediaAssetRepository.save(

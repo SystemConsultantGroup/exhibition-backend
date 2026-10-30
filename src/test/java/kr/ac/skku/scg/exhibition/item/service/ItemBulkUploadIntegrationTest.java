@@ -2,7 +2,6 @@ package kr.ac.skku.scg.exhibition.item.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import io.minio.MinioClient;
@@ -112,10 +111,13 @@ class ItemBulkUploadIntegrationTest {
         assertThat(items.findAll()).allSatisfy(item -> {
             assertThat(item.getThumbnailMedia()).isNotNull();
             assertThat(item.getThumbnailMedia().getItem().getId()).isEqualTo(item.getId());
+            assertThat(item.getThumbnailMedia().getObjectKey())
+                    .isEqualTo("integration/" + period.getId() + "/same.jpg");
         });
         TestTransaction.flagForRollback();
         TestTransaction.end();
-        verify(minio, times(30)).removeObject(any(RemoveObjectArgs.class));
+        verify(minio).putObject(any(io.minio.PutObjectArgs.class));
+        verify(minio).removeObject(any(RemoveObjectArgs.class));
         TestTransaction.start();
         assertThat(items.count()).isZero();
         assertThat(media.count()).isZero();
