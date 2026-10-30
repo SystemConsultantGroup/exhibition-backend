@@ -73,6 +73,29 @@ class CategoryServiceTest {
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
+    /** 생성도 전시 권한과 이름/슬러그 중복을 확인한다. */
+    @Test
+    void create_validatesAndNormalizesName() {
+        ExhibitionEntity exhibition = new ExhibitionEntity(UUID.randomUUID(), "slug", "전시");
+        when(repository.saveAndFlush(org.mockito.ArgumentMatchers.any())).thenAnswer(call -> call.getArgument(0));
+        var result = service.create(exhibition, new AdminCategoryUpdateRequest(" AI "), user(UserType.ADMIN));
+        assertThat(result.name()).isEqualTo("AI");
+        verify(authorization).requireExhibitionAdmin(org.mockito.ArgumentMatchers.any(),
+                org.mockito.ArgumentMatchers.eq(exhibition.getId()));
+    }
+
+    /** 참조 무결성 위반은 삭제 실패 충돌로 변환한다. */
+    @Test
+    void delete_rejectsReferencedCategory() {
+        ExhibitionEntity exhibition = new ExhibitionEntity(UUID.randomUUID(), "slug", "전시");
+        CategoryEntity category = new CategoryEntity(UUID.randomUUID(), exhibition, "AI");
+        when(repository.findByIdAndExhibition_Id(category.getId(), exhibition.getId())).thenReturn(Optional.of(category));
+        org.mockito.Mockito.doThrow(new org.springframework.dao.DataIntegrityViolationException("referenced"))
+                .when(repository).flush();
+        assertThatThrownBy(() -> service.delete(category.getId(), exhibition.getId(), user(UserType.ADMIN)))
+                .isInstanceOf(ConflictException.class);
+    }
+
     private AuthenticatedUser user(UserType type) {
         return new AuthenticatedUser(UUID.randomUUID(), "user", type, null, null, null, null, true);
     }

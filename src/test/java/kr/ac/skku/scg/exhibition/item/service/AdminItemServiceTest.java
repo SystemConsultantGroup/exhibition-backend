@@ -48,6 +48,7 @@ class AdminItemServiceTest {
     @Mock AdminAuthorizationService authorization;
     @Mock MinioClient minio;
     @Mock MediaService mediaService;
+    @Mock kr.ac.skku.scg.exhibition.classification.repository.ItemClassificationRepository classifications;
     private AdminItemService service;
 
     @BeforeEach
@@ -55,7 +56,7 @@ class AdminItemServiceTest {
         MinioProperties properties = new MinioProperties();
         properties.setBucket("exhibition");
         service = new AdminItemService(items, categories, periods, likes, mappings, media,
-                authorization, minio, properties, mediaService);
+                authorization, minio, properties, mediaService, classifications);
     }
 
     @Test
@@ -123,6 +124,62 @@ class AdminItemServiceTest {
         assertThatThrownBy(() -> service.create(exhibition,
                 request(UUID.randomUUID(), null), null, null, null, visitor)).isInstanceOf(ForbiddenException.class);
         verifyNoInteractions(categories, periods, items);
+    }
+
+    /** 파일이 없는 수정은 보존하고 제거 플래그는 지정한 슬롯만 해제한다. */
+    @Test
+    void update_preservesMediaAndCanExplicitlyRemoveIt() {
+        ExhibitionEntity exhibition = new ExhibitionEntity(UUID.randomUUID(), "slug", "전시");
+        CategoryEntity category = new CategoryEntity(UUID.randomUUID(), exhibition, "AI");
+        ItemEntity item = new ItemEntity(UUID.randomUUID(), exhibition, category, null, "기존", null);
+        var thumbnail = new kr.ac.skku.scg.exhibition.media.domain.MediaAssetEntity(
+                UUID.randomUUID(), item, exhibition, "old.png", "image/png", 12);
+        item.updateMedia(thumbnail, thumbnail, null);
+        when(items.findByIdAndExhibition_Id(item.getId(), exhibition.getId())).thenReturn(Optional.of(item));
+        when(categories.findByIdAndExhibition_Id(category.getId(), exhibition.getId())).thenReturn(Optional.of(category));
+        service.update(item.getId(), exhibition.getId(), request(category.getId(), null), user(UserType.ADMIN));
+        assertThat(item.getThumbnailMedia()).isSameAs(thumbnail);
+        var remove = new AdminItemRequest(category.getId(), null, "수정", null, null, null, null, false,
+                List.of(), true, false, false);
+        service.update(item.getId(), exhibition.getId(), remove, user(UserType.ADMIN));
+        assertThat(item.getThumbnailMedia()).isNull();
+        assertThat(item.getPosterMedia()).isSameAs(thumbnail);
+        verify(mappings).deleteAllByItem_Id(item.getId());
+        verifyNoInteractions(mediaService);
+    }
+
+    /** multipart 교체는 미디어 업로드를 실행하고 다른 슬롯은 유지한다. */
+    @Test
+    void update_replacesOnlyProvidedMedia() {
+        ExhibitionEntity exhibition = new ExhibitionEntity(UUID.randomUUID(), "slug", "전시");
+        CategoryEntity category = new CategoryEntity(UUID.randomUUID(), exhibition, "AI");
+        ItemEntity item = new ItemEntity(UUID.randomUUID(), exhibition, category, null, "기존", null);
+        var file = new org.springframework.mock.web.MockMultipartFile("thumbnailFile", "new.png", "image/png", new byte[]{1});
+        var replacement = new kr.ac.skku.scg.exhibition.media.domain.MediaAssetEntity(
+                UUID.randomUUID(), item, exhibition, "new.png", "image/png", 1);
+        when(items.findByIdAndExhibition_Id(item.getId(), exhibition.getId())).thenReturn(Optional.of(item));
+        when(categories.findByIdAndExhibition_Id(category.getId(), exhibition.getId())).thenReturn(Optional.of(category));
+        when(mediaService.uploadForItem(item, file, "image")).thenReturn(replacement);
+        service.update(item.getId(), exhibition.getId(), request(category.getId(), null), file, null, null, user(UserType.ADMIN));
+        assertThat(item.getThumbnailMedia()).isSameAs(replacement);
+        verifyNoInteractions(mappings);
+    }
+
+    /** 다른 전시회의 분류를 지정하면 작품 변경 전 거부한다. */
+    @Test
+    void update_rejectsForeignClassificationBeforeMutation() {
+        ExhibitionEntity exhibition = new ExhibitionEntity(UUID.randomUUID(), "slug", "전시");
+        CategoryEntity category = new CategoryEntity(UUID.randomUUID(), exhibition, "AI");
+        ItemEntity item = new ItemEntity(UUID.randomUUID(), exhibition, category, null, "기존", null);
+        when(items.findByIdAndExhibition_Id(item.getId(), exhibition.getId())).thenReturn(Optional.of(item));
+        UUID foreign = UUID.randomUUID();
+        when(classifications.findByIdAndExhibition_Id(foreign, exhibition.getId())).thenReturn(Optional.empty());
+        var request = new AdminItemRequest(category.getId(), null, "수정", null, null, null, null, false,
+                List.of(foreign), false, false, false);
+        assertThatThrownBy(() -> service.update(item.getId(), exhibition.getId(), request, user(UserType.ADMIN)))
+                .isInstanceOf(NotFoundException.class);
+        assertThat(item.getTitle()).isEqualTo("기존");
+        verifyNoInteractions(categories, mediaService, mappings);
     }
 
     private AdminItemRequest request(UUID categoryId, UUID periodId) {

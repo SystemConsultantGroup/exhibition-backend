@@ -240,6 +240,21 @@ class AdminExhibitionServiceTest {
                 .isEqualTo(defaultToLatestEventPeriod != null ? defaultToLatestEventPeriod : true);
     }
 
+    /** 수정에서도 파일 업로드를 실행하고 기존 ID 연결은 테넌트 범위로 검증한다. */
+    @Test
+    void update_uploadsReplacementLogo() {
+        ExhibitionEntity exhibition = new ExhibitionEntity(UUID.randomUUID(), "slug", "전시");
+        when(exhibitionRepository.findById(exhibition.getId())).thenReturn(Optional.of(exhibition));
+        var file = new MockMultipartFile("logoFile", "logo.png", "image/png", new byte[]{1});
+        var media = new kr.ac.skku.scg.exhibition.media.domain.MediaAssetEntity(
+                UUID.randomUUID(), null, exhibition, "unique/logo.png", "image/png", 1);
+        when(mediaService.uploadForExhibition(exhibition, file, "image")).thenReturn(media);
+        var request = new AdminExhibitionUpdateRequest("example.com", null, "전시", null,
+                null, false, null, false, null, null, null, null, null, null, null);
+        var response = adminExhibitionService.update(exhibition.getId(), request, file, null, null, null, user(UserType.ADMIN));
+        assertThat(response.logoMediaId()).isEqualTo(media.getId());
+    }
+
     @Test
     void delete_removesExhibitionAndAssignments() {
         UUID exhibitionId = UUID.randomUUID();

@@ -125,6 +125,14 @@ public class AdminExhibitionService {
             AdminExhibitionUpdateRequest request,
             AuthenticatedUser currentUser
     ) {
+        return update(exhibitionId, request, null, null, null, null, currentUser);
+    }
+
+    /** 메타데이터와 선택한 미디어 파일을 함께 수정한다. */
+    @Transactional(isolation = Isolation.SERIALIZABLE)
+    public ExhibitionResponse update(UUID exhibitionId, AdminExhibitionUpdateRequest request,
+            MultipartFile logoFile, MultipartFile bannerFile, MultipartFile popupImageFile,
+            MultipartFile introVideoFile, AuthenticatedUser currentUser) {
         adminAuthorizationService.requireExhibitionAdmin(currentUser, exhibitionId);
         ExhibitionEntity exhibition = exhibitionRepository.findById(exhibitionId)
                 .orElseThrow(() -> new NotFoundException("Exhibition not found: " + exhibitionId));
@@ -145,10 +153,11 @@ public class AdminExhibitionService {
 
         try {
             exhibition.updateMetadata(defaultDomain, customDomain, name, request.description(),
-                    findMedia(request.logoMediaId(), exhibitionId), request.bannerEnabled(),
-                    findMedia(request.bannerMediaId(), exhibitionId), request.popupEnabled(),
-                    findMedia(request.popupImageMediaId(), exhibitionId), request.popupUrl(),
-                    request.introTitle(), request.introDescription(), findMedia(request.introVideoMediaId(), exhibitionId));
+                    replacement(exhibition, logoFile, request.logoMediaId(), "image"), request.bannerEnabled(),
+                    replacement(exhibition, bannerFile, request.bannerMediaId(), "image"), request.popupEnabled(),
+                    replacement(exhibition, popupImageFile, request.popupImageMediaId(), "image"), request.popupUrl(),
+                    request.introTitle(), request.introDescription(),
+                    replacement(exhibition, introVideoFile, request.introVideoMediaId(), "video"));
             exhibition.updateDisplaySettings(
                     request.showAwards() == null ? exhibition.isShowAwards() : request.showAwards(),
                     request.defaultToLatestEventPeriod() == null
@@ -177,6 +186,17 @@ public class AdminExhibitionService {
         } catch (DataIntegrityViolationException ex) {
             throw new ConflictException("Exhibition contains data and cannot be deleted: " + exhibitionId);
         }
+    }
+
+    /** 새 파일이 있으면 업로드하고 없으면 검증된 기존 미디어를 연결한다. */
+    private MediaAssetEntity replacement(ExhibitionEntity exhibition, MultipartFile file, UUID mediaId, String type) {
+        if (file != null && !file.isEmpty()) return mediaService.uploadForExhibition(exhibition, file, type);
+        MediaAssetEntity media = findMedia(mediaId, exhibition.getId());
+        if (media != null && (!media.getMediaType().startsWith(type + "/")
+                || media.getItem() != null || media.getBoard() != null)) {
+            throw new IllegalArgumentException("Invalid exhibition " + type + " media: " + mediaId);
+        }
+        return media;
     }
 
     /** 선택한 미디어를 조회한다. */

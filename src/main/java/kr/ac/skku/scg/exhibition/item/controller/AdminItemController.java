@@ -45,10 +45,22 @@ public class AdminItemController {
     }
 
     /** 아이템 메타데이터를 수정한다. */
-    @PutMapping("/{id}")
+    @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ItemResponse> update(@PathVariable UUID id, @Valid @RequestBody AdminItemRequest request,
             @CurrentExhibition ExhibitionEntity exhibition, @CurrentUser AuthenticatedUser user) {
         return ResponseEntity.ok(service.update(id, exhibition.getId(), request, user));
+    }
+
+    /** 기존 파일을 유지하거나 선택한 파일만 교체하는 multipart 수정 API다. */
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ItemResponse> updateWithMedia(@PathVariable UUID id,
+            @Valid @RequestPart("request") AdminItemRequest request,
+            @RequestPart(value = "thumbnailFile", required = false) MultipartFile thumbnailFile,
+            @RequestPart(value = "posterFile", required = false) MultipartFile posterFile,
+            @RequestPart(value = "presentationVideoFile", required = false) MultipartFile presentationVideoFile,
+            @CurrentExhibition ExhibitionEntity exhibition, @CurrentUser AuthenticatedUser user) {
+        return ResponseEntity.ok(service.update(id, exhibition.getId(), request,
+                thumbnailFile, posterFile, presentationVideoFile, user));
     }
 
     /** 아이템을 삭제한다. */

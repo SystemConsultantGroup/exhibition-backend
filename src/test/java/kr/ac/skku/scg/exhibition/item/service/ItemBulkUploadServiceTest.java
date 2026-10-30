@@ -180,9 +180,9 @@ class ItemBulkUploadServiceTest {
                 new MockMultipartFile("mediaFiles", "poster.png", "image/png", new byte[] {1}),
                 new MockMultipartFile("mediaFiles", "video.mp4", "video/mp4", new byte[] {1}));
         byte[] bytes = createWorkbookBytes(exhibitionId, eventPeriodId, "category_name", "video.mp4");
-        when(mediaService.uploadForItem(any(ItemEntity.class),
-                org.mockito.ArgumentMatchers.same(files.get(2)), org.mockito.ArgumentMatchers.eq("image")))
-                .thenThrow(new IllegalArgumentException("Media must be an image file"));
+        org.mockito.Mockito.doThrow(new IllegalArgumentException("Media must be an image file"))
+                .when(mediaService).validateUpload(org.mockito.ArgumentMatchers.same(files.get(2)),
+                        org.mockito.ArgumentMatchers.eq("image"));
 
         assertThatThrownBy(() -> itemBulkUploadService.upload(
                 new MockMultipartFile("file", "items.xlsx", "application/octet-stream", bytes),
@@ -211,17 +211,11 @@ class ItemBulkUploadServiceTest {
         when(eventPeriodRepository.findByIdAndExhibition_Id(eventPeriodId, exhibitionId)).thenReturn(Optional.of(eventPeriod));
         when(categoryRepository.findByExhibition_IdAndName(exhibitionId, "AI")).thenReturn(Optional.of(category));
         when(classificationRepository.findByExhibition_IdAndName(exhibitionId, "작품")).thenReturn(Optional.of(classificationA));
-        when(itemRepository.save(any(ItemEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(mediaService.uploadForItem(any(ItemEntity.class), any(MultipartFile.class), any()))
-                .thenAnswer(invocation -> {
-                    ItemEntity item = invocation.getArgument(0);
-                    MultipartFile mediaFile = invocation.getArgument(1);
-                    return new MediaAssetEntity(null, item, item.getExhibition(),
-                            item.getExhibition().getSlug() + "/" + item.getEventPeriod().getId() + "/"
-                                    + mediaFile.getOriginalFilename(),
-                            mediaFile.getContentType(), mediaFile.getSize());
-                });
-        when(itemClassificationMapRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(mediaService.uploadForItems(any())).thenAnswer(invocation -> {
+            List<MediaService.ItemMediaUpload> uploads = invocation.getArgument(0);
+            return uploads.stream().map(upload -> new MediaAssetEntity(null, upload.item(), exhibition,
+                    "unique/" + upload.file().getOriginalFilename(), upload.file().getContentType(), upload.file().getSize())).toList();
+        });
 
         MockMultipartFile file = new MockMultipartFile(
                 "file",
@@ -255,7 +249,10 @@ class ItemBulkUploadServiceTest {
         assertThat(response.createdItems()).isEqualTo(1);
         assertThat(response.createdMediaAssets()).isEqualTo(3);
         assertThat(response.createdClassificationMappings()).isEqualTo(1);
-        verify(mediaService, times(3)).uploadForItem(any(ItemEntity.class), any(MultipartFile.class), any());
+        verify(mediaService).uploadForItems(org.mockito.ArgumentMatchers.argThat(uploads -> uploads.size() == 3));
+        verify(mediaService, times(3)).validateUpload(any(MultipartFile.class), any());
+        verify(itemRepository).saveAll(any());
+        verify(itemClassificationMapRepository).saveAll(any());
     }
 
     @Test
@@ -269,9 +266,9 @@ class ItemBulkUploadServiceTest {
                         new byte[] {(byte) 0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a}),
                 new MockMultipartFile("mediaFiles", "video.mp4", "video/mp4",
                         new byte[] {0, 0, 0, 8, 'f', 't', 'y', 'p'}));
-        when(mediaService.uploadForItem(any(ItemEntity.class),
-                org.mockito.ArgumentMatchers.same(files.get(0)), org.mockito.ArgumentMatchers.eq("image")))
-                .thenThrow(new IllegalArgumentException("Media file signature does not match its extension"));
+        org.mockito.Mockito.doThrow(new IllegalArgumentException("Media file signature does not match its extension"))
+                .when(mediaService).validateUpload(org.mockito.ArgumentMatchers.same(files.get(0)),
+                        org.mockito.ArgumentMatchers.eq("image"));
 
         assertThatThrownBy(() -> itemBulkUploadService.upload(
                 new MockMultipartFile("file", "items.xlsx", "application/octet-stream",
@@ -279,6 +276,62 @@ class ItemBulkUploadServiceTest {
                 files, exhibitionId, user(UserType.ADMIN)))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("signature does not match its extension");
+    }
+
+    /** 같은 카테고리/분류를 100번 사용해도 조회는 각각 한 번이며 저장은 묶어서 한다. */
+    @Test
+    void upload_cachesRelationsAndBatchesOneHundredRows() throws Exception {
+        UUID exhibitionId = UUID.randomUUID();
+        UUID periodId = UUID.randomUUID();
+        stubWorkbookContext(exhibitionId, periodId);
+        ExhibitionEntity exhibition = new ExhibitionEntity(exhibitionId, "slug", "전시");
+        when(classificationRepository.findByExhibition_IdAndName(exhibitionId, "작품"))
+                .thenReturn(Optional.of(new ItemClassificationEntity(UUID.randomUUID(), exhibition, "작품")));
+        byte[] bytes;
+        try (Workbook workbook = new XSSFWorkbook(new java.io.ByteArrayInputStream(createWorkbookBytes(exhibitionId, periodId)));
+                ByteArrayOutputStream output = new ByteArrayOutputStream()) {
+            Sheet sheet = workbook.getSheet("items_template");
+            for (int i = 1; i <= 100; i++) {
+                Row row = i == 1 ? sheet.getRow(1) : sheet.createRow(i);
+                row.createCell(0).setCellValue("AI");
+                row.createCell(1).setCellValue("작품");
+                row.createCell(2).setCellValue("작품 " + i);
+                row.createCell(8).setCellValue("");
+                row.createCell(9).setCellValue("");
+                row.createCell(10).setCellValue("");
+            }
+            workbook.write(output);
+            bytes = output.toByteArray();
+        }
+        var result = itemBulkUploadService.upload(new MockMultipartFile("file", "items.xlsx", "application/octet-stream", bytes),
+                List.of(), exhibitionId, user(UserType.ADMIN));
+        assertThat(result.createdItems()).isEqualTo(100);
+        assertThat(result.createdClassificationMappings()).isEqualTo(100);
+        verify(categoryRepository).findByExhibition_IdAndName(exhibitionId, "AI");
+        verify(classificationRepository).findByExhibition_IdAndName(exhibitionId, "작품");
+        verify(itemRepository).saveAll(org.mockito.ArgumentMatchers.argThat(rows -> ((List<?>) rows).size() == 100));
+        org.mockito.Mockito.verifyNoInteractions(mediaAssetRepository, minioClient);
+    }
+
+    /** 늦게 발견된 미사용 파일도 DB/MinIO 저장 전에 거부한다. */
+    @Test
+    void upload_rejectsUnusedFilesBeforeAnyWrites() throws Exception {
+        UUID exhibitionId = UUID.randomUUID();
+        UUID periodId = UUID.randomUUID();
+        stubWorkbookContext(exhibitionId, periodId);
+        ExhibitionEntity exhibition = new ExhibitionEntity(exhibitionId, "slug", "전시");
+        when(classificationRepository.findByExhibition_IdAndName(exhibitionId, "작품"))
+                .thenReturn(Optional.of(new ItemClassificationEntity(UUID.randomUUID(), exhibition, "작품")));
+        var files = List.<MultipartFile>of(
+                new MockMultipartFile("mediaFiles", "thumb.jpg", "image/jpeg", new byte[]{1}),
+                new MockMultipartFile("mediaFiles", "poster.png", "image/png", new byte[]{1}),
+                new MockMultipartFile("mediaFiles", "video.mp4", "video/mp4", new byte[]{1}),
+                new MockMultipartFile("mediaFiles", "unused.png", "image/png", new byte[]{1}));
+        assertThatThrownBy(() -> itemBulkUploadService.upload(new MockMultipartFile("file", "items.xlsx", "application/octet-stream",
+                createWorkbookBytes(exhibitionId, periodId)), files, exhibitionId, user(UserType.ADMIN)))
+                .isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Unused mediaFiles");
+        org.mockito.Mockito.verifyNoInteractions(itemRepository, itemClassificationMapRepository);
+        verify(mediaService, org.mockito.Mockito.never()).uploadForItems(any());
     }
 
     private void stubWorkbookContext(UUID exhibitionId, UUID eventPeriodId) {
@@ -289,7 +342,6 @@ class ItemBulkUploadServiceTest {
         when(exhibitionRepository.findById(exhibitionId)).thenReturn(Optional.of(exhibition));
         when(eventPeriodRepository.findByIdAndExhibition_Id(eventPeriodId, exhibitionId)).thenReturn(Optional.of(period));
         when(categoryRepository.findByExhibition_IdAndName(exhibitionId, "AI")).thenReturn(Optional.of(category));
-        when(itemRepository.save(any(ItemEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
     }
 
     private AuthenticatedUser user(UserType role) {

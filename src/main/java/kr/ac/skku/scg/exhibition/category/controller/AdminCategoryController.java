@@ -2,6 +2,9 @@ package kr.ac.skku.scg.exhibition.category.controller;
 
 import jakarta.validation.Valid;
 import java.util.List;
+import java.net.URI;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import java.util.UUID;
 import kr.ac.skku.scg.exhibition.category.dto.request.AdminCategoryOrderRequest;
 import kr.ac.skku.scg.exhibition.category.dto.request.AdminCategoryUpdateRequest;
@@ -25,6 +28,22 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class AdminCategoryController {
     private final CategoryService categoryService;
+
+    /** 새 카테고리를 생성한다. */
+    @PostMapping
+    public ResponseEntity<CategoryResponse> create(@Valid @RequestBody AdminCategoryUpdateRequest request,
+            @CurrentExhibition ExhibitionEntity exhibition, @CurrentUser AuthenticatedUser user) {
+        CategoryResponse response = categoryService.create(exhibition, request, user);
+        return ResponseEntity.created(URI.create("/admin/categories/" + response.id())).body(response);
+    }
+
+    /** 비어 있는 카테고리를 삭제한다. */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable UUID id, @CurrentExhibition ExhibitionEntity exhibition,
+            @CurrentUser AuthenticatedUser user) {
+        categoryService.delete(id, exhibition.getId(), user);
+        return ResponseEntity.noContent().build();
+    }
 
     /** 카테고리 이름을 수정한다. */
     @PutMapping("/{id}")

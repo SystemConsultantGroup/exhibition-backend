@@ -114,6 +114,27 @@ class AdminItemControllerTest {
         verify(service).delete(itemId, exhibitionId, authenticatedUser);
     }
 
+    /** PUT multipart 파일과 제거 플래그를 수정 서비스에 전달한다. */
+    @Test
+    void update_acceptsMultipartAndMediaRemoval() throws Exception {
+        UUID userId = UUID.randomUUID();
+        UUID exhibitionId = UUID.randomUUID();
+        UUID itemId = UUID.randomUUID();
+        ExhibitionEntity exhibition = new ExhibitionEntity(exhibitionId, "slug", "전시");
+        when(userRepository.findById(userId)).thenReturn(Optional.of(admin(userId)));
+        when(exhibitionDomainCacheService.findById(exhibitionId)).thenReturn(Optional.of(exhibition));
+        var request = new MockMultipartFile("request", "", "application/json",
+                ("{\"categoryId\":\"" + UUID.randomUUID() + "\",\"title\":\"수정\",\"awarded\":false,\"removePoster\":true}").getBytes());
+        var thumbnail = new MockMultipartFile("thumbnailFile", "thumb.png", "image/png", new byte[]{1});
+        mockMvc.perform(multipart(org.springframework.http.HttpMethod.PUT, "/admin/items/{id}", itemId)
+                        .file(request).file(thumbnail).header("X-Exhibition-Id", exhibitionId)
+                        .with(user(userId.toString())).requestAttr("auth.userId", userId))
+                .andExpect(status().isOk());
+        verify(service).update(eq(itemId), eq(exhibitionId),
+                org.mockito.ArgumentMatchers.argThat(value -> value.removePoster()), eq(thumbnail),
+                org.mockito.ArgumentMatchers.isNull(), org.mockito.ArgumentMatchers.isNull(), any());
+    }
+
     private org.springframework.restdocs.payload.RequestFieldsSnippet itemRequestFields() {
         return requestFields(
                 fieldWithPath("categoryId").description("카테고리 ID"),

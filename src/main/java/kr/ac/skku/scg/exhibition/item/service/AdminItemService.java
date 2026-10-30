@@ -3,6 +3,10 @@ package kr.ac.skku.scg.exhibition.item.service;
 import io.minio.MinioClient;
 import io.minio.RemoveObjectArgs;
 import java.util.List;
+import java.util.HashSet;
+import kr.ac.skku.scg.exhibition.classification.domain.ItemClassificationEntity;
+import kr.ac.skku.scg.exhibition.classification.domain.ItemClassificationMapEntity;
+import kr.ac.skku.scg.exhibition.classification.repository.ItemClassificationRepository;
 import java.util.UUID;
 import kr.ac.skku.scg.exhibition.category.domain.CategoryEntity;
 import kr.ac.skku.scg.exhibition.category.repository.CategoryRepository;
@@ -40,14 +44,16 @@ public class AdminItemService {
     private final MinioClient minio;
     private final MinioProperties minioProperties;
     private final MediaService mediaService;
+    private final ItemClassificationRepository classifications;
 
     public AdminItemService(ItemRepository items, CategoryRepository categories, EventPeriodRepository periods,
             ItemLikeRepository likes, ItemClassificationMapRepository mappings, MediaAssetRepository media,
             AdminAuthorizationService authorization, MinioClient minio, MinioProperties minioProperties,
-            MediaService mediaService) {
+            MediaService mediaService, ItemClassificationRepository classifications) {
         this.items = items; this.categories = categories; this.periods = periods; this.likes = likes;
         this.mappings = mappings; this.media = media; this.authorization = authorization;
         this.minio = minio; this.minioProperties = minioProperties; this.mediaService = mediaService;
+        this.classifications = classifications;
     }
 
     /** 미디어 파일과 함께 아이템을 생성한다. */
@@ -60,7 +66,9 @@ public class AdminItemService {
         ItemEntity item = new ItemEntity(null, exhibition, category, period, request.title().trim(), request.description());
         item.updateMetadata(category, period, request.title().trim(), request.description(), request.participantNames(),
                 request.participantEmails(), request.advisorNames(), request.awarded());
+        List<ItemClassificationEntity> selected = classifications(request.classificationIds(), exhibition.getId());
         item = items.save(item);
+        updateClassifications(item, selected);
         item.updateMedia(
                 mediaService.uploadForItem(item, thumbnailFile, "image"),
                 mediaService.uploadForItem(item, posterFile, "image"),
@@ -69,15 +77,63 @@ public class AdminItemService {
         return response(item);
     }
 
-    /** 아이템 메타데이터를 수정하고 기존 미디어 연결은 유지한다. */
+    /** JSON 수정은 파일 없이 같은 검증 및 수정 경로를 사용한다. */
     @Transactional
     public ItemResponse update(UUID id, UUID exhibitionId, AdminItemRequest request, AuthenticatedUser user) {
+        return update(id, exhibitionId, request, null, null, null, user);
+    }
+
+    /** 메타데이터와 분류, 미디어 교체·제거를 한 트랜잭션으로 반영한다. */
+    @Transactional
+    public ItemResponse update(UUID id, UUID exhibitionId, AdminItemRequest request,
+            MultipartFile thumbnailFile, MultipartFile posterFile, MultipartFile presentationVideoFile,
+            AuthenticatedUser user) {
         authorization.requireExhibitionAdmin(user, exhibitionId);
         ItemEntity item = item(id, exhibitionId);
+        List<ItemClassificationEntity> selected = classifications(request.classificationIds(), exhibitionId);
+        validateReplacement(thumbnailFile, request.removeThumbnail());
+        validateReplacement(posterFile, request.removePoster());
+        validateReplacement(presentationVideoFile, request.removePresentationVideo());
         item.updateMetadata(category(request.categoryId(), exhibitionId), period(request.eventPeriodId(), exhibitionId),
                 request.title().trim(), request.description(), request.participantNames(), request.participantEmails(),
                 request.advisorNames(), request.awarded());
+        item.updateMedia(
+                replaceMedia(item, thumbnailFile, request.removeThumbnail(), item.getThumbnailMedia(), "image"),
+                replaceMedia(item, posterFile, request.removePoster(), item.getPosterMedia(), "image"),
+                replaceMedia(item, presentationVideoFile, request.removePresentationVideo(), item.getPresentationVideoMedia(), "video"));
+        updateClassifications(item, selected);
         return response(item);
+    }
+
+    /** 교체와 제거를 동시에 요청하는 모호한 입력을 거부한다. */
+    private void validateReplacement(MultipartFile file, boolean remove) {
+        if (remove && file != null && !file.isEmpty()) {
+            throw new IllegalArgumentException("Cannot replace and remove the same media");
+        }
+    }
+
+    /** 파일이 생략되면 기존 미디어를 유지하며 명시적 제거만 반영한다. */
+    private MediaAssetEntity replaceMedia(ItemEntity item, MultipartFile file, boolean remove,
+            MediaAssetEntity existing, String type) {
+        return file != null && !file.isEmpty() ? mediaService.uploadForItem(item, file, type) : remove ? null : existing;
+    }
+
+    /** 변경 전에 분류 ID를 중복 및 테넌트 범위까지 검증한다. */
+    private List<ItemClassificationEntity> classifications(List<UUID> ids, UUID exhibitionId) {
+        if (ids == null) return null;
+        if (new HashSet<>(ids).size() != ids.size() || ids.stream().anyMatch(java.util.Objects::isNull)) {
+            throw new IllegalArgumentException("classificationIds must contain unique non-null IDs");
+        }
+        return ids.stream().map(id -> classifications.findByIdAndExhibition_Id(id, exhibitionId)
+                .orElseThrow(() -> new NotFoundException("Classification not found: " + id))).toList();
+    }
+
+    /** 분류 생략은 유지, 빈 목록은 해제, 나머지는 전체 교체한다. */
+    private void updateClassifications(ItemEntity item, List<ItemClassificationEntity> selected) {
+        if (selected == null) return;
+        mappings.deleteAllByItem_Id(item.getId());
+        mappings.flush();
+        mappings.saveAll(selected.stream().map(value -> new ItemClassificationMapEntity(null, item, value)).toList());
     }
 
     /** 아이템과 종속 관계 및 소유 미디어를 삭제한다. */

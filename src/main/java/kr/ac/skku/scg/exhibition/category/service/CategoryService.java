@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 import kr.ac.skku.scg.exhibition.category.domain.CategoryEntity;
+import kr.ac.skku.scg.exhibition.exhibition.domain.ExhibitionEntity;
 import kr.ac.skku.scg.exhibition.category.dto.request.AdminCategoryOrderRequest;
 import kr.ac.skku.scg.exhibition.category.dto.request.AdminCategoryUpdateRequest;
 import kr.ac.skku.scg.exhibition.category.dto.request.CategoryListRequest;
@@ -39,6 +40,35 @@ public class CategoryService {
     /** 전시회의 카테고리를 정렬된 순서로 조회한다. */
     public List<CategoryResponse> list(CategoryListRequest request) {
         return categoryRepository.findAllByExhibition_Id(request.getExhibitionId()).stream().map(this::toResponse).toList();
+    }
+
+    /** 전시회 범위에서 중복되지 않는 카테고리를 생성한다. */
+    @Transactional
+    public CategoryResponse create(ExhibitionEntity exhibition, AdminCategoryUpdateRequest request, AuthenticatedUser user) {
+        adminAuthorizationService.requireExhibitionAdmin(user, exhibition.getId());
+        CategoryEntity category = new CategoryEntity(null, exhibition, request.name().trim());
+        if (categoryRepository.findByExhibition_IdAndName(exhibition.getId(), category.getName()).isPresent()
+                || categoryRepository.findByExhibition_IdAndSlug(exhibition.getId(), category.getSlug()).isPresent()) {
+            throw new ConflictException("Category name or slug already exists: " + category.getName());
+        }
+        try {
+            return toResponse(categoryRepository.saveAndFlush(category));
+        } catch (DataIntegrityViolationException ex) {
+            throw new ConflictException("Category name or slug already exists: " + category.getName());
+        }
+    }
+
+    /** 참조 중인 작품이 없는 카테고리만 삭제한다. */
+    @Transactional
+    public void delete(UUID id, UUID exhibitionId, AuthenticatedUser user) {
+        adminAuthorizationService.requireExhibitionAdmin(user, exhibitionId);
+        CategoryEntity category = find(id, exhibitionId);
+        try {
+            categoryRepository.delete(category);
+            categoryRepository.flush();
+        } catch (DataIntegrityViolationException ex) {
+            throw new ConflictException("Category is referenced and cannot be deleted: " + id);
+        }
     }
 
     /** 카테고리 이름과 슬러그를 수정한다. */
