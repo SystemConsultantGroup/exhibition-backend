@@ -49,7 +49,7 @@ class MediaServiceTest {
 
         assertThat(media.getMediaType()).isEqualTo("image/png");
         assertThat(media.getExhibition()).isSameAs(exhibition);
-        assertThat(media.getObjectKey()).isEqualTo("slug/logo.png");
+        assertThat(media.getObjectKey()).startsWith("slug/").endsWith("/logo.png");
         verify(minio).putObject(any(PutObjectArgs.class));
     }
 
@@ -66,7 +66,7 @@ class MediaServiceTest {
 
         MediaAssetEntity media = service.uploadForItem(item, file, "image");
 
-        assertThat(media.getObjectKey()).isEqualTo("slug/" + period.getId() + "/thumb.jpg");
+        assertThat(media.getObjectKey()).startsWith("slug/" + period.getId() + "/").endsWith("/thumb.jpg");
     }
 
     @Test

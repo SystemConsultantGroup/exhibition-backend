@@ -55,13 +55,26 @@ public class AdminExhibitionController {
     }
 
     /** 전시회 관리자가 전시회 기본 정보를 수정한다. */
-    @PutMapping("/{exhibitionId}")
+    @PutMapping(value = "/{exhibitionId}", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ExhibitionResponse> update(
             @PathVariable UUID exhibitionId,
             @Valid @RequestBody AdminExhibitionUpdateRequest request,
             @CurrentUser AuthenticatedUser currentUser
     ) {
         return ResponseEntity.ok(adminExhibitionService.update(exhibitionId, request, currentUser));
+    }
+
+    /** 전시회 미디어를 생성 때와 동일한 파일 파트로 교체한다. */
+    @PutMapping(value = "/{exhibitionId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ExhibitionResponse> updateWithMedia(@PathVariable UUID exhibitionId,
+            @Valid @RequestPart("request") AdminExhibitionUpdateRequest request,
+            @RequestPart(value = "logoFile", required = false) MultipartFile logoFile,
+            @RequestPart(value = "bannerFile", required = false) MultipartFile bannerFile,
+            @RequestPart(value = "popupImageFile", required = false) MultipartFile popupImageFile,
+            @RequestPart(value = "introVideoFile", required = false) MultipartFile introVideoFile,
+            @CurrentUser AuthenticatedUser currentUser) {
+        return ResponseEntity.ok(adminExhibitionService.update(exhibitionId, request,
+                logoFile, bannerFile, popupImageFile, introVideoFile, currentUser));
     }
 
     /** 슈퍼유저가 전시회를 삭제한다. */

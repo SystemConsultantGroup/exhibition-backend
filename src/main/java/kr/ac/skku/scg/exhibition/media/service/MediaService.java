@@ -75,7 +75,8 @@ public class MediaService {
         }
         validateSignature(file, contentType);
 
-        String key = prefix + fileName;
+        // 원본 이름이 같아도 다른 작품/이전 버전을 덮어쓰지 않는다.
+        String key = prefix + UUID.randomUUID() + "/" + fileName;
         try (InputStream input = file.getInputStream()) {
             minioClient.putObject(PutObjectArgs.builder()
                     .bucket(minioProperties.getBucket())
