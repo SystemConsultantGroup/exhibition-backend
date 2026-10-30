@@ -70,6 +70,40 @@ export MINIO_BUCKET=exhibition
 
 기본 포트는 Spring Boot 기본값(`8080`)입니다.
 
+## 대량 업로드 성능 및 매니저 연동
+
+- XLSX 전체의 셀·분류·카테고리·파일 참조·시그니처·미사용 파일을 **저장 전에 검증**합니다.
+- 동일 카테고리/분류는 요청 안에서 한 번만 조회합니다. 조회 도중 자동 flush로 매 행의 저장이
+  끊기는 것을 피하고 JDBC 배치(50개), insert/update 정렬을 사용합니다.
+- MinIO I/O만 공유 제한 풀에서 병렬 처리합니다. 엔티티 접근과 DB 저장은 원래 트랜잭션 스레드에
+  남습니다. 전송 하나가 실패해도 시작한 전송을 모두 기다려 정리하며 DB 실패/롤백에도 객체를 제거합니다.
+- 고유 객체 키를 사용하므로 동명 파일의 교체나 다른 작품 업로드가 기존 객체를 덮어쓰지 않습니다.
+- 엔티티/테이블 구성을 변경하지 않습니다.
+
+| 변수 | 기본값 | 설명 |
+|---|---|---|
+| `APP_UPLOAD_WORKERS` | `4` | 공유 MinIO I/O 작업자 수 (1–32); 스토리지/대역폭에 맞춰 조정 |
+| `APP_UPLOAD_MAX_FILE_SIZE` | `500MB` | 파일 한 개의 multipart 제한 |
+| `APP_UPLOAD_MAX_REQUEST_SIZE` | `10GB` | multipart 전체 요청 제한 |
+| `APP_UPLOAD_MAX_PART_COUNT` | `3001` | 최대 파트 수 (엑셀 1 + 미디어 최대 3000) |
+| `APP_CORS_ADMIN_ALLOWED_HOSTS` | `manage.exhibition.scg.sh` | 브라우저 직접 업로드를 허용할 매니저 호스트 목록 |
+
+Excel 제한은 10 MiB / 1000행입니다. 큰 파일을 메모리에 적재하지 않도록 multipart 임시 파일을
+사용하므로 임시 디스크에 충분한 공간을 확보해야 합니다. 역프록시의 본문 크기/버퍼링/시간 제한도
+일치시켜야 합니다. DB 배치의 네트워크 최적화가 필요하면 MySQL JDBC URL의
+`rewriteBatchedStatements=true`를 환경에 맞춰 검토하세요.
+
+`exhibition-manage`는 표준 `next start`를 사용합니다. 매니저에 런타임 변수
+`BULK_UPLOAD_API_BASE_URL=https://공개-API-주소`를 지정하면 브라우저에서 이 API로 직접 전송해
+매니저 경유와 Next의 대용량 본문 수신 제한을 피합니다. 미설정 시 기존 스트리밍 프록시를 유지하지만
+표준 Node/Next의 수신 제한이 적용되므로 대형 업로드는 직접 경로를 권장합니다. API의 CORS에
+매니저 호스트를 등록하고 공개 API 게이트웨이에서 OPTIONS/POST와 인증/전시/업로드 ID 헤더를
+허용해야 합니다. MinIO 주소/자격증명은 브라우저에 노출하지 않습니다.
+
+로컬 테스트는 반복 참조 조회 수, 병렬성, 실패 정리와 H2/JPA 배치 FK 및 롤백을 검증합니다.
+실제 처리량은 배포된 네트워크·MySQL·MinIO에 따라 달라지므로 동일 파일의 업로드 시간과 API 로그의
+`processingMs`를 전후 비교하세요. 로그 시간은 multipart 수신이 끝난 뒤의 처리 시간입니다.
+
 ## 테스트 및 API 문서 생성
 
 ```bash

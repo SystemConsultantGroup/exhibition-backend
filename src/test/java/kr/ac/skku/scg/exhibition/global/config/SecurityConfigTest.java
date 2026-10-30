@@ -28,6 +28,10 @@ class SecurityConfigTest {
         assertThat(configuration).isNotNull();
         assertThat(configuration.getAllowedOrigins()).containsExactly("https://manage.exhibition.scg.sh");
         assertThat(configuration.getAllowedHeaders()).containsExactly("*");
+        assertThat(configuration.getExposedHeaders()).contains("X-Upload-Id", "X-Upload-Error-Source");
+        assertThat(configuration.checkHttpMethod(org.springframework.http.HttpMethod.POST)).contains(org.springframework.http.HttpMethod.POST);
+        assertThat(configuration.checkHeaders(List.of("Authorization", "X-Exhibition-Id", "X-Upload-Id")))
+                .containsExactly("Authorization", "X-Exhibition-Id", "X-Upload-Id");
     }
 
     @Test

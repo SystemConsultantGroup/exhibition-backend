@@ -3,6 +3,7 @@ package kr.ac.skku.scg.exhibition.item.service;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +27,7 @@ import kr.ac.skku.scg.exhibition.item.dto.response.ItemBulkUploadResponse;
 import kr.ac.skku.scg.exhibition.item.repository.ItemRepository;
 import kr.ac.skku.scg.exhibition.media.domain.MediaAssetEntity;
 import kr.ac.skku.scg.exhibition.media.service.MediaService;
+import kr.ac.skku.scg.exhibition.media.service.MediaService.ItemMediaUpload;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -73,7 +75,10 @@ public class ItemBulkUploadService {
         validateFile(file);
         Map<String, MultipartFile> files = indexMediaFiles(mediaFiles);
         Set<String> used = new HashSet<>();
-        int itemCount = 0, mediaCount = 0, mappingCount = 0;
+        List<PendingItem> pending = new ArrayList<>();
+        Map<String, CategoryEntity> categoryCache = new HashMap<>();
+        Map<String, ItemClassificationEntity> classificationCache = new HashMap<>();
+        Set<String> validatedMedia = new HashSet<>();
         DataFormatter formatter = new DataFormatter();
 
         try (InputStream input = file.getInputStream(); Workbook workbook = new XSSFWorkbook(input)) {
@@ -106,34 +111,26 @@ public class ItemBulkUploadService {
                     throw new IllegalArgumentException(
                             "Row " + rowNumber + ": title must be at most 200 characters");
                 }
-                CategoryEntity category = categories.findByExhibition_IdAndName(currentExhibitionId, categoryName)
-                        .orElseThrow(() -> new NotFoundException("Row " + rowNumber + ": category not found: " + categoryName));
+                CategoryEntity category = categoryCache.computeIfAbsent(categoryName, name ->
+                        categories.findByExhibition_IdAndName(currentExhibitionId, name)
+                                .orElseThrow(() -> new NotFoundException("Row " + rowNumber + ": category not found: " + name)));
                 ItemEntity item = new ItemEntity(null, exhibition, category, period, title, nullable(cellValue(row, 3, formatter)));
                 item.updateMetadata(category, period, title, nullable(cellValue(row, 3, formatter)),
                         nullable(cellValue(row, 4, formatter)), nullable(cellValue(row, 5, formatter)),
                         nullable(cellValue(row, 6, formatter)), parseAwarded(cellValue(row, 7, formatter), rowNumber));
-                item = items.save(item);
-                itemCount++;
-
-                MediaAssetEntity thumbnail = createMedia(item, cellValue(row, 8, formatter), "thumbnail_file_name",
-                        rowNumber, "image", files, used);
-                MediaAssetEntity poster = createMedia(item, cellValue(row, 9, formatter), "poster_file_name",
-                        rowNumber, "image", files, used);
-                MediaAssetEntity video = createMedia(item, cellValue(row, 10, formatter), "presentation_video_file_name",
-                        rowNumber, "video", files, used);
-                if (thumbnail != null) mediaCount++;
-                if (poster != null) mediaCount++;
-                if (video != null) mediaCount++;
-                item.updateMedia(thumbnail, poster, video);
-
+                MultipartFile thumbnail = reference(cellValue(row, 8, formatter), "thumbnail_file_name",
+                        rowNumber, "image", files, used, validatedMedia);
+                MultipartFile poster = reference(cellValue(row, 9, formatter), "poster_file_name",
+                        rowNumber, "image", files, used, validatedMedia);
+                MultipartFile video = reference(cellValue(row, 10, formatter), "presentation_video_file_name",
+                        rowNumber, "video", files, used, validatedMedia);
                 String classificationName = nullable(cellValue(row, 1, formatter));
-                if (classificationName != null) {
-                    ItemClassificationEntity classification = classifications.findByExhibition_IdAndName(
-                            currentExhibitionId, classificationName).orElseThrow(() -> new NotFoundException(
-                                    "Row " + rowNumber + ": classification not found: " + classificationName));
-                    mappings.save(new ItemClassificationMapEntity(null, item, classification));
-                    mappingCount++;
-                }
+                ItemClassificationEntity classification = classificationName == null ? null
+                        : classificationCache.computeIfAbsent(classificationName, name ->
+                                classifications.findByExhibition_IdAndName(currentExhibitionId, name)
+                                        .orElseThrow(() -> new NotFoundException(
+                                                "Row " + rowNumber + ": classification not found: " + name)));
+                pending.add(new PendingItem(item, classification, thumbnail, poster, video));
             }
             Set<String> unused = new HashSet<>(files.keySet());
             unused.removeAll(used);
@@ -143,8 +140,30 @@ public class ItemBulkUploadService {
         } catch (IOException ex) {
             throw new IllegalArgumentException("Failed to read excel file", ex);
         }
-        return new ItemBulkUploadResponse(itemCount, mediaCount, mappingCount);
+        // 모든 셀/참조/시그니처 검증이 끝난 뒤에만 DB와 MinIO에 부작용을 발생시킨다.
+        items.saveAll(pending.stream().map(PendingItem::item).toList());
+        List<ItemMediaUpload> uploads = new ArrayList<>();
+        for (PendingItem row : pending) {
+            if (row.thumbnail() != null) uploads.add(new ItemMediaUpload(row.item(), row.thumbnail(), "image"));
+            if (row.poster() != null) uploads.add(new ItemMediaUpload(row.item(), row.poster(), "image"));
+            if (row.video() != null) uploads.add(new ItemMediaUpload(row.item(), row.video(), "video"));
+        }
+        List<MediaAssetEntity> assets = uploads.isEmpty() ? List.of() : mediaService.uploadForItems(uploads);
+        int index = 0;
+        List<ItemClassificationMapEntity> classificationMappings = new ArrayList<>();
+        for (PendingItem row : pending) {
+            row.item().updateMedia(row.thumbnail() == null ? null : assets.get(index++),
+                    row.poster() == null ? null : assets.get(index++), row.video() == null ? null : assets.get(index++));
+            if (row.classification() != null) {
+                classificationMappings.add(new ItemClassificationMapEntity(null, row.item(), row.classification()));
+            }
+        }
+        mappings.saveAll(classificationMappings);
+        return new ItemBulkUploadResponse(pending.size(), assets.size(), classificationMappings.size());
     }
+
+    private record PendingItem(ItemEntity item, ItemClassificationEntity classification,
+            MultipartFile thumbnail, MultipartFile poster, MultipartFile video) { }
 
     /** 템플릿 시트와 숨은 메타데이터 및 헤더를 검증한다. */
     private void validateWorkbook(Sheet sheet, Sheet options, DataFormatter formatter) {
@@ -166,9 +185,9 @@ public class ItemBulkUploadService {
         }
     }
 
-    /** 미디어 참조를 검증하고 공통 미디어 서비스로 업로드한다. */
-    private MediaAssetEntity createMedia(ItemEntity item, String raw, String column, int row, String expectedType,
-            Map<String, MultipartFile> files, Set<String> used) {
+    /** 파일명 참조 및 타입별 시그니처를 저장 전에 한 번만 검증한다. */
+    private MultipartFile reference(String raw, String column, int row, String expectedType,
+            Map<String, MultipartFile> files, Set<String> used, Set<String> validated) {
         String reference = nullable(raw);
         if (reference == null) {
             return null;
@@ -181,7 +200,8 @@ public class ItemBulkUploadService {
         }
         used.add(name);
         try {
-            return mediaService.uploadForItem(item, file, expectedType);
+            if (validated.add(expectedType + ":" + name)) mediaService.validateUpload(file, expectedType);
+            return file;
         } catch (IllegalArgumentException ex) {
             throw new IllegalArgumentException(
                     "Row " + row + ": invalid media type or signature for " + column + ": " + name

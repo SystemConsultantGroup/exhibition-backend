@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import java.time.Instant;
+import java.io.IOException;
 import java.util.UUID;
 import kr.ac.skku.scg.exhibition.category.domain.CategoryEntity;
 import kr.ac.skku.scg.exhibition.eventperiod.domain.EventPeriodEntity;
@@ -67,6 +68,87 @@ class MediaServiceTest {
         MediaAssetEntity media = service.uploadForItem(item, file, "image");
 
         assertThat(media.getObjectKey()).startsWith("slug/" + period.getId() + "/").endsWith("/thumb.jpg");
+    }
+
+    /** 두 전송이 실제로 겹치며 DB 저장은 호출 스레드에서만 수행한다. */
+    @Test
+    void batchUploadsConcurrentlyWithoutMovingJpaToWorkers() throws Exception {
+        var executor = java.util.concurrent.Executors.newFixedThreadPool(2);
+        try {
+            var properties = new MinioProperties();
+            properties.setBucket("test");
+            var batch = new MediaService(repository, minio, properties, executor);
+            var started = new java.util.concurrent.CountDownLatch(2);
+            when(minio.putObject(any())).thenAnswer(call -> {
+                started.countDown();
+                assertThat(started.await(3, java.util.concurrent.TimeUnit.SECONDS)).isTrue();
+                return null;
+            });
+            Thread caller = Thread.currentThread();
+            when(repository.saveAll(any())).thenAnswer(call -> {
+                assertThat(Thread.currentThread()).isSameAs(caller);
+                return call.getArgument(0);
+            });
+            var item = itemWithPeriod();
+            var file = image();
+            var assets = batch.uploadForItems(java.util.List.of(
+                    new MediaService.ItemMediaUpload(item, file, "image"),
+                    new MediaService.ItemMediaUpload(item, file, "image")));
+            assertThat(assets).hasSize(2);
+            assertThat(assets.get(0).getObjectKey()).isNotEqualTo(assets.get(1).getObjectKey());
+        } finally { executor.shutdownNow(); }
+    }
+
+    /** 하나가 실패해도 나머지 전송의 완료를 기다리고 성공 객체만 모두 정리한다. */
+    @Test
+    void batchFailureWaitsAndCleansSuccessfulTransfers() throws Exception {
+        var executor = java.util.concurrent.Executors.newFixedThreadPool(2);
+        try {
+            var properties = new MinioProperties();
+            properties.setBucket("test");
+            var batch = new MediaService(repository, minio, properties, executor);
+            var calls = new java.util.concurrent.atomic.AtomicInteger();
+            var succeeded = new java.util.concurrent.atomic.AtomicBoolean();
+            when(minio.putObject(any())).thenAnswer(call -> {
+                if (calls.incrementAndGet() == 1) throw new IOException("storage failure");
+                Thread.sleep(50);
+                succeeded.set(true);
+                return null;
+            });
+            assertThatThrownBy(() -> batch.uploadForItems(java.util.List.of(
+                    new MediaService.ItemMediaUpload(itemWithPeriod(), image(), "image"),
+                    new MediaService.ItemMediaUpload(itemWithPeriod(), image(), "image"))))
+                    .isInstanceOf(IllegalStateException.class);
+            assertThat(succeeded).isTrue();
+            verify(minio, org.mockito.Mockito.times(2)).removeObject(any(io.minio.RemoveObjectArgs.class));
+            org.mockito.Mockito.verifyNoInteractions(repository);
+        } finally { executor.shutdownNow(); }
+    }
+
+    /** DB 롤백은 병렬 전송이 끝난 객체를 모두 제거한다. */
+    @Test
+    void batchRegistersRollbackCleanupBeforeDatabaseSave() throws Exception {
+        org.springframework.transaction.support.TransactionSynchronizationManager.initSynchronization();
+        try {
+            when(repository.saveAll(any())).thenThrow(new IllegalStateException("DB failure"));
+            assertThatThrownBy(() -> service.uploadForItems(java.util.List.of(
+                    new MediaService.ItemMediaUpload(itemWithPeriod(), image(), "image"))))
+                    .isInstanceOf(IllegalStateException.class);
+            for (var callback : org.springframework.transaction.support.TransactionSynchronizationManager.getSynchronizations()) {
+                callback.afterCompletion(org.springframework.transaction.support.TransactionSynchronization.STATUS_ROLLED_BACK);
+            }
+            verify(minio).removeObject(any(io.minio.RemoveObjectArgs.class));
+        } finally { org.springframework.transaction.support.TransactionSynchronizationManager.clearSynchronization(); }
+    }
+
+    private ItemEntity itemWithPeriod() {
+        var exhibition = new ExhibitionEntity(UUID.randomUUID(), "slug", "전시");
+        var period = new EventPeriodEntity(UUID.randomUUID(), exhibition, "2026", null, null);
+        return new ItemEntity(UUID.randomUUID(), exhibition, new CategoryEntity(UUID.randomUUID(), exhibition, "AI"), period, "작품", null);
+    }
+
+    private MockMultipartFile image() {
+        return new MockMultipartFile("mediaFiles", "same.jpg", "image/jpeg", new byte[]{(byte) 0xff, (byte) 0xd8, (byte) 0xff});
     }
 
     @Test

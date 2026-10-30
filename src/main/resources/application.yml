@@ -1,6 +1,9 @@
+app:
+  upload:
+    workers: ${APP_UPLOAD_WORKERS:4}
 server:
   tomcat:
-    max-part-count: 100
+    max-part-count: ${APP_UPLOAD_MAX_PART_COUNT:3001}
 spring:
   application:
     name: exhibition
@@ -11,7 +14,15 @@ spring:
   servlet:
     multipart:
       max-file-size: ${APP_UPLOAD_MAX_FILE_SIZE:500MB}
-      max-request-size: ${APP_UPLOAD_MAX_REQUEST_SIZE:2GB}
+      max-request-size: ${APP_UPLOAD_MAX_REQUEST_SIZE:10GB}
+      file-size-threshold: 0
+  jpa:
+    properties:
+      hibernate:
+        jdbc:
+          batch_size: 50
+        order_inserts: true
+        order_updates: true
   profiles:
     active: prod
     group:

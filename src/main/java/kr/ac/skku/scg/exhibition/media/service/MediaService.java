@@ -8,8 +8,13 @@ import io.minio.RemoveObjectArgs;
 import io.minio.errors.MinioException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.Executor;
 import kr.ac.skku.scg.exhibition.exhibition.domain.ExhibitionEntity;
 import kr.ac.skku.scg.exhibition.global.config.MinioProperties;
 import kr.ac.skku.scg.exhibition.global.error.NotFoundException;
@@ -17,6 +22,8 @@ import kr.ac.skku.scg.exhibition.item.domain.ItemEntity;
 import kr.ac.skku.scg.exhibition.media.domain.MediaAssetEntity;
 import kr.ac.skku.scg.exhibition.media.dto.response.MediaFileResponse;
 import kr.ac.skku.scg.exhibition.media.repository.MediaAssetRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
@@ -30,15 +37,24 @@ public class MediaService {
     private final MediaAssetRepository mediaAssetRepository;
     private final MinioClient minioClient;
     private final MinioProperties minioProperties;
+    private final Executor uploadExecutor;
 
+    /** 테스트 및 단일 파일 호출의 동기 실행 경로를 제공한다. */
+    public MediaService(MediaAssetRepository repository, MinioClient client, MinioProperties properties) {
+        this(repository, client, properties, Runnable::run);
+    }
+
+    @Autowired
     public MediaService(
             MediaAssetRepository mediaAssetRepository,
             MinioClient minioClient,
-            MinioProperties minioProperties
+            MinioProperties minioProperties,
+            @Qualifier("mediaUploadExecutor") Executor uploadExecutor
     ) {
         this.mediaAssetRepository = mediaAssetRepository;
         this.minioClient = minioClient;
         this.minioProperties = minioProperties;
+        this.uploadExecutor = uploadExecutor;
     }
 
     /** 전시에 사용할 이미지 또는 영상을 MinIO와 DB에 저장한다. */
@@ -62,31 +78,93 @@ public class MediaService {
         return upload(item.getExhibition(), item, file, prefix, expectedType);
     }
 
+    public record ItemMediaUpload(ItemEntity item, MultipartFile file, String expectedType) { }
+    private record PreparedUpload(String key, String contentType, long size, MultipartFile file) { }
+
+    /** 파일의 확장자와 시그니처를 부작용 없이 사전 검증한다. */
+    public void validateUpload(MultipartFile file, String expectedType) {
+        if (file == null || file.isEmpty()) throw new IllegalArgumentException("Media file must not be empty");
+        String contentType = mediaType(extension(fileName(file.getOriginalFilename())));
+        if (!contentType.startsWith(expectedType + "/")) {
+            throw new IllegalArgumentException("Media must be an " + expectedType + " file");
+        }
+        validateSignature(file, contentType);
+    }
+
+    /** 네트워크 I/O만 병렬 실행하고 엔티티 접근과 영속화는 호출 스레드에 남긴다. */
+    @Transactional
+    public List<MediaAssetEntity> uploadForItems(List<ItemMediaUpload> uploads) {
+        List<PreparedUpload> prepared = uploads.stream().map(upload -> {
+            ItemEntity item = upload.item();
+            if (item.getEventPeriod() == null) throw new IllegalArgumentException("Item media requires an event period");
+            validateUpload(upload.file(), upload.expectedType());
+            String name = fileName(upload.file().getOriginalFilename());
+            return new PreparedUpload(item.getExhibition().getSlug() + "/" + item.getEventPeriod().getId()
+                    + "/" + UUID.randomUUID() + "/" + name, mediaType(extension(name)),
+                    upload.file().getSize(), upload.file());
+        }).toList();
+        List<CompletableFuture<Void>> transfers = new ArrayList<>();
+        for (PreparedUpload upload : prepared) {
+            try {
+                transfers.add(CompletableFuture.runAsync(() -> putObject(upload), uploadExecutor));
+            } catch (RuntimeException ex) {
+                transfers.add(CompletableFuture.failedFuture(ex));
+                break;
+            }
+        }
+        // 실패해도 이미 시작한 전송이 모두 끝난 후 정리해야 늦게 생성되는 고아 객체가 없다.
+        try {
+            CompletableFuture.allOf(transfers.toArray(CompletableFuture[]::new)).join();
+        } catch (CompletionException ex) {
+            for (int i = 0; i < transfers.size(); i++) {
+                if (!transfers.get(i).isCompletedExceptionally()) removeObject(prepared.get(i).key());
+            }
+            throw new IllegalStateException("Failed to upload bulk media", ex.getCause());
+        }
+        // DB 저장 중 오류가 발생해도 모든 성공 객체가 롤백 정리 대상이어야 한다.
+        prepared.forEach(upload -> removeOnRollback(upload.key()));
+        List<MediaAssetEntity> assets = new ArrayList<>();
+        for (int i = 0; i < prepared.size(); i++) {
+            PreparedUpload upload = prepared.get(i);
+            ItemEntity item = uploads.get(i).item();
+            assets.add(new MediaAssetEntity(null, item, item.getExhibition(), upload.key(), upload.contentType(), upload.size()));
+        }
+        return mediaAssetRepository.saveAll(assets);
+    }
+
+    /** 엔티티와 DB에 접근하지 않고 파일을 스트리밍 전송한다. */
+    private void putObject(PreparedUpload upload) {
+        try (InputStream input = upload.file().getInputStream()) {
+            minioClient.putObject(PutObjectArgs.builder().bucket(minioProperties.getBucket())
+                    .object(upload.key()).stream(input, upload.size(), -1).contentType(upload.contentType()).build());
+        } catch (Exception ex) {
+            // 응답/스트림 종료 오류는 객체 저장 여부가 불명확하므로 고유 키를 정리한다.
+            removeObject(upload.key());
+            throw new IllegalStateException("Failed to upload media file: " + upload.file().getOriginalFilename(), ex);
+        }
+    }
+
+    /** 실패한 업로드나 DB 롤백의 객체를 최선 노력으로 정리한다. */
+    private void removeObject(String key) {
+        try {
+            minioClient.removeObject(RemoveObjectArgs.builder().bucket(minioProperties.getBucket()).object(key).build());
+        } catch (Exception ignored) {
+            // 원래 업로드/DB 오류를 보존한다.
+        }
+    }
+
     /** 검증한 미디어 파일을 지정 경로에 저장한다. */
     private MediaAssetEntity upload(ExhibitionEntity exhibition, ItemEntity item, MultipartFile file,
             String prefix, String expectedType) {
         if (file == null || file.isEmpty()) {
             return null;
         }
+        validateUpload(file, expectedType);
         String fileName = fileName(file.getOriginalFilename());
         String contentType = mediaType(extension(fileName));
-        if (!contentType.startsWith(expectedType + "/")) {
-            throw new IllegalArgumentException("Media must be an " + expectedType + " file");
-        }
-        validateSignature(file, contentType);
-
         // 원본 이름이 같아도 다른 작품/이전 버전을 덮어쓰지 않는다.
         String key = prefix + UUID.randomUUID() + "/" + fileName;
-        try (InputStream input = file.getInputStream()) {
-            minioClient.putObject(PutObjectArgs.builder()
-                    .bucket(minioProperties.getBucket())
-                    .object(key)
-                    .stream(input, file.getSize(), -1)
-                    .contentType(contentType)
-                    .build());
-        } catch (Exception ex) {
-            throw new IllegalStateException("Failed to upload media file: " + file.getOriginalFilename(), ex);
-        }
+        putObject(new PreparedUpload(key, contentType, file.getSize(), file));
         removeOnRollback(key);
         return mediaAssetRepository.save(
                 new MediaAssetEntity(null, item, exhibition, key, contentType, file.getSize()));
@@ -200,12 +278,7 @@ public class MediaService {
             @Override
             public void afterCompletion(int status) {
                 if (status != STATUS_COMMITTED) {
-                    try {
-                        minioClient.removeObject(RemoveObjectArgs.builder()
-                                .bucket(minioProperties.getBucket()).object(key).build());
-                    } catch (Exception ignored) {
-                        // DB 롤백 원인을 보존한다.
-                    }
+                    removeObject(key);
                 }
             }
         });
