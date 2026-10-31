@@ -1,10 +1,11 @@
 package kr.ac.skku.scg.exhibition.media.service;
 
 import io.minio.GetObjectArgs;
-import io.minio.GetObjectResponse;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import io.minio.RemoveObjectArgs;
+import io.minio.StatObjectArgs;
+import io.minio.StatObjectResponse;
 import io.minio.errors.MinioException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,6 +27,8 @@ import kr.ac.skku.scg.exhibition.media.dto.response.MediaFileResponse;
 import kr.ac.skku.scg.exhibition.media.repository.MediaAssetRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.io.AbstractResource;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
@@ -180,25 +183,54 @@ public class MediaService {
                 new MediaAssetEntity(null, item, exhibition, key, contentType, file.getSize()));
     }
 
+    /** 메타데이터만 먼저 조회하고 파일 본문은 Spring의 Resource 변환기가 스트리밍한다. */
     public MediaFileResponse getFile(UUID id) {
         MediaAssetEntity media = mediaAssetRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Media not found: " + id));
+        String objectKey = media.getObjectKey();
+        String bucket = minioProperties.getBucket();
 
-        try (GetObjectResponse object = minioClient.getObject(
-                GetObjectArgs.builder()
-                        .bucket(minioProperties.getBucket())
-                        .object(media.getObjectKey())
-                        .build())) {
+        try {
+            StatObjectResponse object = minioClient.statObject(
+                    StatObjectArgs.builder().bucket(bucket).object(objectKey).build());
+            String fileName = extractFileName(objectKey);
+            String contentType = extractContentType(object.contentType(), media.getMediaType());
+            long contentLength = object.size();
+            Resource resource = new AbstractResource() {
+                /** 본문 전송 시 열고 변환기가 닫는다. 다중 Range 요청도 다시 열 수 있다. */
+                @Override
+                public InputStream getInputStream() throws IOException {
+                    try {
+                        return minioClient.getObject(
+                                GetObjectArgs.builder().bucket(bucket).object(objectKey).build());
+                    } catch (Exception e) {
+                        throw new IOException("Failed to read media file from MinIO: " + objectKey, e);
+                    }
+                }
 
-            byte[] bytes = object.readAllBytes();
-            String fileName = extractFileName(media.getObjectKey());
-            String contentType = extractContentType(object, media.getMediaType());
-            long contentLength = bytes.length;
-            return new MediaFileResponse(fileName, contentType, contentLength, bytes);
+                /** 본문을 읽지 않고 실제 객체 크기를 반환한다. */
+                @Override
+                public long contentLength() {
+                    return contentLength;
+                }
+
+                /** 기존 파일명을 유지한다. */
+                @Override
+                public String getFilename() {
+                    return fileName;
+                }
+
+                /** 리소스 진단용 설명을 반환한다. */
+                @Override
+                public String getDescription() {
+                    return "MinIO object: " + objectKey;
+                }
+            };
+            return new MediaFileResponse(fileName, contentType, contentLength, resource);
         } catch (MinioException | IOException e) {
-            throw new IllegalStateException("Failed to read media file from MinIO: " + media.getObjectKey(), e);
+            throw new IllegalStateException("Failed to read media file from MinIO: " + objectKey, e);
         } catch (Exception e) {
-            throw new IllegalStateException("Unexpected MinIO error: " + media.getObjectKey(), e);
+            throw new IllegalStateException("Unexpected MinIO error: " + objectKey, e);
         }
     }
 
@@ -294,8 +326,8 @@ public class MediaService {
         });
     }
 
-    private String extractContentType(GetObjectResponse object, String fallbackContentType) {
-        String minioContentType = object.headers().get("Content-Type");
+    /** MinIO의 MIME 타입을 우선하고 누락 시 저장된 타입을 사용한다. */
+    private String extractContentType(String minioContentType, String fallbackContentType) {
         if (minioContentType != null && !minioContentType.isBlank()) {
             return minioContentType;
         }
