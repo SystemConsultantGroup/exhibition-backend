@@ -3,26 +3,42 @@ package kr.ac.skku.scg.exhibition.media.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import io.minio.GetObjectArgs;
+import io.minio.GetObjectResponse;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
+import io.minio.StatObjectArgs;
+import io.minio.StatObjectResponse;
 import java.time.Instant;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Optional;
 import java.util.UUID;
 import kr.ac.skku.scg.exhibition.category.domain.CategoryEntity;
 import kr.ac.skku.scg.exhibition.eventperiod.domain.EventPeriodEntity;
 import kr.ac.skku.scg.exhibition.exhibition.domain.ExhibitionEntity;
 import kr.ac.skku.scg.exhibition.global.config.MinioProperties;
+import kr.ac.skku.scg.exhibition.global.error.NotFoundException;
 import kr.ac.skku.scg.exhibition.item.domain.ItemEntity;
 import kr.ac.skku.scg.exhibition.media.domain.MediaAssetEntity;
 import kr.ac.skku.scg.exhibition.media.repository.MediaAssetRepository;
+import okhttp3.Headers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.MediaType;
+import org.springframework.http.converter.ResourceHttpMessageConverter;
+import org.springframework.mock.http.MockHttpOutputMessage;
 import org.springframework.mock.web.MockMultipartFile;
 
 @ExtendWith(MockitoExtension.class)
@@ -37,6 +53,66 @@ class MediaServiceTest {
         MinioProperties properties = new MinioProperties();
         properties.setBucket("test");
         service = new MediaService(repository, minio, properties);
+    }
+
+    /** 없는 미디어는 MinIO에 접근하지 않고 기존 404 예외를 발생시킨다. */
+    @Test
+    void missingDownloadDoesNotAccessStorage() {
+        UUID id = UUID.randomUUID();
+        when(repository.findById(id)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.getFile(id)).isInstanceOf(NotFoundException.class);
+        verifyNoInteractions(minio);
+    }
+
+    /** 메타데이터 조회 실패는 응답 본문 전송 전에 기존 예외로 전달한다. */
+    @Test
+    void metadataFailureDoesNotOpenDownload() throws Exception {
+        UUID id = UUID.randomUUID();
+        when(repository.findById(id)).thenReturn(Optional.of(
+                new MediaAssetEntity(id, null, null, "slug/a.jpg", "image/jpeg", 3L)));
+        IOException failure = new IOException("storage unavailable");
+        when(minio.statObject(any(StatObjectArgs.class))).thenThrow(failure);
+
+        assertThatThrownBy(() -> service.getFile(id))
+                .isInstanceOf(IllegalStateException.class).hasCause(failure);
+        verify(minio, never()).getObject(any(GetObjectArgs.class));
+    }
+
+    /** 전송 중 연결이 끊기면 나머지를 읽지 않고 MinIO 스트림을 닫는다. */
+    @Test
+    void interruptedDownloadClosesStreamWithoutReadingWholeFile() throws Exception {
+        UUID id = UUID.randomUUID();
+        when(repository.findById(id)).thenReturn(Optional.of(
+                new MediaAssetEntity(id, null, null, "slug/a.mp4", "video/mp4", 1024 * 1024)));
+        StatObjectResponse metadata = mock(StatObjectResponse.class);
+        when(metadata.size()).thenReturn(1024 * 1024L);
+        when(metadata.contentType()).thenReturn(null);
+        when(minio.statObject(any(StatObjectArgs.class))).thenReturn(metadata);
+        var input = spy(new ByteArrayInputStream(new byte[1024 * 1024]));
+        when(minio.getObject(any(GetObjectArgs.class))).thenReturn(
+                new GetObjectResponse(new Headers.Builder().build(), "test", null, "slug/a.mp4", input));
+        var file = service.getFile(id);
+        assertThat(file.contentType()).isEqualTo("video/mp4");
+        var output = new MockHttpOutputMessage() {
+            /** 클라이언트 연결 종료를 재현한다. */
+            @Override
+            public OutputStream getBody() {
+                return new OutputStream() {
+                    /** 첫 전송에서 연결 종료 오류를 발생시킨다. */
+                    @Override
+                    public void write(int value) throws IOException {
+                        throw new IOException("client disconnected");
+                    }
+                };
+            }
+        };
+
+        assertThatThrownBy(() -> new ResourceHttpMessageConverter()
+                .write(file.resource(), MediaType.parseMediaType(file.contentType()), output))
+                .isInstanceOf(IOException.class).hasMessage("client disconnected");
+        verify(input).close();
+        assertThat(input.available()).isPositive();
     }
 
     @Test
